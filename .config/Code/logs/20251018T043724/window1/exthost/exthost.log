@@ -1,0 +1,74 @@
+2025-10-18 04:37:25.702 [info] Extension host with pid 3859 started
+2025-10-18 04:37:25.714 [info] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onAuthenticationRequest:github'
+2025-10-18 04:37:25.734 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2025-10-18 04:37:25.803 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: true, activationEvent: '*', root cause: vscode.git
+2025-10-18 04:37:25.852 [info] ExtensionService#_doActivateExtension vscode.git, startup: true, activationEvent: '*'
+2025-10-18 04:37:25.887 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2025-10-18 04:37:25.983 [info] Eager extensions activated
+2025-10-18 04:37:25.999 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:37:26.001 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:43:14.767 [info] ExtensionService#_doActivateExtension GitHub.copilot-chat, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:43:15.224 [info] ExtensionService#_doActivateExtension GitHub.copilot, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:43:16.367 [info] ExtensionService#_doActivateExtension vscode.microsoft-authentication, startup: false, activationEvent: 'onAuthenticationRequest:microsoft'
+2025-10-18 04:43:16.830 [error] Error: chatParticipant must be declared in package.json: claude-code
+    at sqt.$registerAgent (vscode-file://vscode-app/usr/share/code/resources/app/out/vs/workbench/workbench.desktop.main.js:509:5906)
+2025-10-18 04:43:21.857 [info] ExtensionService#_doActivateExtension vscode.configuration-editing, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:43:21.866 [info] ExtensionService#_doActivateExtension vscode.json-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:43:21.910 [info] ExtensionService#_doActivateExtension vscode.typescript-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:43:56.083 [info] ExtensionService#_doActivateExtension openai.chatgpt, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:44:44.802 [info] Extension host terminating: renderer closed the MessagePort
+2025-10-18 04:44:44.824 [error] Error: Channel has been closed
+    at n (file:///usr/share/code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:121:2816)
+    at Object.error (file:///usr/share/code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:121:3250)
+    at Object.error (/home/acead/.vscode/extensions/openai.chatgpt-0.4.19-linux-x64/out/extension.js:1:1076)
+    at ChildProcess.<anonymous> (/home/acead/.vscode/extensions/openai.chatgpt-0.4.19-linux-x64/out/extension.js:29:192)
+    at ChildProcess.emit (node:events:519:28)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:293:12)
+2025-10-18 04:44:44.824 [info] Extension host with pid 3859 exiting with code 0
+2025-10-18 04:44:45.212 [info] Extension host with pid 4185 started
+2025-10-18 04:44:45.221 [info] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onAuthenticationRequest:github'
+2025-10-18 04:44:45.240 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2025-10-18 04:44:45.253 [info] ExtensionService#_doActivateExtension vscode.microsoft-authentication, startup: false, activationEvent: 'onAuthenticationRequest:microsoft'
+2025-10-18 04:44:45.284 [info] ExtensionService#_doActivateExtension GitHub.copilot-chat, startup: false, activationEvent: 'onLanguageModelChatProvider:copilot'
+2025-10-18 04:44:45.686 [info] ExtensionService#_doActivateExtension vscode.configuration-editing, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:44:45.691 [info] ExtensionService#_doActivateExtension vscode.json-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:44:45.725 [info] ExtensionService#_doActivateExtension vscode.typescript-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:44:45.827 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: false, activationEvent: 'api', root cause: GitHub.copilot-chat
+2025-10-18 04:44:45.897 [info] ExtensionService#_doActivateExtension vscode.git, startup: false, activationEvent: 'api', root cause: GitHub.copilot-chat
+2025-10-18 04:44:46.034 [info] ExtensionService#_doActivateExtension GitHub.copilot, startup: false, activationEvent: 'api', root cause: GitHub.copilot-chat
+2025-10-18 04:44:47.139 [error] Error: chatParticipant must be declared in package.json: claude-code
+    at sqt.$registerAgent (vscode-file://vscode-app/usr/share/code/resources/app/out/vs/workbench/workbench.desktop.main.js:509:5906)
+2025-10-18 04:44:47.199 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2025-10-18 04:44:47.572 [info] Eager extensions activated
+2025-10-18 04:44:47.578 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:44:47.582 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:44:47.599 [info] ExtensionService#_doActivateExtension openai.chatgpt, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:46:27.301 [info] Extension host terminating: renderer closed the MessagePort
+2025-10-18 04:46:27.325 [error] Error: Channel has been closed
+    at n (file:///usr/share/code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:121:2816)
+    at Object.error (file:///usr/share/code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:121:3250)
+    at Object.error (/home/acead/.vscode/extensions/openai.chatgpt-0.5.20-linux-x64/out/extension.js:1:1076)
+    at ChildProcess.<anonymous> (/home/acead/.vscode/extensions/openai.chatgpt-0.5.20-linux-x64/out/extension.js:7:192)
+    at ChildProcess.emit (node:events:519:28)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:293:12)
+2025-10-18 04:46:27.326 [info] Extension host with pid 4185 exiting with code 0
+2025-10-18 04:46:27.745 [info] Extension host with pid 4505 started
+2025-10-18 04:46:27.754 [info] ExtensionService#_doActivateExtension vscode.github-authentication, startup: false, activationEvent: 'onAuthenticationRequest:github'
+2025-10-18 04:46:27.772 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2025-10-18 04:46:27.784 [info] ExtensionService#_doActivateExtension vscode.microsoft-authentication, startup: false, activationEvent: 'onAuthenticationRequest:microsoft'
+2025-10-18 04:46:27.815 [info] ExtensionService#_doActivateExtension GitHub.copilot-chat, startup: false, activationEvent: 'onLanguageModelChatProvider:copilot'
+2025-10-18 04:46:28.275 [info] ExtensionService#_doActivateExtension vscode.configuration-editing, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:46:28.282 [info] ExtensionService#_doActivateExtension vscode.json-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:46:28.320 [info] ExtensionService#_doActivateExtension vscode.typescript-language-features, startup: false, activationEvent: 'onLanguage:jsonc'
+2025-10-18 04:46:28.433 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: false, activationEvent: 'api', root cause: GitHub.copilot-chat
+2025-10-18 04:46:28.501 [info] ExtensionService#_doActivateExtension vscode.git, startup: false, activationEvent: 'api', root cause: GitHub.copilot-chat
+2025-10-18 04:46:28.651 [info] ExtensionService#_doActivateExtension GitHub.copilot, startup: false, activationEvent: 'api', root cause: GitHub.copilot-chat
+2025-10-18 04:46:29.818 [error] Error: chatParticipant must be declared in package.json: claude-code
+    at sqt.$registerAgent (vscode-file://vscode-app/usr/share/code/resources/app/out/vs/workbench/workbench.desktop.main.js:509:5906)
+2025-10-18 04:46:29.825 [info] ExtensionService#_doActivateExtension vscode.github, startup: true, activationEvent: '*'
+2025-10-18 04:46:29.877 [info] ExtensionService#_doActivateExtension openai.chatgpt, startup: false, activationEvent: 'onView:chatgpt.sidebarView'
+2025-10-18 04:46:30.373 [info] Eager extensions activated
+2025-10-18 04:46:30.379 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:46:30.380 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2025-10-18 04:54:10.400 [info] Extension host terminating: renderer closed the MessagePort
+2025-10-18 04:54:10.440 [info] Extension host with pid 4505 exiting with code 0

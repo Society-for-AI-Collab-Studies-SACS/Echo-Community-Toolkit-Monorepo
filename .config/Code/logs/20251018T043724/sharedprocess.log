@@ -1,0 +1,35 @@
+2025-10-18 04:37:25.437 [info] Started initializing default profile extensions in extensions installation folder. file:///home/acead/.vscode/extensions
+2025-10-18 04:37:25.544 [warning] Failed to create default profile extensions manifest in extensions installation folder. file:///home/acead/.vscode/extensions Unable to create file 'vscode-userdata:/home/acead/.vscode/extensions/extensions.json' that already exists when overwrite flag is not set
+2025-10-18 04:37:25.544 [info] Completed initializing default profile extensions in extensions installation folder. file:///home/acead/.vscode/extensions
+2025-10-18 04:43:12.124 [info] Getting Manifest... github.copilot-chat
+2025-10-18 04:43:12.172 [info] Installing extension: github.copilot-chat {"enable":true,"isApplicationScoped":true,"isMachineScoped":false,"installEverywhere":true,"installPreReleaseVersion":false,"pinned":false,"profileLocation":{"$mid":1,"external":"vscode-userdata:/home/acead/.vscode/extensions/extensions.json","path":"/home/acead/.vscode/extensions/extensions.json","scheme":"vscode-userdata"},"productVersion":{"version":"1.105.1","date":"2025-10-14T22:33:36.618Z"}}
+2025-10-18 04:43:12.301 [info] Getting Manifest... github.copilot
+2025-10-18 04:43:12.311 [info] Installing extension: github.copilot {"enable":true,"isApplicationScoped":true,"isMachineScoped":false,"installEverywhere":true,"installPreReleaseVersion":false,"pinned":false,"profileLocation":{"$mid":1,"external":"vscode-userdata:/home/acead/.vscode/extensions/extensions.json","path":"/home/acead/.vscode/extensions/extensions.json","scheme":"vscode-userdata"},"productVersion":{"version":"1.105.1","date":"2025-10-14T22:33:36.618Z"},"installGivenVersion":false,"context":{"dependecyOrPackExtensionInstall":true}}
+2025-10-18 04:43:13.555 [info] Extension signature verification result for github.copilot-chat: Success. Internal Code: 0. Executed: true. Duration: 955ms.
+2025-10-18 04:43:13.704 [info] Extension signature verification result for github.copilot: Success. Internal Code: 0. Executed: true. Duration: 767ms.
+2025-10-18 04:43:14.105 [info] Extracted extension to file:///home/acead/.vscode/extensions/github.copilot-chat-0.32.1: github.copilot-chat
+2025-10-18 04:43:14.118 [info] Renamed to /home/acead/.vscode/extensions/github.copilot-chat-0.32.1
+2025-10-18 04:43:14.527 [info] Extracted extension to file:///home/acead/.vscode/extensions/github.copilot-1.372.0: github.copilot
+2025-10-18 04:43:14.540 [info] Renamed to /home/acead/.vscode/extensions/github.copilot-1.372.0
+2025-10-18 04:43:14.559 [info] Extension installed successfully: github.copilot-chat vscode-userdata:/home/acead/.vscode/extensions/extensions.json
+2025-10-18 04:43:14.559 [info] Extension installed successfully: github.copilot vscode-userdata:/home/acead/.vscode/extensions/extensions.json
+2025-10-18 04:43:52.651 [info] Getting Manifest... openai.chatgpt
+2025-10-18 04:43:52.695 [info] Installing extension: openai.chatgpt {"isMachineScoped":false,"installPreReleaseVersion":false,"pinned":false,"profileLocation":{"$mid":1,"external":"vscode-userdata:/home/acead/.vscode/extensions/extensions.json","path":"/home/acead/.vscode/extensions/extensions.json","scheme":"vscode-userdata"},"isApplicationScoped":false,"productVersion":{"version":"1.105.1","date":"2025-10-14T22:33:36.618Z"}}
+2025-10-18 04:43:55.564 [info] Extension signature verification result for openai.chatgpt: Success. Internal Code: 0. Executed: true. Duration: 519ms.
+2025-10-18 04:43:55.995 [info] Extracted extension to file:///home/acead/.vscode/extensions/openai.chatgpt-0.4.19-linux-x64: openai.chatgpt
+2025-10-18 04:43:56.004 [info] Renamed to /home/acead/.vscode/extensions/openai.chatgpt-0.4.19-linux-x64
+2025-10-18 04:43:56.018 [info] Extension installed successfully: openai.chatgpt vscode-userdata:/home/acead/.vscode/extensions/extensions.json
+2025-10-18 04:43:59.597 [info] Getting Manifest... openai.chatgpt
+2025-10-18 04:43:59.867 [info] Installing extension: openai.chatgpt {"installPreReleaseVersion":true,"preRelease":true,"pinned":false,"productVersion":{"version":"1.105.1","date":"2025-10-14T22:33:36.618Z"},"operation":3,"isApplicationScoped":false,"profileLocation":{"$mid":1,"external":"vscode-userdata:/home/acead/.vscode/extensions/extensions.json","path":"/home/acead/.vscode/extensions/extensions.json","scheme":"vscode-userdata"}}
+2025-10-18 04:44:02.205 [info] Extension signature verification result for openai.chatgpt: Success. Internal Code: 0. Executed: true. Duration: 512ms.
+2025-10-18 04:44:02.636 [info] Extracted extension to file:///home/acead/.vscode/extensions/openai.chatgpt-0.5.20-linux-x64: openai.chatgpt
+2025-10-18 04:44:02.642 [info] Renamed to /home/acead/.vscode/extensions/openai.chatgpt-0.5.20-linux-x64
+2025-10-18 04:44:02.661 [info] Marked extension as removed openai.chatgpt-0.4.19-linux-x64
+2025-10-18 04:44:02.669 [info] Extension installed successfully: openai.chatgpt vscode-userdata:/home/acead/.vscode/extensions/extensions.json
+2025-10-18 04:46:01.420 [info] Getting Manifest... github.copilot
+2025-10-18 04:46:01.428 [info] Installing extension: github.copilot {"installPreReleaseVersion":true,"preRelease":true,"pinned":false,"productVersion":{"version":"1.105.1","date":"2025-10-14T22:33:36.618Z"},"operation":3,"isApplicationScoped":true,"profileLocation":{"$mid":1,"external":"vscode-userdata:/home/acead/.vscode/extensions/extensions.json","path":"/home/acead/.vscode/extensions/extensions.json","scheme":"vscode-userdata"}}
+2025-10-18 04:46:02.600 [info] Extension signature verification result for github.copilot: Success. Internal Code: 0. Executed: true. Duration: 717ms.
+2025-10-18 04:46:03.283 [info] Extracted extension to file:///home/acead/.vscode/extensions/github.copilot-1.383.1811: github.copilot
+2025-10-18 04:46:03.292 [info] Renamed to /home/acead/.vscode/extensions/github.copilot-1.383.1811
+2025-10-18 04:46:03.305 [info] Marked extension as removed github.copilot-1.372.0
+2025-10-18 04:46:03.310 [info] Extension installed successfully: github.copilot vscode-userdata:/home/acead/.vscode/extensions/extensions.json

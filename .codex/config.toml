@@ -1,0 +1,4 @@
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
+[projects."/home/acead"]
+trust_level = "trusted"

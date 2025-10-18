@@ -1,0 +1,217 @@
+[ERROR] Failed to save config with lock: Error: ENOENT: no such file or directory, lstat '/home/acead/.claude.json'
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789109668
+[DEBUG] Setting permissions for new file: 600
+[DEBUG] Temp file written successfully, size: 103 bytes
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789109668 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789109675
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 183 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789109675 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789109682
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 220 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789109682 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Found 0 plugins (0 enabled, 0 disabled)
+[DEBUG] >>>>> getSkillsIfEnabled() CALLED <<<<<
+[DEBUG] ENABLE_SKILLS value: true, type: boolean
+[DEBUG] ENABLE_SKILLS check passed, loading skills...
+[DEBUG] Loading skills from directories: managed=/etc/claude-code/.claude/skills, user=/home/acead/.claude/skills, project=/home/acead/.claude/skills
+[DEBUG] >>>>> getPluginSkills CALLED <<<<<
+[DEBUG] Creating shell snapshot for bash (/bin/bash)
+[DEBUG] Looking for shell config file: /home/acead/.bashrc
+[DEBUG] Snapshots directory: /home/acead/.claude/shell-snapshots
+[DEBUG] Creating snapshot at: /home/acead/.claude/shell-snapshots/snapshot-bash-1760789110442-to83j5.sh
+[DEBUG] Shell binary exists: true
+[DEBUG] Execution timeout: 10000ms
+[DEBUG] Writing to temp file: /home/acead/.claude/todos/87a3ed75-a1a1-416e-97a4-b67ec2727fa5-agent-87a3ed75-a1a1-416e-97a4-b67ec2727fa5.json.tmp.14723.1760789110445
+[DEBUG] Temp file written successfully, size: 2 bytes
+[DEBUG] Renaming /home/acead/.claude/todos/87a3ed75-a1a1-416e-97a4-b67ec2727fa5-agent-87a3ed75-a1a1-416e-97a4-b67ec2727fa5.json.tmp.14723.1760789110445 to /home/acead/.claude/todos/87a3ed75-a1a1-416e-97a4-b67ec2727fa5-agent-87a3ed75-a1a1-416e-97a4-b67ec2727fa5.json
+[DEBUG] File /home/acead/.claude/todos/87a3ed75-a1a1-416e-97a4-b67ec2727fa5-agent-87a3ed75-a1a1-416e-97a4-b67ec2727fa5.json written atomically
+[DEBUG] getPluginSkills: Processing 0 enabled plugins
+[DEBUG] Total plugin skills loaded: 0
+[DEBUG] Total plugin commands loaded: 0
+[DEBUG] Registered 0 hooks from 0 plugins
+[DEBUG] Loaded 0 skills total (managed: 0, user: 0, project: 0)
+[DEBUG] getSkillsIfEnabled returning: 0 skill dir commands, 0 plugin skills
+[DEBUG] Total plugin agents loaded: 0
+[DEBUG] Ripgrep first use test: PASSED (mode=builtin, path=/home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg)
+[DEBUG] Shell snapshot created successfully (3439 bytes)
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789110553
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31454 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789110553 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789110609
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31536 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789110609 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789110615
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31566 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789110615 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[ERROR] Error streaming, falling back to non-streaming mode: Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the "X-Api-Key" or "Authorization" headers to be explicitly omitted
+[ERROR] Error in non-streaming fallback: Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the "X-Api-Key" or "Authorization" headers to be explicitly omitted
+[ERROR] Error: Error: Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the "X-Api-Key" or "Authorization" headers to be explicitly omitted
+    at Jy.validateHeaders (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:357:930)
+    at Jy.buildHeaders (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:357:8412)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Jy.buildRequest (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:357:7470)
+    at async Jy.makeRequest (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:357:3309)
+    at async BTQ.Ao1.model (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:3310:18707)
+    at async Ao1 (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:2650:39781)
+    at async BTQ (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:3310:18875)
+    at async file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:3310:13054
+    at async ba0 (file:///home/acead/.nvm/versions/node/v22.20.0/lib/node_modules/@anthropic-ai/claude-code/cli.js:3310:4494)
+[DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+[DEBUG] Found 0 hook matchers in settings
+[DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789116974
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31566 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789116974 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789116980
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31566 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789116980 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] BigQuery metrics exporter flush complete
+[DEBUG] Telemetry flushed successfully
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789181431
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31566 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789181431 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789181434
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31566 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789181434 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789181548
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31838 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789181548 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789181675
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 31962 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789181675 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789181780
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32023 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789181780 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Getting matching hook commands for Notification with query: undefined
+[DEBUG] Found 0 hook matchers in settings
+[DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789193573
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32094 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789193573 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789199196
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32125 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789199196 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789199200
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32145 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789199200 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Getting matching hook commands for SessionStart with query: startup
+[DEBUG] Found 0 hook matchers in settings
+[DEBUG] Matched 0 unique hooks for query "startup" (0 before deduplication)
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789199234
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32145 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789199234 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789199237
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32181 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789199237 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789199240
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32638 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789199240 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] AutoUpdaterWrapper: Installation type: npm-global, using native: false
+[DEBUG] performStartupChecks called
+[DEBUG] Trust not accepted for current directory - skipping plugin installations
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789202173
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32743 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789202173 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Skills and commands included in Skill tool:
+[DEBUG] Slash commands included in SlashCommand tool:
+[DEBUG] Loaded plugins - Enabled: 0, Disabled: 0, Commands: 0, Agents: 0, Errors: 0
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789202248
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32743 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789202248 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] AutoUpdaterWrapper: Installation type: npm-global, using native: false
+[DEBUG] Cleaned up session snapshot: /home/acead/.claude/shell-snapshots/snapshot-bash-1760789110442-to83j5.sh
+[DEBUG] FileHistory: Added snapshot for ba03f846-cdd1-4f6c-af3e-3dc77c0840c0, tracking 0 files
+[DEBUG] Rendering user message with 1 content blocks
+[DEBUG] Block 0: <command-name>/exit</command-name>
+            <command-message>exit</command-message>
+            <...
+[DEBUG] UserCommandMessage rendering: "exit" (args: "none")
+[DEBUG] isSkillFormat: false, prefix: "/"
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789233470
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32792 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789233470 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789233478
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 32881 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789233478 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically
+[DEBUG] Metrics opt-out API response: enabled=true
+[DEBUG] BigQuery metrics exported successfully
+[DEBUG] API Response: {
+  "accepted_count": 2,
+  "rejected_count": 0
+}
+[DEBUG] BigQuery metrics exporter flush complete
+[DEBUG] BigQuery metrics exporter flush complete
+[DEBUG] BigQuery metrics exporter shutdown complete
+[DEBUG] Writing to temp file: /home/acead/.claude.json.tmp.14723.1760789233937
+[DEBUG] Preserving file permissions: 100600
+[DEBUG] Temp file written successfully, size: 33302 bytes
+[DEBUG] Applied original permissions to temp file
+[DEBUG] Renaming /home/acead/.claude.json.tmp.14723.1760789233937 to /home/acead/.claude.json
+[DEBUG] File /home/acead/.claude.json written atomically

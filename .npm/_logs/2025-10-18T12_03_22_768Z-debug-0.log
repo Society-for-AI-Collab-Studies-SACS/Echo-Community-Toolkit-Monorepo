@@ -1,0 +1,124 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@9.2.0
+2 info using node@v18.19.1
+3 timing npm:load:whichnode Completed in 0ms
+4 timing config:load:defaults Completed in 2ms
+5 timing config:load:file:/usr/share/nodejs/npm/npmrc Completed in 2ms
+6 timing config:load:builtin Completed in 2ms
+7 timing config:load:cli Completed in 2ms
+8 timing config:load:env Completed in 0ms
+9 timing config:load:project Completed in 1ms
+10 timing config:load:file:/home/acead/.npmrc Completed in 1ms
+11 timing config:load:user Completed in 1ms
+12 timing config:load:file:/etc/npmrc Completed in 0ms
+13 timing config:load:global Completed in 0ms
+14 timing config:load:setEnvs Completed in 1ms
+15 timing config:load Completed in 9ms
+16 timing npm:load:configload Completed in 9ms
+17 timing npm:load:mkdirpcache Completed in 0ms
+18 timing npm:load:mkdirplogs Completed in 0ms
+19 verbose title npm install @anthropic-ai/claude-code
+20 verbose argv "install" "--global" "@anthropic-ai/claude-code"
+21 timing npm:load:setTitle Completed in 1ms
+22 timing config:load:flatten Completed in 2ms
+23 timing npm:load:display Completed in 3ms
+24 verbose logfile logs-max:10 dir:/home/acead/.npm/_logs/2025-10-18T12_03_22_768Z-
+25 verbose logfile /home/acead/.npm/_logs/2025-10-18T12_03_22_768Z-debug-0.log
+26 timing npm:load:logFile Completed in 6ms
+27 timing npm:load:timers Completed in 0ms
+28 timing npm:load:configScope Completed in 0ms
+29 timing npm:load Completed in 19ms
+30 timing config:load:flatten Completed in 1ms
+31 timing arborist:ctor Completed in 0ms
+32 silly logfile done cleaning log files
+33 timing idealTree:init Completed in 5ms
+34 timing idealTree:userRequests Completed in 3ms
+35 silly idealTree buildDeps
+36 silly fetch manifest @anthropic-ai/claude-code@*
+37 http fetch GET 200 https://registry.npmjs.org/@anthropic-ai%2fclaude-code 171ms (cache miss)
+38 silly placeDep ROOT @anthropic-ai/claude-code@2.0.22 OK for:  want: *
+39 silly fetch manifest @img/sharp-linux-arm@^0.33.5
+40 silly fetch manifest @img/sharp-linux-x64@^0.33.5
+41 silly fetch manifest @img/sharp-win32-x64@^0.33.5
+42 silly fetch manifest @img/sharp-darwin-x64@^0.33.5
+43 silly fetch manifest @img/sharp-linux-arm64@^0.33.5
+44 silly fetch manifest @img/sharp-darwin-arm64@^0.33.5
+45 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-linux-arm 57ms (cache miss)
+46 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-linux-x64 70ms (cache miss)
+47 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-win32-x64 71ms (cache miss)
+48 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-darwin-x64 79ms (cache miss)
+49 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-linux-arm64 127ms (cache miss)
+50 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-darwin-arm64 140ms (cache miss)
+51 timing idealTree:#root Completed in 325ms
+52 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-darwin-arm64@0.33.5 OK for: @anthropic-ai/claude-code@2.0.22 want: ^0.33.5
+53 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-darwin-x64@0.33.5 OK for: @anthropic-ai/claude-code@2.0.22 want: ^0.33.5
+54 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-linux-arm@0.33.5 OK for: @anthropic-ai/claude-code@2.0.22 want: ^0.33.5
+55 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-linux-arm64@0.33.5 OK for: @anthropic-ai/claude-code@2.0.22 want: ^0.33.5
+56 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-linux-x64@0.33.5 OK for: @anthropic-ai/claude-code@2.0.22 want: ^0.33.5
+57 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-win32-x64@0.33.5 OK for: @anthropic-ai/claude-code@2.0.22 want: ^0.33.5
+58 silly fetch manifest @img/sharp-libvips-darwin-arm64@1.0.4
+59 silly fetch manifest @img/sharp-libvips-darwin-x64@1.0.4
+60 silly fetch manifest @img/sharp-libvips-linux-arm@1.0.5
+61 silly fetch manifest @img/sharp-libvips-linux-arm64@1.0.4
+62 silly fetch manifest @img/sharp-libvips-linux-x64@1.0.4
+63 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-libvips-linux-arm64 48ms (cache miss)
+64 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-libvips-darwin-x64 77ms (cache miss)
+65 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-libvips-linux-x64 88ms (cache miss)
+66 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-libvips-linux-arm 95ms (cache miss)
+67 http fetch GET 200 https://registry.npmjs.org/@img%2fsharp-libvips-darwin-arm64 97ms (cache miss)
+68 timing idealTree:node_modules/@anthropic-ai/claude-code Completed in 105ms
+69 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-libvips-darwin-arm64@1.0.4 OK for: @img/sharp-darwin-arm64@0.33.5 want: 1.0.4
+70 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-darwin-arm64 Completed in 1ms
+71 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-libvips-darwin-x64@1.0.4 OK for: @img/sharp-darwin-x64@0.33.5 want: 1.0.4
+72 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-darwin-x64 Completed in 1ms
+73 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-libvips-darwin-arm64 Completed in 0ms
+74 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-libvips-darwin-x64 Completed in 0ms
+75 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-libvips-linux-arm@1.0.5 OK for: @img/sharp-linux-arm@0.33.5 want: 1.0.5
+76 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-linux-arm Completed in 1ms
+77 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-libvips-linux-arm Completed in 0ms
+78 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-libvips-linux-arm64@1.0.4 OK for: @img/sharp-linux-arm64@0.33.5 want: 1.0.4
+79 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-linux-arm64 Completed in 1ms
+80 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-libvips-linux-arm64 Completed in 0ms
+81 silly placeDep node_modules/@anthropic-ai/claude-code @img/sharp-libvips-linux-x64@1.0.4 OK for: @img/sharp-linux-x64@0.33.5 want: 1.0.4
+82 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-linux-x64 Completed in 1ms
+83 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-libvips-linux-x64 Completed in 0ms
+84 timing idealTree:node_modules/@anthropic-ai/claude-code/node_modules/@img/sharp-win32-x64 Completed in 0ms
+85 timing idealTree:buildDeps Completed in 435ms
+86 timing idealTree:fixDepFlags Completed in 1ms
+87 timing idealTree Completed in 444ms
+88 timing reify:loadTrees Completed in 447ms
+89 timing reify:diffTrees Completed in 1ms
+90 silly reify moves {}
+91 timing reify:retireShallow Completed in 1ms
+92 timing reify:rollback:createSparse Completed in 0ms
+93 timing reify:rollback:retireShallow Completed in 0ms
+94 timing command:install Completed in 456ms
+95 verbose stack Error: EACCES: permission denied, mkdir '/usr/local/lib/node_modules/@anthropic-ai'
+96 verbose cwd /home/acead
+97 verbose Linux 6.6.87.2-microsoft-standard-WSL2
+98 verbose node v18.19.1
+99 verbose npm  v9.2.0
+100 error code EACCES
+101 error syscall mkdir
+102 error path /usr/local/lib/node_modules/@anthropic-ai
+103 error errno -13
+104 error [Error: EACCES: permission denied, mkdir '/usr/local/lib/node_modules/@anthropic-ai'] {
+104 error   errno: -13,
+104 error   code: 'EACCES',
+104 error   syscall: 'mkdir',
+104 error   path: '/usr/local/lib/node_modules/@anthropic-ai'
+104 error }
+105 error
+105 error The operation was rejected by your operating system.
+105 error It is likely you do not have the permissions to access this file as the current user
+105 error
+105 error If you believe this might be a permissions issue, please double-check the
+105 error permissions of the file and its containing directories, or try running
+105 error the command again as root/Administrator.
+106 verbose exit -13
+107 timing npm Completed in 492ms
+108 verbose unfinished npm timer reify 1760789002804
+109 verbose unfinished npm timer reify:createSparse 1760789003255
+110 verbose code -13
+111 error A complete log of this run can be found in:
+111 error     /home/acead/.npm/_logs/2025-10-18T12_03_22_768Z-debug-0.log

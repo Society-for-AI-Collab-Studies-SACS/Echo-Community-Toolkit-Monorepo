@@ -1,0 +1,18 @@
+2025-10-18 04:37:25.159 [info] ChatSessionStore: Migrating 0 chat sessions from storage service to file system
+2025-10-18 04:37:25.256 [info] Started local extension host with pid 3859.
+2025-10-18 04:37:25.290 [info] Started initializing default profile extensions in extensions installation folder. file:///home/acead/.vscode/extensions
+2025-10-18 04:37:25.444 [info] Completed initializing default profile extensions in extensions installation folder. file:///home/acead/.vscode/extensions
+2025-10-18 04:37:25.728 [info] MCP Registry configured: https://api.mcp.github.com/2025-09-15
+2025-10-18 04:37:25.842 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2025-10-18 04:37:28.148 [info] [perf] Render performance baseline is 15ms
+2025-10-18 04:43:15.224 [error] [Extension Host] (node:3859) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `exe --trace-warnings ...` to show where the warning was created)
+2025-10-18 04:43:16.831 [error] chatParticipant must be declared in package.json: claude-code
+2025-10-18 04:44:44.841 [info] Started local extension host with pid 4185.
+2025-10-18 04:44:45.686 [error] [Extension Host] (node:4185) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `exe --trace-warnings ...` to show where the warning was created)
+2025-10-18 04:44:47.140 [error] chatParticipant must be declared in package.json: claude-code
+2025-10-18 04:46:27.367 [info] Started local extension host with pid 4505.
+2025-10-18 04:46:28.276 [error] [Extension Host] (node:4505) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `exe --trace-warnings ...` to show where the warning was created)
+2025-10-18 04:46:29.819 [error] chatParticipant must be declared in package.json: claude-code

@@ -1,0 +1,139 @@
+{
+	"name": "chatgpt",
+	"publisher": "openai",
+	"displayName": "Codex – OpenAI’s coding agent",
+	"description": "One agent for everywhere you code — included in ChatGPT Plus, Pro, Business, Edu, and Enterprise plans.",
+	"version": "0.4.19",
+	"engines": {
+		"vscode": "^1.96.2"
+	},
+	"categories": [
+		"AI",
+		"Chat"
+	],
+	"activationEvents": [
+		"onStartupFinished",
+		"onUri"
+	],
+	"main": "./out/extension.js",
+	"icon": "resources/blossom.dark.png",
+	"contributes": {
+		"keybindings": [
+			{
+				"command": "chatgpt.newChat",
+				"key": "ctrl+n",
+				"mac": "cmd+n",
+				"when": "chatgpt.supportsNewChatKeyShortcut"
+			}
+		],
+		"commands": [
+			{
+				"command": "chatgpt.implementTodo",
+				"title": "Implement with Codex",
+				"category": "Codex",
+				"enablement": "false"
+			},
+			{
+				"command": "chatgpt.openSidebar",
+				"title": "Open Codex",
+				"category": "Codex",
+				"icon": {
+					"light": "resources/blossom-black.svg",
+					"dark": "resources/blossom-white.svg"
+				}
+			},
+			{
+				"command": "chatgpt.addToChat",
+				"title": "Add to Codex chat",
+				"category": "Codex"
+			},
+			{
+				"command": "chatgpt.newChat",
+				"title": "New Chat",
+				"category": "Codex"
+			},
+			{
+				"command": "chatgpt.dumpNuxState",
+				"title": "Debug: print NUX state to console",
+				"category": "Codex",
+				"enablement": "chatgpt.sidebarView.visible"
+			},
+			{
+				"command": "chatgpt.resetNuxState",
+				"title": "Debug: reset NUX state",
+				"category": "Codex",
+				"enablement": "chatgpt.sidebarView.visible"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Codex Settings",
+			"properties": {
+				"chatgpt.commentCodeLensEnabled": {
+					"description": "Enable CodeLens above TODO comments to implement with Codex.",
+					"type": "boolean",
+					"default": true
+				},
+				"chatgpt.cliExecutable": {
+					"description": "DEVELOPMENT ONLY: Path to the Codex CLI executable. You do NOT need to set this unless you are actively developing the Codex CLI. If set this manually, parts of the extension may not work as expected.",
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"scope": "application",
+					"restricted": true
+				},
+				"chatgpt.openOnStartup": {
+					"description": "Focus the Codex sidebar when the extension finishes starting up.",
+					"type": "boolean",
+					"default": false
+				}
+			}
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "codexViewContainer",
+					"title": "Codex",
+					"icon": "resources/blossom-white.svg"
+				}
+			]
+		},
+		"views": {
+			"codexViewContainer": [
+				{
+					"id": "chatgpt.sidebarView",
+					"type": "webview",
+					"name": "Codex"
+				}
+			]
+		},
+		"menus": {
+			"editor/title": [
+				{
+					"command": "chatgpt.openSidebar",
+					"group": "navigation"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "chatgpt.addToChat",
+					"group": "codex",
+					"when": "resourceScheme == file"
+				}
+			],
+			"webview/context": [
+				{
+					"command": "chatgpt.newChat",
+					"when": "webviewId == 'chatgpt.sidebarView' && chatgpt.supportsNewChatMenu"
+				}
+			]
+		}
+	},
+	"__metadata": {
+		"installedTimestamp": 1760787835995,
+		"targetPlatform": "linux-x64",
+		"size": 50312762
+	}
+}
