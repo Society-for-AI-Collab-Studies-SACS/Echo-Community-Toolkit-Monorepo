@@ -1,0 +1,19 @@
+module(name = "acead_unified", version = "0.1.0")
+
+# Initial polyglot setup. We pin common rulesets but keep usage minimal for now.
+# Note: We start with Python; Node remains via shell wrappers for now.
+bazel_dep(name = "rules_python", version = "0.40.0")
+
+# Hermetic Python deps via rules_python pip (bzlmod)
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pypi",
+    python_version = "3.11",
+    requirements_lock = "//:requirements.txt",
+)
+use_repo(pip, "pypi")
+
+# Register a default Python 3.11 toolchain for hermetic builds
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(is_default = True, python_version = "3.11")
+use_repo(python, "python_3_11")

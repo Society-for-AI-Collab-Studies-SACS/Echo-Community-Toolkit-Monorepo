@@ -1,0 +1,11 @@
+# Runtime deps for SIGPRINT agent and Journal Logger
+numpy==1.26.4
+grpcio==1.66.1
+protobuf==4.25.3
+pyserial==3.5
+SpeechRecognition==3.10.3
+# Optional for voice input; may require system headers
+PyAudio==0.2.14
+websockets==12.0
+cryptography==42.0.7
+PyYAML==6.0.2

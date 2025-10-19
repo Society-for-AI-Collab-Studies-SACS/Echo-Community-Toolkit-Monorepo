@@ -1,0 +1,102 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_test")
+load("@pypi//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"]) 
+
+# Quick polyglot build aggregation using subpackage wrappers.
+alias(
+    name = "echo_toolkit_all",
+    actual = "//Echo-Community-Toolkit:pipeline_all",
+)
+
+alias(
+    name = "kira_prime_build",
+    actual = "//kira-prime:barebones_build",
+)
+
+alias(
+    name = "vessel_mrp_validate",
+    actual = "//vessel-narrative-mrp:validate",
+)
+
+# PlatformIO can be heavy and requires `pio` in PATH.
+alias(
+    name = "platformio_firmware",
+    actual = "//PlatformIO:firmware",
+)
+
+filegroup(
+    name = "build_all",
+    srcs = [
+        ":echo_toolkit_all",
+        ":kira_prime_build",
+        ":vessel_mrp_validate",
+    ],
+)
+
+sh_test(
+    name = "echo_soulcode_tests",
+    srcs = ["tools/bazel/echo_soulcode_pytest.sh"],
+)
+
+sh_test(
+    name = "vessel_mrp_tests",
+    srcs = ["tools/bazel/vessel_mrp_validate.sh"],
+)
+
+sh_test(
+    name = "kira_prime_tests",
+    srcs = ["tools/bazel/kira_prime_pytest.sh"],
+)
+
+# Native Python test (Bazel) for Echo LSB codec tests
+py_test(
+    name = "echo_lsb_tests_py",
+    main = "//tools/bazel/pytests:echo_lsb_wrapper.py",
+    srcs = ["//tools/bazel/pytests:echo_lsb_wrapper.py"],
+    deps = [
+        requirement("numpy"),
+        requirement("Pillow"),
+    ],
+    data = [
+        "//Echo-Community-Toolkit:assets/images/echo_key.png",
+        "//Echo-Community-Toolkit:tests/test_lsb.py",
+        "//Echo-Community-Toolkit:src/lsb_extractor.py",
+        "//Echo-Community-Toolkit:src/lsb_encoder_decoder.py",
+    ],
+    tags = ["manual"],
+)
+
+# Node scripts via shell wrappers (will migrate to rules_js later)
+sh_binary(
+    name = "echo_soulcode_emit_schema",
+    srcs = ["tools/bazel/js/echo_emit_schema.sh"],
+)
+
+sh_test(
+    name = "echo_soulcode_validate",
+    srcs = ["tools/bazel/js/echo_validate_bundle.sh"],
+)
+
+sh_binary(
+    name = "echo_npm_ci",
+    srcs = ["tools/bazel/js/echo_npm_ci.sh"],
+)
+
+sh_binary(
+    name = "kira_collab_build",
+    srcs = ["tools/bazel/js/kira_collab_build.sh"],
+)
+
+py_binary(
+    name = "orchestrator",
+    srcs = ["orchestrator.py"],
+    python_version = "PY3",
+    deps = [
+        "//protos:agents_py_proto",
+        "//protos:agents_py_grpc",
+        requirement("grpcio"),
+        requirement("protobuf"),
+        requirement("PyYAML"),
+    ],
+)

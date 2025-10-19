@@ -1,0 +1,49 @@
+syntax = "proto3";
+package agents;
+
+import "google/protobuf/empty.proto";
+
+// Message for a generic ledger entry (either a SIGPRINT reading or a journal entry).
+message LedgerEntry {
+  string time = 1;                 // ISO timestamp of the entry
+  string type = 2;                 // "SIGPRINT" or "JOURNAL"
+  string text = 3;                 // Journal text (empty for SIGPRINT entries)
+  string sigprint = 4;             // 20-digit brain state signature
+  float coherence = 5;             // Global 8Hz coherence (0-100)
+  map<string, float> features = 6; // Additional features
+}
+
+// Message for a real-time SIGPRINT update (without journal text).
+message SigprintUpdate {
+  string time = 1;
+  string sigprint = 2;
+  float coherence = 3;
+  map<string, float> features = 4;
+}
+
+// Message for an event notification to Garden.
+message GardenEvent {
+  string event_type = 1;   // e.g. "STATE_CHANGE", "SELF_REFLECTION"
+  string description = 2;  // optional details
+}
+
+// Acknowledgement reply (for simple success/failure responses).
+message Ack {
+  bool success = 1;
+}
+
+// Sigprint service: offered by sigprint_agent to provide latest brain-state signature.
+service SigprintService {
+  rpc GetLatestSigprint(google.protobuf.Empty) returns (SigprintUpdate);
+}
+
+// Ledger service: offered by Limnus to commit a new ledger block.
+service LedgerService {
+  rpc CommitEntry(LedgerEntry) returns (Ack);
+}
+
+// Garden service: offered by Garden to receive narrative-trigger events.
+service GardenService {
+  rpc NotifyEvent(GardenEvent) returns (Ack);
+}
+

@@ -1,0 +1,80 @@
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("@pypi//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"]) 
+
+py_library(
+    name = "sigprint",
+    srcs = ["encoder.py"],
+    deps = [
+        requirement("numpy"),
+    ],
+)
+
+py_library(
+    name = "coherence",
+    srcs = ["coherence.py"],
+    deps = [
+        requirement("numpy"),
+        # Optional SciPy for circmean:
+        # requirement("scipy"),
+    ],
+)
+
+py_library(
+    name = "gate_loop",
+    srcs = ["gate_loop.py"],
+    deps = [
+        requirement("numpy"),
+    ],
+)
+
+py_library(
+    name = "lockin",
+    srcs = ["lockin.py"],
+    deps = [
+        requirement("numpy"),
+        # Optional SciPy:
+        # requirement("scipy"),
+    ],
+)
+
+py_test(
+    name = "encoder_tests",
+    srcs = ["tests/test_encoder.py"],
+    main = "tests/test_encoder.py",
+    deps = [
+        ":sigprint",
+        requirement("numpy"),
+    ],
+)
+
+py_test(
+    name = "lockin_tests",
+    srcs = ["tests/test_lockin.py"],
+    main = "tests/test_lockin.py",
+    deps = [
+        ":lockin",
+        requirement("numpy"),
+    ],
+)
+
+py_test(
+    name = "coherence_tests",
+    srcs = ["tests/test_coherence.py"],
+    main = "tests/test_coherence.py",
+    deps = [
+        ":coherence",
+        requirement("numpy"),
+    ],
+)
+
+py_test(
+    name = "gate_loop_tests",
+    srcs = ["tests/test_gate_loop.py"],
+    main = "tests/test_gate_loop.py",
+    deps = [
+        ":gate_loop",
+        requirement("numpy"),
+    ],
+)

@@ -1,0 +1,25 @@
+# Build artifacts
+bazel-*/
+bazel/
+bazel-bin/
+bazel-out/
+bazel-testlogs/
+.cache/
+__pycache__/
+*.pyc
+
+# Editor/IDE
+*.code-workspace
+
+# Logs
+logs/
+*.log
+
+# Virtual environments
+venv/
+
+# PlatformIO build output
+PlatformIO/.pio/
+
+# OS junk
+*.DS_Store
