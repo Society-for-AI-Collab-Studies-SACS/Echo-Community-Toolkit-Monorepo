@@ -3,3 +3,7 @@ pillow
 pyserial
 PyYAML
 cryptography
+pyzmq
+aiohttp
+prometheus-client
+requests
