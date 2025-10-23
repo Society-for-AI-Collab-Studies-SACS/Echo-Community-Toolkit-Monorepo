@@ -1,0 +1,35 @@
+{
+  "name": "@AceTheDactyl/rhz-stylus-arch",
+  "version": "0.1.2",
+  "description": "RHZ Stylus architecture ASCII and LLM module guide CLI/API",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "rhz-stylus-arch": "bin/cli.js"
+  },
+  "files": [
+    "index.js",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AceTheDactyl/PlatformIO.git"
+  },
+  "keywords": [
+    "rhz",
+    "stylus",
+    "esp32-s3",
+    "firmware",
+    "architecture",
+    "ascii",
+    "cli"
+  ]
+}
+

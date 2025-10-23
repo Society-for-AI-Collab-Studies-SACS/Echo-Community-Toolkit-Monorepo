@@ -1,0 +1,65 @@
+name: Publish npm (GitHub Packages)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g., v0.1.4)"
+        required: false
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@AceTheDactyl'
+      - name: Configure npm auth (GitHub Packages)
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "${NPM_TOKEN}" ]; then
+            echo "NPM_TOKEN secret is missing. Add a PAT (classic) with read:packages, write:packages as NPM_TOKEN." >&2
+            exit 1
+          fi
+          echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm config set @AceTheDactyl:registry https://npm.pkg.github.com
+      - name: Set version from tag (if available)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd packages/rhz-stylus-arch
+          TAG_INPUT="${{ github.event.inputs.tag }}"
+          if [ -n "$TAG_INPUT" ]; then
+            TAG="${TAG_INPUT#v}"
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME#v}"
+          else
+            # Fallback to latest release tag
+            TAG=$(curl -sSL -H "authorization: Bearer ${GH_TOKEN}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" | jq -r .tag_name | sed 's/^v//')
+          fi
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "Could not determine version tag" >&2
+            exit 1
+          fi
+          echo "Setting package.json version to ${TAG}"
+          jq ".version=\"${TAG}\"" package.json > package.json.tmp && mv package.json.tmp package.json
+      - name: Pack (dry-run)
+        run: |
+          cd packages/rhz-stylus-arch
+          npm pack --dry-run
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/rhz-stylus-arch
+          npm publish --access public
