@@ -7,14 +7,12 @@ on:
       - 'package.json'
       - 'packages/**'
       - 'PlatformIO/**'
-      - '.github/workflows/npm-grunt.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'package.json'
       - 'packages/**'
       - 'PlatformIO/**'
-      - '.github/workflows/npm-grunt.yml'
 
 jobs:
   build:
