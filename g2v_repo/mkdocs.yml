@@ -1,0 +1,25 @@
+site_name: RHZ Stylus
+site_description: Maker firmware and lab workflow docs for the RHZ Stylus (ESP32‑S3)
+repo_url: https://github.com/AceTheDactyl/PlatformIO
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+nav:
+  - Home: index.md
+  - Firmware:
+      - Install & Use: INSTALL.md
+      - Build & Test Checklist: checklist_template.md
+  - Host Tools:
+      - Serial Logger: host_logger_serial.md
+      - PSD Quicklook: host_psd_quicklook.md
+  - CI & Releases:
+      - CI Pipeline: ci.md
+      - Release Notes (GitHub): https://github.com/AceTheDactyl/PlatformIO/releases
+      - Changelog: CHANGELOG.md
+  - Project Setup:
+      - Template Notes: TEMPLATE_NOTES.md
