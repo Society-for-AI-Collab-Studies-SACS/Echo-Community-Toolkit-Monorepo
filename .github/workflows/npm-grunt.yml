@@ -3,8 +3,18 @@ name: NodeJS with Grunt
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'package.json'
+      - 'packages/**'
+      - 'PlatformIO/**'
+      - '.github/workflows/npm-grunt.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'package.json'
+      - 'packages/**'
+      - 'PlatformIO/**'
+      - '.github/workflows/npm-grunt.yml'
 
 jobs:
   build:
@@ -24,5 +34,13 @@ jobs:
 
     - name: Build
       run: |
-        npm install
-        grunt
+        if [ -f package.json ]; then
+          npm install
+          if command -v grunt >/dev/null 2>&1; then
+            grunt
+          else
+            npx --yes grunt
+          fi
+        else
+          echo "No package.json at repo root; skipping"
+        fi

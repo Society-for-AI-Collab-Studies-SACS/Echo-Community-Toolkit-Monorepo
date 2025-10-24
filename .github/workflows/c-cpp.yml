@@ -3,8 +3,18 @@ name: C/C++ CI
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'firmware/**'
+      - 'stylus/firmware/**'
+      - 'PlatformIO/firmware/**'
+      - '.github/workflows/c-cpp.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'firmware/**'
+      - 'stylus/firmware/**'
+      - 'PlatformIO/firmware/**'
+      - '.github/workflows/c-cpp.yml'
 
 jobs:
   build:
