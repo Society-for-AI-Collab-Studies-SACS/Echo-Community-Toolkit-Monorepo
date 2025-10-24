@@ -3,7 +3,13 @@ name: g2v-ci
 on:
   push:
     branches: ["**"]
+    paths:
+      - 'g2v_repo/**'
+      - '.github/workflows/g2v-ci.yml'
   pull_request:
+    paths:
+      - 'g2v_repo/**'
+      - '.github/workflows/g2v-ci.yml'
 
 permissions:
   contents: read
@@ -32,4 +38,3 @@ jobs:
       - name: Run g2v tests
         run: |
           pytest -q g2v_repo/tests
-
