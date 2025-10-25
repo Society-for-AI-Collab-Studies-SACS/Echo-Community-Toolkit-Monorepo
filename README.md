@@ -70,6 +70,8 @@ Unified living workspace for VesselOS, Echo Community Toolkit, narrative engines
 
 ## Repository Constellation
 
+Full ASCII trees and subsystem context live in [`architecture.md`](architecture.md).
+
 ```
 Monorepo Root
 ├─ Echo-Community-Toolkit/        Core hyperfollow + soulcode toolkit (Node/Python)
