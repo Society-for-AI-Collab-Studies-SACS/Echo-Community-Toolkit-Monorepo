@@ -37,6 +37,8 @@ on:
         description: Base branch for nested PR
         required: false
         default: "master"
+  schedule:
+    - cron: '0 6 * * *'
 
 permissions:
   contents: write
@@ -78,7 +80,7 @@ jobs:
   autopush:
     name: Auto push + PR (SSH)
     needs: test
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.auto_push == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.auto_push == 'true') || github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (SSH)
@@ -95,8 +97,8 @@ jobs:
 
       - name: Create/update branch and push
         env:
-          BRANCH: ${{ inputs.branch }}
-          PUSH_TAGS: ${{ inputs.push_tags }}
+          BRANCH: ${{ inputs.branch || 'ci/auto-updates' }}
+          PUSH_TAGS: ${{ inputs.push_tags || 'false' }}
         run: |
           set -e
           git checkout -B "$BRANCH"
@@ -113,9 +115,9 @@ jobs:
       - name: Open PR (root)
         uses: actions/github-script@v7
         env:
-          BRANCH: ${{ inputs.branch }}
-          BASE: ${{ inputs.base }}
-          TITLE: ${{ inputs.pr_title }}
+          BRANCH: ${{ inputs.branch || 'ci/auto-updates' }}
+          BASE: ${{ inputs.base || 'main' }}
+          TITLE: ${{ inputs.pr_title || 'ci: automated maintenance updates' }}
         with:
           script: |
             const owner = context.repo.owner;
