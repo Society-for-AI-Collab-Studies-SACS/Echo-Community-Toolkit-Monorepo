@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "echo-soulcode"
+version = "0.1.0"
+description = "Echo soulcode generation and Hilbert-state live readings"
+authors = [{name="Echo", email="echo@example.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["jsonschema>=4.20"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

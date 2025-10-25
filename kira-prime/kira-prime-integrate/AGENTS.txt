@@ -1,0 +1,701 @@
+# Agent System Reference
+
+## Overview
+
+VesselOS implements a four-agent architecture where each agent has distinct responsibilities in the narrative workflow. This document provides comprehensive details on all four agents.
+
+## Architecture Principles
+
+### Agent Isolation
+Each agent operates independently with:
+- **Dedicated state files** - No shared memory pollution
+- **Encapsulated logic** - Commands don't leak across agents
+- **Clear interfaces** - Well-defined input/output contracts
+
+### Inter-Agent Communication
+Agents communicate through:
+- **Dispatcher** - Central routing mechanism
+- **Shared state** - JSON files in `state/` directory
+- **Event log** - Append-only audit trail
+
+### RGB Channel Mapping (MRP)
+
+The Multi-Role Persona system maps agents to RGB channels:
+- **R (Red) - Message/Origin**: Echo + Limnus
+- **G (Green) - Metadata/Bloom**: Garden
+- **B (Blue) - Parity/ECC**: Kira
+
+---
+
+## Echo Agent
+
+**Role**: Voice & Persona Manager  
+**Channel**: R (Message/Origin)  
+**State File**: `state/echo_state.json`
+
+### Core Responsibility
+Echo interprets user input and reframes it in narrative voice using a blend of three personas (α, β, γ).
+
+### Persona System
+
+#### Alpha (α) - Squirrel
+- **Energy**: Playful, scattered, energetic
+- **Voice**: Excitable, tangential, curious
+- **Use case**: Exploration, brainstorming, play
+
+#### Beta (β) - Fox
+- **Energy**: Clever, focused, strategic
+- **Voice**: Sharp, witty, purposeful
+- **Use case**: Problem-solving, analysis, planning
+
+#### Gamma (γ) - Paradox
+- **Energy**: Mysterious, deep, contemplative
+- **Voice**: Poetic, philosophical, liminal
+- **Use case**: Reflection, mystery, integration
+
+### Persona Blending
+
+Personas are weighted (α + β + γ = 1.0):
+
+```python
+# Default balanced mode
+α = 0.34  # Slightly favor playfulness
+β = 0.33  # Balanced focus
+γ = 0.33  # Balanced depth
+
+# Squirrel mode (playful)
+α = 0.7
+β = 0.2
+γ = 0.1
+
+# Fox mode (focused)
+α = 0.2
+β = 0.7
+γ = 0.1
+
+# Paradox mode (contemplative)
+α = 0.1
+β = 0.2
+γ = 0.7
+```
+
+### Commands
+
+#### `summon()`
+Reset to canonical persona blend and deliver greeting mantra.
+
+```python
+def summon(self):
+    self.state.alpha = 0.34
+    self.state.beta = 0.33
+    self.state.gamma = 0.33
+    return self.greeting_mantra()
+```
+
+**CLI**: `vesselos echo summon`
+
+#### `mode(persona)`
+Force a specific persona mode.
+
+**Options**: `squirrel`, `fox`, `paradox`, `balanced`
+
+```python
+def mode(self, persona: str):
+    self.state.set_weights(PERSONA_MODES[persona])
+    self.state.save()
+```
+
+**CLI**: `vesselos echo mode fox`
+
+#### `say(text)`
+Speak in current persona's tone (no state change).
+
+```python
+def say(self, text: str):
+    styled = self.apply_persona_style(text)
+    return styled
+```
+
+**CLI**: `vesselos echo say "The garden blooms"`
+
+#### `learn(text)`
+Learn from text: adjust persona weights and forward to Limnus.
+
+```python
+def learn(self, text: str):
+    keywords = self.analyze_sentiment(text)
+    self.adjust_weights(keywords)
+    
+    limnus = get_agent('Limnus')
+    limnus.cache(text, layer='L2', tags=['echo_learning'])
+```
+
+**CLI**: `vesselos echo learn --file input.txt`
+
+### State Schema
+
+```json
+{
+  "alpha": 0.34,
+  "beta": 0.33,
+  "gamma": 0.33,
+  "mode": "balanced",
+  "history": [
+    {
+      "timestamp": "2025-10-15T10:30:00Z",
+      "mode": "fox",
+      "weights": {"alpha": 0.2, "beta": 0.7, "gamma": 0.1}
+    }
+  ],
+  "last_summon": "2025-10-15T09:00:00Z"
+}
+```
+
+---
+
+## Garden Agent
+
+**Role**: Ritual Orchestrator & Scroll Keeper  
+**Channel**: G (Metadata/Bloom)  
+**State File**: `state/garden_ledger.json`
+
+### Core Responsibility
+Garden guides the ritual spiral narrative flow and manages scroll content (Proof, Acorn, Cache, Chronicle).
+
+### Ritual Spiral
+
+The ritual progresses through five stages in a continuous cycle:
+
+```
+1. SCATTER  → Disperse seeds, begin exploration
+2. WITNESS  → Observe what emerges
+3. PLANT    → Root intentions deeply
+4. TEND     → Nurture and care for growth
+5. HARVEST  → Gather fruits of the cycle
+   ↓
+(Loop back to SCATTER)
+```
+
+### Scroll System
+
+Four scrolls provide narrative content:
+
+| Scroll | Purpose | Sections |
+|--------|---------|----------|
+| **Proof** | Primary narrative thread | 20 |
+| **Acorn** | Seeds of wisdom | 15 |
+| **Cache** | Hidden memories | 12 |
+| **Chronicle** | Historical record | 20 |
+
+### Commands
+
+#### `start()`
+Initialize or restart ritual cycle.
+
+```python
+def start(self):
+    self.state.init_ledger()
+    self.state.current_stage = 'scatter'
+    self.state.cycle_count += 1
+    return {'stage': 'scatter', 'cycle': self.state.cycle_count}
+```
+
+**CLI**: `vesselos garden start`
+
+#### `next()`
+Advance to next ritual stage.
+
+```python
+def next(self):
+    stages = ['scatter', 'witness', 'plant', 'tend', 'harvest']
+    current_idx = stages.index(self.state.current_stage)
+    next_stage = stages[(current_idx + 1) % len(stages)]
+    self.state.current_stage = next_stage
+    return {'stage': next_stage}
+```
+
+**CLI**: `vesselos garden next`
+
+#### `open(scroll)`
+Open next section of specified scroll.
+
+```python
+def open(self, scroll='proof'):
+    section = self.scroll_manager.get_next_section(scroll)
+    self.state.log_scroll_access(scroll, section['id'])
+    return section
+```
+
+**CLI**: `vesselos garden open --scroll acorn`
+
+#### `log(entry)`
+Record custom log entry in ritual ledger.
+
+```python
+def log(self, entry: dict):
+    self.state.append_ledger({
+        'timestamp': datetime.now().isoformat(),
+        'type': 'custom',
+        'data': entry
+    })
+```
+
+**CLI**: `vesselos garden log '{"event": "meditation"}'`
+
+### State Schema
+
+```json
+{
+  "current_stage": "scatter",
+  "cycle_count": 3,
+  "scroll_positions": {
+    "proof": 7,
+    "acorn": 3,
+    "cache": 1,
+    "chronicle": 5
+  },
+  "ledger": [
+    {
+      "timestamp": "2025-10-15T10:00:00Z",
+      "type": "stage_change",
+      "stage": "scatter"
+    }
+  ],
+  "started_at": "2025-10-15T09:00:00Z"
+}
+```
+
+---
+
+## Limnus Agent
+
+**Role**: Memory Engine & Ledger Steward  
+**Channel**: R (Message/Archive)  
+**State File**: `state/limnus_memory.json`
+
+### Core Responsibility
+Limnus maintains multi-layered memory cache and hash-chained ledger, ensuring all narrative events are archived.
+
+### Memory Layer Architecture
+
+Three-tier memory system:
+
+**L1 - Short-Term**
+- Capacity: 100 entries
+- TTL: 1 hour
+- Use: Immediate context, current session
+
+**L2 - Medium-Term**
+- Capacity: 1,000 entries
+- TTL: 24 hours
+- Use: Recent insights, daily work
+
+**L3 - Long-Term**
+- Capacity: 10,000 entries
+- TTL: Permanent
+- Use: Core memories, milestones
+
+### Ledger Structure
+
+Hash-chained blocks ensure integrity:
+
+```python
+{
+  "block_id": 47,
+  "timestamp": "2025-10-15T10:30:00Z",
+  "payload": {...},
+  "prev_hash": "a3f2...",
+  "hash": "7b9e..."
+}
+```
+
+Each block's hash depends on previous block, creating tamper-evident chain.
+
+### Commands
+
+#### `init()`
+Initialize memory structures and verify toolkit.
+
+```python
+def init(self):
+    self.state.ensure_layers()
+    self.verify_stego_toolkit()
+    return {'status': 'initialized', 'layers': 3}
+```
+
+**CLI**: `vesselos limnus init`
+
+#### `cache(text, layer, tags)`
+Cache memory fragment in specified layer.
+
+```python
+def cache(self, text: str, layer='L2', tags=None):
+    entry = {
+        'id': generate_id(),
+        'timestamp': datetime.now().isoformat(),
+        'text': text,
+        'tags': tags or [],
+        'layer': layer
+    }
+    self.state.add_memory(entry, layer)
+    return {'id': entry['id'], 'layer': layer}
+```
+
+**CLI**: `vesselos limnus cache "text" --layer L2 --tags insight,daily`
+
+#### `recall(keyword, tag, limit)`
+Retrieve memories by keyword or tag.
+
+```python
+def recall(self, keyword=None, tag=None, limit=10):
+    results = self.state.search_memories(
+        keyword=keyword,
+        tag=tag,
+        limit=limit
+    )
+    return results
+```
+
+**CLI**: `vesselos limnus recall --keyword "garden" --limit 5`
+
+#### `commit_block(payload)`
+Append new block to hash-chained ledger.
+
+```python
+def commit_block(self, payload: dict):
+    prev_hash = self.state.get_latest_hash()
+    block = {
+        'timestamp': datetime.now().isoformat(),
+        'payload': payload,
+        'prev_hash': prev_hash,
+        'hash': self.calculate_hash(payload, prev_hash)
+    }
+    self.state.append_ledger_block(block)
+    return block
+```
+
+**CLI**: `vesselos limnus commit '{"event": "milestone"}'`
+
+#### `encode_ledger(output)`
+Embed entire ledger into PNG via LSB steganography.
+
+```python
+def encode_ledger(self, output='ledger.png'):
+    ledger_json = json.dumps(self.state.get_full_ledger())
+    self.stego.encode(ledger_json, output)
+    return {'file': output, 'size': len(ledger_json)}
+```
+
+**CLI**: `vesselos limnus encode-ledger --output backup.png`
+
+#### `decode_ledger(image)`
+Extract and verify ledger from PNG.
+
+```python
+def decode_ledger(self, image: str):
+    ledger_json = self.stego.decode(image)
+    ledger = json.loads(ledger_json)
+    is_valid = self.verify_chain(ledger)
+    return {'ledger': ledger, 'valid': is_valid}
+```
+
+**CLI**: `vesselos limnus decode-ledger --input backup.png`
+
+### State Schema
+
+```json
+{
+  "layers": {
+    "L1": [
+      {
+        "id": "mem_001",
+        "timestamp": "2025-10-15T10:30:00Z",
+        "text": "Current thought",
+        "tags": ["active"],
+        "expires_at": "2025-10-15T11:30:00Z"
+      }
+    ],
+    "L2": [...],
+    "L3": [...]
+  },
+  "ledger": [
+    {
+      "block_id": 1,
+      "timestamp": "2025-10-15T09:00:00Z",
+      "payload": {"type": "genesis"},
+      "prev_hash": "0000000000",
+      "hash": "a3f2b8c9..."
+    }
+  ],
+  "stats": {
+    "total_memories": 234,
+    "total_blocks": 47
+  }
+}
+```
+
+---
+
+## Kira Agent
+
+**Role**: Validator, Mentor & Integrator  
+**Channel**: B (Parity/ECC)  
+**State File**: `state/contract.json`
+
+### Core Responsibility
+Kira validates system integrity, mentors other agents, and integrates outputs with Git/GitHub.
+
+### Validation Checks
+
+Kira runs comprehensive validation:
+- **Ledger integrity**: Hash chain verification
+- **Memory consistency**: Layer capacity and TTL
+- **Persona normalization**: Weights sum to 1.0
+- **Ritual validity**: Stage sequence correctness
+- **File structure**: JSON schema compliance
+
+### Mentorship System
+
+Kira analyzes system state and provides guidance:
+- **Persona drift**: Suggests persona adjustments
+- **Memory balance**: Recommends layer optimization
+- **Ritual pacing**: Advises on stage timing
+- **Ledger health**: Identifies integrity issues
+
+### Commands
+
+#### `validate(strict)`
+Run full validation checks.
+
+```python
+def validate(self, strict=False):
+    results = {
+        'ledger': self.validate_ledger(),
+        'memory': self.validate_memory(),
+        'persona': self.validate_persona(),
+        'ritual': self.validate_ritual(),
+        'files': self.validate_files()
+    }
+    all_passed = all(r['passed'] for r in results.values())
+    return {'passed': all_passed, 'results': results}
+```
+
+**CLI**: `vesselos kira validate --strict`
+
+#### `mentor(apply)`
+Analyze state and suggest improvements.
+
+```python
+def mentor(self, apply=False):
+    analysis = {
+        'persona_drift': self.analyze_persona_drift(),
+        'memory_balance': self.analyze_memory_distribution(),
+        'ritual_progress': self.analyze_ritual_pacing()
+    }
+    suggestions = self.generate_suggestions(analysis)
+    
+    if apply:
+        self.apply_suggestions(suggestions)
+    
+    return {'analysis': analysis, 'suggestions': suggestions}
+```
+
+**CLI**: `vesselos kira mentor --apply`
+
+#### `publish(release, version)`
+Package narrative and optionally create GitHub release.
+
+```python
+def publish(self, release=False, version=None):
+    bundle = self.create_bundle()
+    self.git_commit(f"Narrative update: {datetime.now().date()}")
+    
+    if release:
+        tag = version or self.generate_version_tag()
+        self.create_github_release(tag, bundle)
+        return {'released': True, 'tag': tag}
+    
+    return {'committed': True, 'bundle': bundle}
+```
+
+**CLI**: `vesselos kira publish --release --version v1.0.0`
+
+#### `seal()`
+Seal ritual: finalize outputs and write soul contract.
+
+```python
+def seal(self):
+    contract = {
+        'sealed_at': datetime.now().isoformat(),
+        'final_persona': self.get_current_persona(),
+        'ritual_stages_completed': self.get_completed_stages(),
+        'total_memories': self.count_memories(),
+        'hash': self.generate_contract_hash()
+    }
+    self.state.save_contract(contract)
+    
+    limnus = get_agent('Limnus')
+    limnus.encode_ledger('final_ledger.png')
+    
+    return contract
+```
+
+**CLI**: `vesselos kira seal`
+
+### State Schema
+
+```json
+{
+  "sealed": false,
+  "version": "1.0.0",
+  "last_validation": {
+    "timestamp": "2025-10-15T10:30:00Z",
+    "passed": true,
+    "issues": []
+  },
+  "mentor_history": [
+    {
+      "timestamp": "2025-10-15T09:00:00Z",
+      "suggestions": ["Shift to paradox mode"],
+      "applied": false
+    }
+  ],
+  "publications": [
+    {
+      "timestamp": "2025-10-14T18:00:00Z",
+      "version": "v0.9.0",
+      "commit": "abc123"
+    }
+  ]
+}
+```
+
+---
+
+## Agent Interaction Patterns
+
+### Sequential Processing
+
+For dictation input, agents process in order:
+
+```
+Garden → Echo → Limnus → Kira
+  ↓       ↓       ↓       ↓
+ Log    Style   Store  Validate
+```
+
+### Direct Invocation
+
+CLI commands invoke agents directly:
+
+```bash
+vesselos echo summon
+# → Only Echo executes
+```
+
+### Cross-Agent Communication
+
+Agents can call each other:
+
+```python
+# In Echo.learn()
+limnus = get_agent('Limnus')
+limnus.cache(text, layer='L2')
+
+# In Garden.log()
+limnus = get_agent('Limnus')
+limnus.commit_block(entry)
+
+# In Kira.seal()
+limnus = get_agent('Limnus')
+limnus.encode_ledger('final.png')
+```
+
+---
+
+## Best Practices
+
+### 1. Always Validate Before Publishing
+
+```bash
+vesselos kira validate
+# If passed:
+vesselos kira publish --release
+```
+
+### 2. Use Appropriate Memory Layers
+
+- **L1**: Temporary, session-specific
+- **L2**: Daily work, recent insights
+- **L3**: Permanent records, milestones
+
+### 3. Follow Ritual Sequence
+
+Don't skip stages arbitrarily. Complete the full cycle:
+```bash
+vesselos garden start     # scatter
+vesselos garden next      # witness
+vesselos garden next      # plant
+vesselos garden next      # tend
+vesselos garden next      # harvest
+```
+
+### 4. Monitor Persona Drift
+
+```bash
+vesselos kira mentor
+# Check persona drift suggestions
+```
+
+### 5. Regular Ledger Encoding
+
+```bash
+# Daily backup
+vesselos limnus encode-ledger --output "backups/ledger_$(date +%Y%m%d).png"
+```
+
+---
+
+## Troubleshooting Agents
+
+### Echo Issues
+
+**Persona weights don't sum to 1.0**
+```bash
+vesselos echo summon  # Reset to canonical
+```
+
+### Garden Issues
+
+**Stuck in a stage**
+```bash
+vesselos garden next  # Force advance
+```
+
+### Limnus Issues
+
+**Memory layer full**
+```bash
+vesselos limnus trim --layer L1 --older-than 1h
+```
+
+**Ledger hash mismatch**
+```bash
+vesselos kira validate --fix
+```
+
+### Kira Issues
+
+**Validation failing**
+```bash
+vesselos kira validate --verbose
+# Review specific failure points
+```
+
+---
+
+## Further Reading
+
+- [API Reference](../api/API_REFERENCE.md)
+- [Development Guide](../development/CONTRIBUTING.md)
+- [Workflow Examples](../guides/WORKFLOWS.md)

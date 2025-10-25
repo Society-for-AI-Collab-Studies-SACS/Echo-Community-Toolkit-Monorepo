@@ -1,0 +1,112 @@
+# VesselOS Documentation Changelog
+
+All notable changes to the VesselOS documentation will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2025-10-15
+
+### Added
+- **Complete Documentation Repository** - First comprehensive release
+- **Main README** - Documentation index and navigation
+- **Architecture Documentation**
+  - System architecture overview
+  - Four-agent system reference (Echo, Garden, Limnus, Kira)
+  - Data flow diagrams and interaction patterns
+- **User Guides**
+  - Quick start guide (5-minute setup)
+  - Installation guide with multiple options
+  - CLI reference with all commands
+  - Dictation guide for voice/text input
+  - Comprehensive workflow examples
+  - Troubleshooting guide
+- **Technical Specifications**
+  - MRP (Multi-Role Persona) specification
+  - Memory layers architecture (L1/L2/L3)
+  - Ledger format and hash-chain structure
+  - Steganography (LSB encoding) documentation
+- **Narrative Documentation**
+  - Ritual stages (scatter → witness → plant → tend → harvest)
+  - Scroll system (Proof, Acorn, Cache, Chronicle)
+  - Persona modes (Squirrel, Fox, Paradox)
+  - 20-chapter chronicles structure
+- **Developer Documentation**
+  - API reference
+  - Contributing guidelines
+  - Testing procedures
+  - Extension development guide
+- **Examples**
+  - Batch command files
+  - Configuration samples
+  - Python script examples
+  - Shell script workflows
+- **Legal**
+  - MIT License
+  - Attribution guidelines
+  - Open source philosophy statement
+
+### Documentation Coverage
+- ✅ All four agents fully documented
+- ✅ Complete CLI command reference
+- ✅ 8+ workflow examples
+- ✅ Installation for macOS, Linux, Docker
+- ✅ Troubleshooting for common issues
+- ✅ API reference with code examples
+- ✅ MRP specification with RGB channel mapping
+- ✅ Memory layer architecture
+- ✅ Steganography implementation details
+
+### Structure
+```
+vesselos-docs/
+├── README.md (Main index)
+├── LICENSE
+├── CHANGELOG.md (This file)
+├── guides/ (User guides - 7 files)
+├── architecture/ (System design - 3 files)
+├── agents/ (Per-agent docs - 4 files)
+├── specs/ (Technical specs - 4 files)
+├── narrative/ (Narrative docs - 4 files)
+├── api/ (API reference)
+├── development/ (Developer docs - 3 files)
+├── examples/ (Code examples)
+└── assets/ (Images, diagrams)
+```
+
+## [Unreleased]
+
+### Planned
+- Video tutorials
+- Interactive API playground
+- More workflow examples
+- Diagrams and visualizations
+- Translations (ES, FR, DE)
+- Community contributions section
+- FAQ section
+- Glossary of terms
+
+## Notes
+
+### Version Numbering
+- **Major** (X.0.0): Breaking changes to documentation structure
+- **Minor** (1.X.0): New documentation sections or major additions
+- **Patch** (1.0.X): Corrections, clarifications, minor updates
+
+### Contributing
+To suggest documentation improvements:
+1. Fork the repository
+2. Make your changes
+3. Submit a pull request
+4. Reference specific sections changed
+
+### Feedback
+- Report issues: https://github.com/your-org/vesselos/issues
+- Discussions: https://github.com/your-org/vesselos/discussions
+- Discord: https://discord.gg/vesselos
+
+---
+
+**Maintained by**: VesselOS Documentation Team  
+**Last Updated**: 2025-10-15  
+**Next Review**: 2025-11-15

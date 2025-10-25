@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Vessel Narrative Chapter",
+  "type": "object",
+  "properties": {
+    "chapter": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "narrator": {
+      "type": "string",
+      "enum": [
+        "Limnus",
+        "Garden",
+        "Kira"
+      ]
+    },
+    "flags": {
+      "type": "object",
+      "properties": {
+        "R": {
+          "type": "string",
+          "enum": [
+            "active",
+            "latent"
+          ]
+        },
+        "G": {
+          "type": "string",
+          "enum": [
+            "active",
+            "latent"
+          ]
+        },
+        "B": {
+          "type": "string",
+          "enum": [
+            "active",
+            "latent"
+          ]
+        }
+      },
+      "required": [
+        "R",
+        "G",
+        "B"
+      ],
+      "additionalProperties": false
+    },
+    "glyphs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "file": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "chapter",
+    "narrator",
+    "flags",
+    "file"
+  ],
+  "additionalProperties": true
+}

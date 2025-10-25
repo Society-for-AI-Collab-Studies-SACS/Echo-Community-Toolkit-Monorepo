@@ -1,0 +1,46 @@
+{
+  "id": null,
+  "title": "VesselOS – Minimal",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Journal Commits",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "journal_commits_total",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+    },
+    {
+      "type": "graph",
+      "title": "Journal Entries",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(journal_commits_total[5m])",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Sigprint Requests",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sigprint_requests_total",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+    }
+  ]
+}

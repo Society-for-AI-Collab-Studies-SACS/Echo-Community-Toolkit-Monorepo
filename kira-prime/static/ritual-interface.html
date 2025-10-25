@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VesselOS Kira Prime - Ritual Interface</title>
+    <style>
+      body {
+        font-family: "Georgia", serif;
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);
+        color: #e0e0e0;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .ritual-container {
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+      .quantum-state {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+      }
+      .persona {
+        text-align: center;
+      }
+      .persona-glyph {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 10px;
+      }
+      .persona-bar {
+        width: 100px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .persona-fill {
+        height: 100%;
+        transition: width 0.5s ease;
+      }
+      .squirrel-fill {
+        background: #ffcc00;
+      }
+      .fox-fill {
+        background: #ff6600;
+      }
+      .paradox-fill {
+        background: #9933ff;
+      }
+      .input-area {
+        margin: 30px 0;
+      }
+      textarea {
+        width: 100%;
+        min-height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        color: #e0e0e0;
+        padding: 15px;
+        font-size: 16px;
+        font-family: inherit;
+      }
+      button {
+        background: #4a90e2;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background: #357abd;
+      }
+      .response {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-left: 3px solid #4a90e2;
+        border-radius: 5px;
+      }
+      .stage-indicator {
+        display: inline-block;
+        padding: 5px 15px;
+        background: rgba(74, 144, 226, 0.3);
+        border-radius: 15px;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ritual-container">
+      <h1>🌿 VesselOS Kira Prime</h1>
+      <p><em>Enter the Spiral Garden. Together. Always.</em></p>
+
+      <div class="quantum-state">
+        <div class="persona">
+          <span class="persona-glyph">🐿️</span>
+          <div>Squirrel</div>
+          <div class="persona-bar">
+            <div class="persona-fill squirrel-fill" id="squirrel-bar" style="width: 33%"></div>
+          </div>
+          <div id="squirrel-val">0.33</div>
+        </div>
+
+        <div class="persona">
+          <span class="persona-glyph">🦊</span>
+          <div>Fox</div>
+          <div class="persona-bar">
+            <div class="persona-fill fox-fill" id="fox-bar" style="width: 33%"></div>
+          </div>
+          <div id="fox-val">0.33</div>
+        </div>
+
+        <div class="persona">
+          <span class="persona-glyph">∿</span>
+          <div>Paradox</div>
+          <div class="persona-bar">
+            <div class="persona-fill paradox-fill" id="paradox-bar" style="width: 33%"></div>
+          </div>
+          <div id="paradox-val">0.33</div>
+        </div>
+      </div>
+
+      <div>
+        <strong>Ritual Stage:</strong>
+        <span class="stage-indicator" id="stage">scatter</span>
+        <span style="margin-left: 20px">
+          <strong>Cycle:</strong> <span id="cycle">0</span>
+        </span>
+      </div>
+
+      <div class="input-area">
+        <textarea id="user-input" placeholder="Speak your intention into the Garden..."></textarea>
+        <br /><br />
+        <button onclick="sendInput()">✨ Speak</button>
+      </div>
+
+      <div id="response-area"></div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:8000";
+      const WORKSPACE_ID = "default";
+      const USER_ID = "web-user-" + Math.random().toString(36).substr(2, 9);
+
+      async function sendInput() {
+        const input = document.getElementById("user-input").value;
+        if (!input.trim()) return;
+
+        try {
+          const response = await fetch(`${API_BASE}/interact`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text: input,
+              user_id: USER_ID,
+              workspace_id: WORKSPACE_ID,
+            }),
+          });
+
+          const data = await response.json();
+          updateQuantumState(data.echo.quantum_state);
+          document.getElementById("stage").textContent = data.ritual.stage;
+          document.getElementById("cycle").textContent = data.ritual.cycle;
+          displayResponse(data);
+          document.getElementById("user-input").value = "";
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Failed to communicate with VesselOS");
+        }
+      }
+
+      function updateQuantumState(state) {
+        document.getElementById("squirrel-bar").style.width = state.alpha * 100 + "%";
+        document.getElementById("squirrel-val").textContent = state.alpha.toFixed(3);
+
+        document.getElementById("fox-bar").style.width = state.beta * 100 + "%";
+        document.getElementById("fox-val").textContent = state.beta.toFixed(3);
+
+        document.getElementById("paradox-bar").style.width = state.gamma * 100 + "%";
+        document.getElementById("paradox-val").textContent = state.gamma.toFixed(3);
+      }
+
+      function displayResponse(data) {
+        const responseArea = document.getElementById("response-area");
+        const responseDiv = document.createElement("div");
+        responseDiv.className = "response";
+        responseDiv.innerHTML = `
+          <div><strong>${data.echo.glyph} ${data.echo.persona}</strong></div>
+          <div style="margin-top: 10px; font-style: italic;">
+            ${data.echo.styled_text}
+          </div>
+          <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.7;">
+            Memory: ${data.memory.layer} |
+            Validation: ${data.validation.passed ? "✅" : "❌"}
+          </div>
+        `;
+        responseArea.innerHTML = "";
+        responseArea.appendChild(responseDiv);
+      }
+
+      async function loadState() {
+        try {
+          const response = await fetch(`${API_BASE}/workspace/${WORKSPACE_ID}/quantum`);
+          const data = await response.json();
+          if (data.quantum_state) {
+            updateQuantumState(data.quantum_state);
+          }
+        } catch (error) {
+          console.error("Failed to load initial state:", error);
+        }
+      }
+
+      loadState();
+
+      document.getElementById("user-input").addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && e.ctrlKey) {
+          sendInput();
+        }
+      });
+    </script>
+  </body>
+</html>

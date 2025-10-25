@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+workspaces/*/logs/*
+workspaces/*/state/*.bak
+node_modules/
+collab-server/node_modules/
+collab-server/dist/

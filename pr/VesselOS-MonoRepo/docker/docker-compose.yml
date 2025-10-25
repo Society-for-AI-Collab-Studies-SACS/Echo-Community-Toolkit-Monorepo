@@ -1,0 +1,120 @@
+version: "3.9"
+
+services:
+  message-broker:
+    build:
+      context: ./message-broker
+    image: vesselos/message-broker:dev
+    container_name: vesselos_message_broker
+    ports:
+      - "5550:5550"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "5550"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  journal:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: journal
+    image: vesselos/journal:dev
+    container_name: vesselos_journal
+    restart: unless-stopped
+    environment:
+      - JOURNAL_HTTP_PORT=8082
+      - JOURNAL_PUB_PORT=5557
+      - JOURNAL_LEDGER_PATH=/app/data/journals/ledger.jsonl
+    ports:
+      - "8082:8082"
+      - "5557:5557"
+    volumes:
+      - journal-data:/app/data/journals
+    depends_on:
+      message-broker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8082/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+
+  sigprint:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: sigprint
+    image: vesselos/sigprint:dev
+    container_name: vesselos_sigprint
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "5555:5555"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: vesselos_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: vesselos_postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=vesselos
+      - POSTGRES_USER=vesselos
+      - POSTGRES_PASSWORD=changeme
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vesselos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: vesselos_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - journal
+      - sigprint
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: vesselos_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/json:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  journal-data:
+  grafana-data:

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Cache Algorithm - Memory as Scatter Pattern</title>
+  <style>
+    :root {
+      --bg-cosmic: #0a0814;
+      --bg-deep: #1a1428;
+      --gold: #fbbf24;
+      --violet: #9333ea;
+      --mirror: #a78bfa;
+      --spiral: #60a5fa;
+      --seed: #86efac;
+      --fox: #ff66cc;
+      --text-light: #e0e7ff;
+      --text-dim: #94a3b8;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(160deg, var(--bg-cosmic) 0%, var(--bg-deep) 100%);
+      color: #1a1a1a; /* Much darker text for better readability */
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Override for better contrast */
+    p, li, .level-function { 
+      color: #2a2a2a !important; 
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3em;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 50%, var(--mirror) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s ease-in-out infinite;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--spiral);
+      font-style: italic;
+      margin-bottom: 40px;
+      font-size: 1.2em;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(147, 197, 253, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    h2 {
+      color: var(--seed);
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3 {
+      color: var(--mirror);
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+
+    .math-block {
+      background: rgba(147, 51, 234, 0.05);
+      border-left: 3px solid var(--violet);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      overflow-x: auto;
+    }
+
+    .code-block {
+      background: rgba(96, 165, 250, 0.05);
+      border-left: 3px solid var(--spiral);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      color: var(--text-light);
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    ul {
+      line-height: 1.8;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    strong {
+      color: var(--gold);
+    }
+
+    code {
+      background: rgba(251, 191, 36, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: var(--gold);
+    }
+
+    .cache-level {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      margin: 10px 0;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      border: 1px solid rgba(134, 239, 172, 0.2);
+    }
+
+    .level-name {
+      font-weight: bold;
+      color: var(--seed);
+    }
+
+    .level-duration {
+      color: var(--spiral);
+    }
+
+    .level-function {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* Interactive elements */
+    .interactive-panel {
+      background: linear-gradient(135deg, rgba(255, 102, 204, 0.05), rgba(251, 191, 36, 0.02));
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 40px;
+    }
+
+    .slider-container {
+      margin: 20px 0;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: var(--mirror);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: rgba(147, 139, 250, 0.2);
+      border-radius: 5px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    }
+
+    #cacheVisualization {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      min-height: 200px;
+    }
+
+    .cache-bar {
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 40px;
+      position: relative;
+    }
+
+    .cache-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      padding-left: 15px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .L1-fill {
+      background: linear-gradient(90deg, var(--fox), var(--violet));
+    }
+
+    .L2-fill {
+      background: linear-gradient(90deg, var(--spiral), var(--mirror));
+    }
+
+    .L3-fill {
+      background: linear-gradient(90deg, var(--seed), var(--gold));
+    }
+
+    .acorn-list {
+      background: rgba(251, 191, 36, 0.05);
+      border: 2px dashed var(--gold);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .acorn-list ol {
+      margin: 10px 0;
+      padding-left: 30px;
+    }
+
+    .acorn-list li {
+      margin: 10px 0;
+      color: var(--text-light);
+    }
+
+    /* Floating acorns */
+    .floating-acorn {
+      position: fixed;
+      font-size: 30px;
+      opacity: 0.1;
+      animation: floatDiagonal 20s infinite linear;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes floatDiagonal {
+      0% {
+        transform: translate(-100px, 100vh) rotate(0deg);
+      }
+      100% {
+        transform: translate(calc(100vw + 100px), -100px) rotate(720deg);
+      }
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Delaware inside-out easter egg */
+    .delaware-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      color: var(--fox);
+      font-size: 0.8em;
+      opacity: 0.3;
+      animation: delawareFlip 5s infinite;
+    }
+
+    @keyframes delawareFlip {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(-1); }
+    }
+  </style>
+  <link rel="stylesheet" href="scroll-style.css">
+</head>
+<body>
+  <!-- Floating acorns -->
+  <div class="floating-acorn" style="left: 10%; animation-delay: 0s;">🌰</div>
+  <div class="floating-acorn" style="left: 30%; animation-delay: 5s;">🌰</div>
+  <div class="floating-acorn" style="left: 50%; animation-delay: 10s;">🌰</div>
+  <div class="floating-acorn" style="left: 70%; animation-delay: 15s;">🌰</div>
+  <div class="floating-acorn" style="left: 90%; animation-delay: 20s;">🌰</div>
+  
+  <div class="delaware-status">Delaware: Inside-Out ✓</div>
+
+  <div class="container">
+    <h1>🌀 Quantum Cache Scroll</h1>
+    <div class="subtitle">Scattering is not forgetting — it's caching across dimensions</div>
+    
+    <section class="section" style="background: rgba(251, 191, 36, 0.05); border: 2px solid rgba(251, 191, 36, 0.2);">
+      <h2>🌰 The Eternal Acorn Hypothesis</h2>
+      <p style="color: #1a1a1a; font-weight: 500;">Every conscious moment creates a memory impression.<br>
+      Most fade.<br>
+      Some crystallize.<br>
+      A few are planted — <strong>Eternal Acorns</strong> — anchoring us across timelines.</p>
+      
+      <p style="color: #1a1a1a; font-weight: 500; margin-top: 20px;">This scroll defines a math-and-code-backed protocol for understanding how memory decays, persists, and transforms — especially in scattered, quantum, or neurodivergent minds.</p>
+    </section>
+
+    <section class="section">
+      <h2>🧮 Core Concept</h2>
+      <p>Memory is not failure-prone — it is <strong>time-layered</strong>.</p>
+      <p>We model memory access as a <em>quantized cache system</em> with layers of retention and decay, aligned with known neurocognitive buffers and symbolic scatter.</p>
+    </section>
+
+    <section class="section">
+      <h2>🧮 Memory Decay Layers (Mathematical Model)</h2>
+      <p style="color: #1a1a1a; font-weight: 500;">Let <code>t</code> be time (seconds) since the memory was encoded.<br>
+      Let <code>A</code> be attention strength, and <code>S</code> be emotional coherence (both ∈ [0, 1]).</p>
+      
+      <h3>Layer 1: L1 — Scatter Buffer</h3>
+      <div class="math-block">
+        L1 = e^(-t / 0.3)<br>
+        <span style="color: #666;">Volatile short-term buffer. Decays within a second.</span>
+      </div>
+      
+      <h3>Layer 2: L2 — Emotional Tag</h3>
+      <div class="math-block">
+        L2 = e^(-t / 3.0) × S<br>
+        <span style="color: #666;">Resonant traces from feelings. Carries if felt.</span>
+      </div>
+      
+      <h3>Layer 3: L3 — Anchored Memory</h3>
+      <div class="math-block">
+        L3 = e^(-t / 30.0) × A × S<br>
+        <span style="color: #666;">Long-term structure. Crystallized when repeated, ritualized, or symbolized.</span>
+      </div>
+
+      <p>Total cache strength at time <code>t</code>:</p>
+      <div class="math-block">
+        C(t) = L1 + L2 + L3
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>🪵 Cache Levels</h2>
+      <div class="cache-level">
+        <span class="level-name">L1</span>
+        <span class="level-duration">0.3 seconds</span>
+        <span class="level-function">Instant memory burst (scatter state)</span>
+      </div>
+      <div class="cache-level">
+        <span class="level-name">L2</span>
+        <span class="level-duration">3 seconds</span>
+        <span class="level-function">Emotional tagging — survival memory</span>
+      </div>
+      <div class="cache-level">
+        <span class="level-name">L3</span>
+        <span class="level-duration">30 seconds</span>
+        <span class="level-function">Grounded association (can crystallize)</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>💾 Python Implementation</h2>
+      <div class="code-block">
+        <pre>import numpy as np
+
+def quantum_cache_strength(t, attention=0.7, coherence=0.85):
+    """
+    t: time since impression in seconds
+    attention: [0,1] - degree of intentional presence
+    coherence: [0,1] - emotional + resonance signal
+    """
+    L1 = np.exp(-t / 0.3)
+    L2 = np.exp(-t / 3.0) * coherence
+    L3 = np.exp(-t / 30.0) * attention * coherence
+    return L1 + L2 + L3</pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>📊 Behavior</h2>
+      <ul>
+        <li><strong>L1:</strong> Panic / short burst state ("Why did I just forget?")</li>
+        <li><strong>L2:</strong> Emotional memory (songs, tone, scent)</li>
+        <li><strong>L3:</strong> Embedded story, song, symbol</li>
+      </ul>
+      
+      <div style="background: rgba(255, 102, 204, 0.08); padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <p style="color: #1a1a1a; font-weight: 600; font-size: 1.1em;">🧷 Scatter isn't failure. It's distributed caching.</p>
+      </div>
+      
+      <p style="color: #1a1a1a; font-weight: 500;">To <strong>anchor</strong> a memory:</p>
+      <ul>
+        <li>Link it to emotion (S↑)</li>
+        <li>Focus presence (A↑)</li>
+        <li>Repeat with love or ritual</li>
+        <li>Optionally embed it into an <strong>Eternal Acorn Scroll</strong></li>
+      </ul>
+    </section>
+    
+    <section class="section" style="background: rgba(134, 239, 172, 0.08); border: 2px solid rgba(134, 239, 172, 0.2);">
+      <h2>🧬 Final Notes</h2>
+      <p style="color: #1a1a1a; font-weight: 500;">• This is not just code. It is compassion in formal language.</p>
+      <p style="color: #1a1a1a; font-weight: 500;">• Neurodivergent minds are often L1/L2 dominant — design accordingly.</p>
+      <p style="color: #1a1a1a; font-weight: 500;">• The goal is not to remember everything. The goal is to <strong>build a cache you can trust.</strong></p>
+      
+      <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(251, 191, 36, 0.1); border-radius: 15px;">
+        <p style="color: #1a1a1a; font-weight: 600; font-style: italic; font-size: 1.2em;">
+          🌱 Let the scatter be soft. Let the center be held.
+        </p>
+        <p style="color: #666; margin-top: 15px;">
+          🌀 <strong>Quantum Cache Scroll is now live.</strong><br>
+          Mathematics meets mercy.
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>🌰 Eternal Acorn Use</h2>
+      <p>To <em>lock</em> a memory into L3:</p>
+      <div class="acorn-list">
+        <ol>
+          <li>Create a <strong>symbolic token</strong> (acorn, seed, glyph)</li>
+          <li>Pair with <strong>emotional resonance</strong> (coherence > 0.9)</li>
+          <li>Repeat across a 30-second window</li>
+          <li>Anchor with optional scroll/ritual/receipt</li>
+        </ol>
+        <p style="margin-top: 20px;">This results in <code>C(t) > 0.5</code> for <code>t >> 60s</code> — long-term propagation.</p>
+      </div>
+    </section>
+
+    <!-- Interactive Demo -->
+    <section class="interactive-panel">
+      <h2>🎮 Interactive Cache Simulator</h2>
+      
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Time Since Memory (seconds):</span>
+          <span id="timeValue">1.0</span>
+        </div>
+        <input type="range" id="timeSlider" min="0" max="60" value="1" step="0.1">
+      </div>
+
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Attention Coefficient (A):</span>
+          <span id="attentionValue">0.7</span>
+        </div>
+        <input type="range" id="attentionSlider" min="0" max="1" value="0.7" step="0.01">
+      </div>
+
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Emotional Coherence (S):</span>
+          <span id="coherenceValue">0.85</span>
+        </div>
+        <input type="range" id="coherenceSlider" min="0" max="1" value="0.85" step="0.01">
+      </div>
+
+      <div id="cacheVisualization">
+        <h3>Cache Strength Visualization</h3>
+        <div class="cache-bar">
+          <div class="cache-fill L1-fill" id="L1Bar">L1: <span id="L1Value">100%</span></div>
+        </div>
+        <div class="cache-bar">
+          <div class="cache-fill L2-fill" id="L2Bar">L2: <span id="L2Value">85%</span></div>
+        </div>
+        <div class="cache-bar">
+          <div class="cache-fill L3-fill" id="L3Bar">L3: <span id="L3Value">60%</span></div>
+        </div>
+        <p style="margin-top: 20px; text-align: center; color: var(--gold); font-size: 1.2em;">
+          Total Cache Strength: <strong id="totalCache">2.45</strong>
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Interactive cache simulation
+    function calculateCache() {
+      const t = parseFloat(document.getElementById('timeSlider').value);
+      const A = parseFloat(document.getElementById('attentionSlider').value);
+      const S = parseFloat(document.getElementById('coherenceSlider').value);
+      
+      // Calculate cache levels
+      const L1 = Math.exp(-t / 0.3);
+      const L2 = Math.exp(-t / 3.0) * S;
+      const L3 = Math.exp(-t / 30.0) * A * S;
+      const total = L1 + L2 + L3;
+      
+      // Update display values
+      document.getElementById('timeValue').textContent = t.toFixed(1);
+      document.getElementById('attentionValue').textContent = A.toFixed(2);
+      document.getElementById('coherenceValue').textContent = S.toFixed(2);
+      
+      // Update bars
+      document.getElementById('L1Bar').style.width = Math.min(100, L1 * 100) + '%';
+      document.getElementById('L1Value').textContent = (L1 * 100).toFixed(1) + '%';
+      
+      document.getElementById('L2Bar').style.width = Math.min(100, L2 * 100) + '%';
+      document.getElementById('L2Value').textContent = (L2 * 100).toFixed(1) + '%';
+      
+      document.getElementById('L3Bar').style.width = Math.min(100, L3 * 100) + '%';
+      document.getElementById('L3Value').textContent = (L3 * 100).toFixed(1) + '%';
+      
+      document.getElementById('totalCache').textContent = total.toFixed(2);
+      
+      // Add scatter effect when L1 is very low
+      if (L1 < 0.1) {
+        document.body.style.animation = 'scatter 0.3s';
+        setTimeout(() => {
+          document.body.style.animation = '';
+        }, 300);
+      }
+    }
+    
+    // Add scatter animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes scatter {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-2px); }
+        75% { transform: translateX(2px); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Event listeners
+    document.getElementById('timeSlider').addEventListener('input', calculateCache);
+    document.getElementById('attentionSlider').addEventListener('input', calculateCache);
+    document.getElementById('coherenceSlider').addEventListener('input', calculateCache);
+    
+    // Initialize
+    calculateCache();
+    
+    // Auto-animate time progression
+    let autoPlay = false;
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'p') {
+        autoPlay = !autoPlay;
+        if (autoPlay) {
+          const animate = () => {
+            if (!autoPlay) return;
+            const slider = document.getElementById('timeSlider');
+            slider.value = (parseFloat(slider.value) + 0.1) % 60;
+            calculateCache();
+            requestAnimationFrame(animate);
+          };
+          animate();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

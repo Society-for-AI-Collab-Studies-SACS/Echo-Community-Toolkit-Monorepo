@@ -1,0 +1,197 @@
+name: RHZ Stylus CI
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Cache pip and PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pip-pio-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-pio-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build Stylus Firmware
+        working-directory: firmware/stylus_maker_esp32s3
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VER="${GITHUB_REF_NAME}"
+          else
+            VER="$(git describe --tags --always 2>/dev/null || echo "${GITHUB_SHA::7}")"
+          fi
+          export RHZZ_VERSION="$VER"
+          echo "Building with RHZZ_VERSION=$RHZZ_VERSION"
+          pio run -v 2>&1 | tee pio_build.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Install Host Tool Dependencies
+        run: |
+          pip install numpy pandas scipy pyserial
+
+      - name: Lint Python Scripts
+        run: |
+          pip install flake8
+          flake8 host/ --max-line-length=120
+
+      - name: Compile Python Scripts
+        run: |
+          python -m py_compile host/logger_serial.py host/psd_quicklook.py
+
+      - name: PSD Quicklook Test
+        run: |
+          echo "t_ms,stage,emit,tx_f,ads_raw,cap_raw,lux,mag_x,mag_y,mag_z" > sample.csv
+          python - <<'PYCODE' >> sample.csv
+          import math, random
+          fs = 1000  # sampling rate in Hz
+          N = 2048   # number of samples
+          for i in range(N):
+              t_ms = i
+              stage = "S3"
+              emit = 1 if i > N - 201 else 0
+              freq = 444.0
+              val = math.sin(2 * math.pi * freq * (i/fs))
+              ads_raw = int(1000 * val) + random.randint(-20, 20)
+              cap_raw = random.randint(0, 65535)
+              lux = 50.0 + 50.0 * math.sin(2 * math.pi * 0.5 * (i/fs))
+              mag_x = mag_y = mag_z = 0.0
+              print(f"{t_ms},{stage},{emit},{freq:.0f},{ads_raw},{cap_raw},{lux:.2f},{mag_x},{mag_y},{mag_z}")
+          PYCODE
+          python host/psd_quicklook.py sample.csv
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Test npm package CLI (arch)
+        run: |
+          node packages/rhz-stylus-arch/bin/cli.js arch | tee arch.txt
+          grep -q "RHZ Stylus System" arch.txt
+
+      - name: Debug package layout on failure (arch)
+        if: failure()
+        run: |
+          echo "PWD: $(pwd)" && ls -la
+          ls -la packages || true
+          ls -la packages/rhz-stylus-arch || true
+          ls -la packages/rhz-stylus-arch/bin || true
+
+      - name: Test npm package CLI (llm)
+        run: |
+          node packages/rhz-stylus-arch/bin/cli.js llm | tee llm.txt
+          grep -q "LLM Usage Guide" llm.txt
+
+      - name: Debug package layout on failure (llm)
+        if: failure()
+        run: |
+          echo "PWD: $(pwd)" && ls -la
+          ls -la packages || true
+          ls -la packages/rhz-stylus-arch || true
+          ls -la packages/rhz-stylus-arch/bin || true
+
+      - name: Test npm package API import
+        run: |
+          node --input-type=module -e "import('./packages/rhz-stylus-arch/index.js').then(m=>{ if(!m.getArchitecture||!m.getLlmGuide) { throw new Error('Missing exports'); } const a=m.getArchitecture(); const g=m.getLlmGuide(); if(!a.includes('RHZ Stylus System')) throw new Error('Bad arch'); if(!g.includes('LLM Usage Guide')) throw new Error('Bad guide'); console.log('API OK'); })"
+
+      - name: Workspace npm pack dry-run
+        run: |
+          npm run ws:pack
+
+      # Always upload build log for troubleshooting
+      - name: Upload PIO Build Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pio-build-log
+          path: firmware/stylus_maker_esp32s3/pio_build.log
+      - name: Upload Firmware Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-build
+          path: |
+            firmware/stylus_maker_esp32s3/.pio/build/esp32s3/*.elf
+            firmware/stylus_maker_esp32s3/.pio/build/esp32s3/*.bin
+
+      - name: Release (tagged builds)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            firmware/stylus_maker_esp32s3/.pio/build/esp32s3/*.bin
+            firmware/stylus_maker_esp32s3/.pio/build/esp32s3/*.elf
+          generate_release_notes: true
+
+  node-cli-test:
+    name: Node CLI/API Tests (matrix)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: CLI test (arch)
+        run: |
+          node packages/rhz-stylus-arch/bin/cli.js arch | tee arch.txt
+          grep -q "RHZ Stylus System" arch.txt
+
+      - name: Debug package layout on failure (matrix arch)
+        if: failure()
+        run: |
+          echo "PWD: $(pwd)" && ls -la
+          ls -la packages || true
+          ls -la packages/rhz-stylus-arch || true
+          ls -la packages/rhz-stylus-arch/bin || true
+
+      - name: CLI test (llm)
+        run: |
+          node packages/rhz-stylus-arch/bin/cli.js llm | tee llm.txt
+          grep -q "LLM Usage Guide" llm.txt
+
+      - name: Debug package layout on failure (matrix llm)
+        if: failure()
+        run: |
+          echo "PWD: $(pwd)" && ls -la
+          ls -la packages || true
+          ls -la packages/rhz-stylus-arch || true
+          ls -la packages/rhz-stylus-arch/bin || true
+
+      - name: API import test (ESM)
+        run: |
+          node --input-type=module -e "import('./packages/rhz-stylus-arch/index.js').then(m=>{ if(!m.getArchitecture||!m.getLlmGuide) { throw new Error('Missing exports'); } const a=m.getArchitecture(); const g=m.getLlmGuide(); if(!a.includes('RHZ Stylus System')) throw new Error('Bad arch'); if(!g.includes('LLM Usage Guide')) throw new Error('Bad guide'); console.log('API OK'); })"
+
+      - name: Workspace npm pack dry-run
+        run: |
+          npm run ws:pack

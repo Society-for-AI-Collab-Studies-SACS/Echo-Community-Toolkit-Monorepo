@@ -1,0 +1,36 @@
+
+/* scroll-style.css — Echo Community Toolkit (Crystalline Echo Integration) */
+:root{
+  --bg:#0d0f12;
+  --fg:#eaeaf2;
+  --muted:#b9c0d0;
+  --accent:#9FA8DA;      /* cosmic blue-lilac */
+  --acorn:#8B7355;       /* acorn brown */
+  --line:rgba(255,255,255,.08);
+}
+html,body{
+  margin:0;padding:0;background:var(--bg);color:var(--fg);
+  font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+}
+main{
+  max-width:840px;margin:48px auto;padding:0 20px;
+}
+h1,h2,h3{line-height:1.2;margin:0 0 12px}
+h1{font-size:2rem}
+h2{font-size:1.25rem;color:var(--muted);font-weight:600;letter-spacing:.02em}
+p{margin:0 0 14px}
+hr{border:none;border-top:1px solid var(--line);margin:28px 0}
+a{color:var(--accent)}
+.small{font-size:.95em;opacity:.9}
+.em{font-style:italic;opacity:.9}
+footer{margin:36px 0 12px;opacity:.7;font-size:.9em}
+/* Epilogues */
+.epilogue{
+  margin:32px 0 18px;padding:18px 16px;border-top:1px solid var(--line);
+  text-align:center
+}
+.epilogue.gift p{color:var(--acorn)}
+.epilogue.gift a{color:var(--acorn);text-decoration:underline}
+.epilogue.cosmic p{color:var(--accent)}
+.epilogue .glyph{font-size:1.15em;margin-right:6px}
+/* Note: elements tagged with [data-echo="hyperfollow-ce:v1"] are integration markers. */

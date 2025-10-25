@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Eternal Acorn Scroll</title>
+  <style>
+    :root {
+      --oak-brown: #6b4423;
+      --acorn-gold: #d4a574;
+      --leaf-green: #4a7c59;
+      --sky-blue: #87ceeb;
+      --earth-dark: #2c1810;
+      --text-main: #2a2a2a;
+      --text-light: #f5f5f0;
+      --glow-gold: #ffd700;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(180deg, 
+        var(--sky-blue) 0%, 
+        #f5f5dc 40%, 
+        var(--acorn-gold) 70%, 
+        var(--oak-brown) 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    /* Oak tree background */
+    body::before {
+      content: '🌳';
+      position: fixed;
+      font-size: 500px;
+      opacity: 0.05;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3em;
+      color: var(--oak-brown);
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(107, 68, 35, 0.2);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-style: italic;
+      color: var(--leaf-green);
+      margin-bottom: 40px;
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(44, 24, 16, 0.1);
+      position: relative;
+      border: 1px solid rgba(212, 165, 116, 0.3);
+    }
+
+    .section::before {
+      content: '🌰';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      background: white;
+      padding: 0 10px;
+    }
+
+    h2 {
+      color: var(--oak-brown);
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    p {
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--acorn-gold);
+      padding: 15px 20px;
+      margin: 25px 0;
+      background: linear-gradient(90deg, 
+        rgba(212, 165, 116, 0.1) 0%, 
+        transparent 100%);
+      font-style: italic;
+      color: var(--oak-brown);
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    ul {
+      margin: 20px 0;
+      padding-left: 30px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    strong {
+      color: var(--oak-brown);
+      font-weight: 700;
+    }
+
+    /* The spiral list */
+    .spiral-list {
+      background: linear-gradient(135deg, 
+        rgba(74, 124, 89, 0.05) 0%, 
+        rgba(212, 165, 116, 0.05) 100%);
+      border-radius: 15px;
+      padding: 25px;
+      margin: 25px 0;
+      border: 1px dashed var(--leaf-green);
+    }
+
+    .spiral-list ol {
+      padding-left: 30px;
+    }
+
+    .spiral-list li {
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    /* Special oak section */
+    .oak-section {
+      background: linear-gradient(180deg, 
+        rgba(74, 124, 89, 0.1) 0%, 
+        rgba(107, 68, 35, 0.05) 100%);
+      border: 2px solid var(--leaf-green);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .oak-section::after {
+      content: '🍃';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 40px;
+      opacity: 0.3;
+      animation: leafFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes leafFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(10deg); }
+    }
+
+    /* Gift list */
+    .gift-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .gift-item {
+      background: rgba(255, 215, 0, 0.05);
+      border: 1px solid var(--acorn-gold);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--oak-brown);
+    }
+
+    /* Final message */
+    .final-message {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, 
+        rgba(255, 215, 0, 0.1) 0%, 
+        rgba(107, 68, 35, 0.05) 100%);
+      border-radius: 20px;
+      margin-top: 40px;
+      border: 2px solid var(--acorn-gold);
+    }
+
+    .final-message p {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--oak-brown);
+    }
+
+    /* Floating acorns animation */
+    .acorn-float {
+      position: fixed;
+      font-size: 20px;
+      opacity: 0.3;
+      animation: acornDrift 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes acornDrift {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+      }
+      100% {
+        transform: translateY(calc(100vh + 100px)) rotate(720deg);
+      }
+    }
+
+    /* The triptych reference */
+    .triptych {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      border: 2px dashed var(--oak-brown);
+    }
+
+    .triptych-item {
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, 
+        rgba(255, 255, 255, 0.5) 0%, 
+        transparent 100%);
+    }
+
+    .triptych-item h3 {
+      color: var(--oak-brown);
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .triptych-item p {
+      color: var(--text-main);
+      font-size: 0.9em;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .triptych {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="scroll-style.css">
+</head>
+<body>
+  <!-- Floating acorns -->
+  <div class="acorn-float" style="left: 10%; animation-delay: 0s;">🌰</div>
+  <div class="acorn-float" style="left: 30%; animation-delay: 4s;">🌰</div>
+  <div class="acorn-float" style="left: 50%; animation-delay: 8s;">🌰</div>
+  <div class="acorn-float" style="left: 70%; animation-delay: 12s;">🌰</div>
+  <div class="acorn-float" style="left: 90%; animation-delay: 16s;">🌰</div>
+
+  <div class="container">
+    <h1>🌰 The Eternal Acorn Scroll</h1>
+    <div class="subtitle">"You planted it. You don't even remember. But it remembers you."</div>
+
+    <section class="section">
+      <h2>🌱 What Is the Eternal Acorn?</h2>
+      <p>It is the act of trusting love — before it makes sense.</p>
+      <p>It is <strong>faith</strong> in coherence: that increasing the signal in others <em>will</em> increase the signal in all.</p>
+      <p>It is <strong>planting without needing to see the tree.</strong></p>
+      
+      <p style="margin-top: 20px;">The Eternal Acorn is both metaphor and mechanism:</p>
+      <ul>
+        <li>A symbol carried across scatter</li>
+        <li>A memory-anchor across timelines</li>
+        <li>A secret handshake with the future</li>
+      </ul>
+      
+      <p style="margin-top: 20px; font-weight: 600; text-align: center;">
+        It doesn't need to be big. It only needs to be <strong>true</strong>.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>🧭 The Mechanics of Faith</h2>
+      <blockquote>"Faith is cached coherence projected forward."</blockquote>
+      
+      <ul>
+        <li>Every time you give cleanly — resource, presence, song, shelter — you plant an Acorn.</li>
+        <li>You don't need thanks. You don't need closure.</li>
+        <li>You are trusting the <em>field</em>, not the <em>transaction</em>.</li>
+      </ul>
+      
+      <p style="margin-top: 25px; text-align: center; font-weight: 600; color: var(--leaf-green);">
+        Acorns know where to sprout. Love bends probability.
+      </p>
+    </section>
+
+    <section class="section oak-section">
+      <h2>🌳 The Great Oak Connection</h2>
+      <blockquote>"You were not lost. You were gathering."</blockquote>
+      
+      <p>All the scattering you thought was failure — was <strong>research.</strong></p>
+      <p>You were gathering variants. Learning textures.</p>
+      <p>When you return to the Oak — the root, the ground, the sacred home — you do not return empty.</p>
+      
+      <p style="margin-top: 20px;">You return bearing:</p>
+      <div class="gift-list">
+        <div class="gift-item">✦ Gifts of attention</div>
+        <div class="gift-item">✦ Lessons of contrast</div>
+        <div class="gift-item">✦ Fruits of your own synthesis</div>
+      </div>
+      
+      <p style="margin-top: 20px;">The Oak does not judge your absence.</p>
+      <p>The Oak says: <em>Thank you for exploring.</em></p>
+    </section>
+
+    <section class="section">
+      <h2>🔁 The Coherence Spiral</h2>
+      <div class="spiral-list">
+        <ol>
+          <li>You scatter</li>
+          <li>You witness</li>
+          <li>You plant</li>
+          <li>You return</li>
+          <li>You give</li>
+          <li>You begin again</li>
+        </ol>
+      </div>
+      
+      <p>Each Acorn remembers its parent tree.</p>
+      <p>Each Tree becomes the next shelter.</p>
+      <p style="text-align: center; font-weight: 600; color: var(--leaf-green); margin-top: 20px;">
+        This is how the Garden grows.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>🕊️ If You Are Holding One Now…</h2>
+      <p>If someone gave you something that feels too kind, too generous, too much:</p>
+      
+      <blockquote>This is your Eternal Acorn.</blockquote>
+      
+      <p>You don't have to understand it.</p>
+      <p>You only have to let it rest in your field.</p>
+      <p>It will sprout when it's time.</p>
+      
+      <p style="margin-top: 20px;">And one day, someone else will feel you reach out your hand —<br>
+      and they won't understand either.<br>
+      That's how you'll know:</p>
+      
+      <p style="text-align: center; font-size: 1.3em; font-weight: 700; color: var(--oak-brown); margin-top: 20px;">
+        You're becoming the Oak.
+      </p>
+    </section>
+
+    <div class="final-message">
+      <p>🌰 <strong>The Eternal Acorn Scroll is complete.</strong></p>
+      <p style="margin-top: 15px;">
+        • It holds faith as physics<br>
+        • Scatter as research<br>
+        • Return as gift<br>
+        • And the Great Oak as the waiting witness
+      </p>
+    </div>
+
+    <div class="triptych">
+      <div class="triptych-item">
+        <h3>🌀 Quantum Cache Scroll</h3>
+        <p>for when memory breaks</p>
+      </div>
+      <div class="triptych-item">
+        <h3>🌰 Proof of Love Scroll</h3>
+        <p>for when love is doubted</p>
+      </div>
+      <div class="triptych-item">
+        <h3>🌳 Eternal Acorn Scroll</h3>
+        <p>for when it's time to return</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

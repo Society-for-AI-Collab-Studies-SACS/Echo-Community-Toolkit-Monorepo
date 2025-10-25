@@ -1,0 +1,30 @@
+{
+  "name": "lambda-vite",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "mrp:encode": "python3 MRP_Seed_Package/mrp.py encode",
+    "mrp:decode": "python3 MRP_Seed_Package/mrp.py decode",
+    "mrp:setup": "python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt",
+    "mrp:setup:win": "py -3 -m venv .venv && .venv\\Scripts\\python -m pip install -r requirements.txt"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "jsdom": "^24.1.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.6.0",
+    "@vitejs/plugin-react": "^4.2.0"
+  }
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EchoClient Demo — Bundle + Memory</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0b10; color:#e7e8ea; margin:0; padding:24px; }
+      .wrap { max-width: 880px; margin: 0 auto; }
+      .card { background:#12131a; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px 18px; margin:14px 0; }
+      .row { display:flex; gap:12px; flex-wrap:wrap; }
+      .pill { background:#1a1b23; border:1px solid rgba(255,255,255,0.08); padding:6px 10px; border-radius:999px; }
+      .ok { color:#85f7a8 } .warn { color:#ffd580 } .err { color:#ff8a7a }
+      svg { display:block }
+      code { background:#1a1b23; padding:2px 6px; border-radius:6px; }
+      a { color:#9FD7FB }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>EchoClient Demo</h1>
+      <p>
+        This page demonstrates both the linked helper (<code>/web/echo-client.js</code>) and ESM
+        import (<code>/web/echo-client.module.js</code>) against embedded JSON.
+      </p>
+
+      <!-- Minimal embedded bundle JSON (as produced by the integration script) -->
+      <script id="echo-soulcode-bundle" type="application/json" data-echo="soulcode:bundle:v1">{
+        "ECHO_SQUIRREL": {"id":"demo-squirrel","glitch_persona":"Echo Squirrel"},
+        "ECHO_FOX": {"id":"demo-fox","glitch_persona":"Echo Fox"},
+        "ECHO_PARADOX": {"id":"demo-paradox","glitch_persona":"Echo Paradox"}
+      }</script>
+
+      <!-- Minimal memory JSON (as produced by `npm run mem:simulate`) -->
+      <script id="echo-memory-state" type="application/json" data-echo="memory:series:v1">{
+        "series": [
+          {"t":0, "L1":1.00, "L2":0.20, "L3":0.00},
+          {"t":1, "L1":0.55, "L2":0.30, "L3":0.08},
+          {"t":2, "L1":0.25, "L2":0.35, "L3":0.14},
+          {"t":3, "L1":0.12, "L2":0.38, "L3":0.19},
+          {"t":4, "L1":0.06, "L2":0.39, "L3":0.22}
+        ],
+        "events": 1
+      }</script>
+
+      <!-- Linked helper (same tag the integration script injects) -->
+      <script id="echo-client-helper" src="/web/echo-client.js"></script>
+
+      <div class="card" id="global-demo">
+        <h2>Global Helper Demo</h2>
+        <div class="row" id="bundle-status"></div>
+        <div class="row" id="persona-list"></div>
+        <div class="row" style="margin-top:10px; align-items: center;">
+          <div id="mem-stats"></div>
+          <svg id="mem-spark" width="400" height="100"></svg>
+        </div>
+        <p style="opacity:0.8">Using <code>window.EchoClient</code> from <code>/web/echo-client.js</code>.</p>
+      </div>
+
+      <div class="card">
+        <h2>ESM Helper Demo</h2>
+        <p id="esm-status" class="warn">Loading ESM...</p>
+        <pre id="esm-output" style="white-space: pre-wrap"></pre>
+        <p style="opacity:0.8">Using <code>import EchoClient from '/web/echo-client.module.js'</code>.</p>
+      </div>
+
+      <div class="card">
+        <h3>Tips</h3>
+        <ul>
+          <li>To test with live data, run the integration pipeline to embed JSON into your pages.</li>
+          <li>You can also point your server to serve this demo at <code>/web/examples/echo-client-demo.html</code>.</li>
+          <li>For CI artifacts (memory_state.json, ledger PNG), see the workflow run artifacts.</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        function el(id){ return document.getElementById(id); }
+        function pill(text, ok){ var span=document.createElement('span'); span.className='pill '+(ok?'ok':'err'); span.textContent=text; return span; }
+        function svgPath(points, w, h, color){
+          if(!points.length) return null;
+          var min=Infinity, max=-Infinity;
+          for(var i=0;i<points.length;i++){ var v=points[i].v; if(v<min)min=v; if(v>max)max=v; }
+          var p=8, d='';
+          for(var i=0;i<points.length;i++){
+            var x=p + (i/(points.length-1||1))*(w-2*p);
+            var y=p + (h-2*p)*(1 - ((points[i].v - min) / ((max-min)||1)));
+            d += (i? ' L':'M') + x + ' ' + y;
+          }
+          var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+          path.setAttribute('d', d);
+          path.setAttribute('fill','none');
+          path.setAttribute('stroke', color);
+          path.setAttribute('stroke-width','2');
+          return path;
+        }
+
+        function renderGlobal(){
+          if(!window.EchoClient) return;
+          var ec = window.EchoClient;
+          var bundle = ec.getBundle();
+          var isValid = ec.validateBundle(bundle);
+          el('bundle-status').appendChild(pill(isValid? 'Bundle OK':'Bundle invalid', isValid));
+          if(bundle){
+            ['ECHO_SQUIRREL','ECHO_FOX','ECHO_PARADOX'].forEach(function(k){
+              var soul = ec.getSoul(k) || { glitch_persona: '(missing)' };
+              var span = document.createElement('span');
+              span.className = 'pill';
+              span.textContent = k+': '+soul.glitch_persona;
+              el('persona-list').appendChild(span);
+            });
+          }
+          var mem = ec.getMemory();
+          if(mem){
+            var l3 = ec.getSeries(mem,'L3');
+            var s = ec.stats(l3);
+            el('mem-stats').textContent = 'L3 stats — min: '+s.min.toFixed(3)+' max: '+s.max.toFixed(3)+' avg: '+s.avg.toFixed(3);
+            var svg = el('mem-spark');
+            while(svg.firstChild) svg.removeChild(svg.firstChild);
+            var p = svgPath(l3, svg.viewBox.baseVal.width||svg.getAttribute('width'), svg.viewBox.baseVal.height||svg.getAttribute('height'), '#d8b6ff');
+            if(p) svg.appendChild(p);
+          }
+        }
+        if(window.EchoClient) renderGlobal();
+        else document.addEventListener('DOMContentLoaded', renderGlobal);
+      })();
+    </script>
+
+    <script type="module">
+      import EchoClient from '/web/echo-client.module.js';
+      const mem = EchoClient.getMemory();
+      const l2 = EchoClient.getSeries(mem,'L2');
+      const ma = EchoClient.movingAverage(l2, 3);
+      const st = EchoClient.stats(ma);
+      const out = `ESM moving average (L2, window=3) — min=${st.min.toFixed(3)} max=${st.max.toFixed(3)} avg=${st.avg.toFixed(3)}`;
+      document.getElementById('esm-status').textContent = 'ESM ready';
+      document.getElementById('esm-output').textContent = out;
+    </script>
+  </body>
+  </html>
+

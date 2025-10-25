@@ -1,0 +1,47 @@
+name: vesselos-validate
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run unit tests
+        run: python3 -m pytest -q
+
+      - name: Integration suite (Garden→Echo→Limnus→Kira)
+        run: python3 scripts/integration_complete.py
+
+      - name: CLI validation (exit code must be 0)
+        run: python3 vesselos.py validate
+
+      - name: Workspace audit
+        run: python3 vesselos.py audit full --workspace ci-validate
+
+      - name: Upload audit logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-validate-logs
+          path: |
+            workspaces/ci-validate/logs/**
+            workspaces/ci-validate/state/**
+          if-no-files-found: ignore

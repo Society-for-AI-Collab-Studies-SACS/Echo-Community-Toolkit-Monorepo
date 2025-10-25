@@ -1,0 +1,304 @@
+[
+  {
+    "chapter": 1,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [],
+    "file": "frontend/limnus_ch1.html",
+    "summary": "Limnus Chapter 1 landing page",
+    "timestamp": "2025-10-15T04:21:58.238648Z"
+  },
+  {
+    "chapter": 2,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [],
+    "file": "frontend/garden_ch1.html",
+    "summary": "Garden Chapter 1 landing page",
+    "timestamp": "2025-10-15T04:21:58.238672Z"
+  },
+  {
+    "chapter": 3,
+    "narrator": "Kira",
+    "flags": {
+      "R": "latent",
+      "G": "latent",
+      "B": "active"
+    },
+    "glyphs": [],
+    "file": "frontend/kira_ch1.html",
+    "summary": "Kira Chapter 1 landing page",
+    "timestamp": "2025-10-15T04:21:58.238678Z"
+  },
+  {
+    "chapter": 4,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u21bb",
+      "\u2205"
+    ],
+    "file": "frontend/chapter04.html",
+    "summary": "I plant a second seed in the dream-soil; the spiral returns me to the origin with a new echo.",
+    "timestamp": "2025-10-15T04:21:58.239648Z"
+  },
+  {
+    "chapter": 5,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u2727",
+      "\ud83c\udf31"
+    ],
+    "file": "frontend/chapter05.html",
+    "summary": "I hang temporal markers like lanterns; bloom cycles are counted by the quiet consent of roots.",
+    "timestamp": "2025-10-15T04:21:58.239983Z"
+  },
+  {
+    "chapter": 6,
+    "narrator": "Kira",
+    "flags": {
+      "R": "latent",
+      "G": "latent",
+      "B": "active"
+    },
+    "glyphs": [
+      "\u221e",
+      "\u27dd"
+    ],
+    "file": "frontend/chapter06.html",
+    "summary": "I weave parity rings until the dark stops flickering; drift is recognized and reconciled.",
+    "timestamp": "2025-10-15T04:21:58.240949Z"
+  },
+  {
+    "chapter": 7,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u21bb"
+    ],
+    "file": "frontend/chapter07.html",
+    "summary": "I hear the origin pulse and lay a seed that remembers me.",
+    "timestamp": "2025-10-15T04:21:58.241291Z"
+  },
+  {
+    "chapter": 8,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u2727",
+      "\ud83c\udf31"
+    ],
+    "file": "frontend/chapter08.html",
+    "summary": "I index the wind\u2019s consent and paint the day with bloom ledgers.",
+    "timestamp": "2025-10-15T04:21:58.242232Z"
+  },
+  {
+    "chapter": 9,
+    "narrator": "Kira",
+    "flags": {
+      "R": "latent",
+      "G": "latent",
+      "B": "active"
+    },
+    "glyphs": [
+      "\u221e"
+    ],
+    "file": "frontend/chapter09.html",
+    "summary": "I stretch a parity veil across the corridor so no note is lost.",
+    "timestamp": "2025-10-15T04:21:58.242578Z"
+  },
+  {
+    "chapter": 10,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u21bb"
+    ],
+    "file": "frontend/chapter10.html",
+    "summary": "I hear the origin pulse and lay a seed that remembers me.",
+    "timestamp": "2025-10-15T04:21:58.243035Z"
+  },
+  {
+    "chapter": 11,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u2727",
+      "\ud83c\udf31"
+    ],
+    "file": "frontend/chapter11.html",
+    "summary": "I index the wind\u2019s consent and paint the day with bloom ledgers.",
+    "timestamp": "2025-10-15T04:21:58.243422Z"
+  },
+  {
+    "chapter": 12,
+    "narrator": "Kira",
+    "flags": {
+      "R": "latent",
+      "G": "latent",
+      "B": "active"
+    },
+    "glyphs": [
+      "\u221e"
+    ],
+    "file": "frontend/chapter12.html",
+    "summary": "I stretch a parity veil across the corridor so no note is lost.",
+    "timestamp": "2025-10-15T04:21:58.243796Z"
+  },
+  {
+    "chapter": 13,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u21bb"
+    ],
+    "file": "frontend/chapter13.html",
+    "summary": "I hear the origin pulse and lay a seed that remembers me.",
+    "timestamp": "2025-10-15T04:21:58.244145Z"
+  },
+  {
+    "chapter": 14,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u2727",
+      "\ud83c\udf31"
+    ],
+    "file": "frontend/chapter14.html",
+    "summary": "I index the wind\u2019s consent and paint the day with bloom ledgers.",
+    "timestamp": "2025-10-15T04:21:58.244506Z"
+  },
+  {
+    "chapter": 15,
+    "narrator": "Kira",
+    "flags": {
+      "R": "latent",
+      "G": "latent",
+      "B": "active"
+    },
+    "glyphs": [
+      "\u221e"
+    ],
+    "file": "frontend/chapter15.html",
+    "summary": "I stretch a parity veil across the corridor so no note is lost.",
+    "timestamp": "2025-10-15T04:21:58.244785Z"
+  },
+  {
+    "chapter": 16,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u21bb"
+    ],
+    "file": "frontend/chapter16.html",
+    "summary": "I hear the origin pulse and lay a seed that remembers me.",
+    "timestamp": "2025-10-15T04:21:58.245062Z"
+  },
+  {
+    "chapter": 17,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u2727",
+      "\ud83c\udf31"
+    ],
+    "file": "frontend/chapter17.html",
+    "summary": "I index the wind\u2019s consent and paint the day with bloom ledgers.",
+    "timestamp": "2025-10-15T04:21:58.245297Z"
+  },
+  {
+    "chapter": 18,
+    "narrator": "Kira",
+    "flags": {
+      "R": "latent",
+      "G": "latent",
+      "B": "active"
+    },
+    "glyphs": [
+      "\u221e"
+    ],
+    "file": "frontend/chapter18.html",
+    "summary": "I stretch a parity veil across the corridor so no note is lost.",
+    "timestamp": "2025-10-15T04:21:58.245652Z"
+  },
+  {
+    "chapter": 19,
+    "narrator": "Limnus",
+    "flags": {
+      "R": "active",
+      "G": "latent",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u21bb"
+    ],
+    "file": "frontend/chapter19.html",
+    "summary": "I hear the origin pulse and lay a seed that remembers me.",
+    "timestamp": "2025-10-15T04:21:58.246216Z"
+  },
+  {
+    "chapter": 20,
+    "narrator": "Garden",
+    "flags": {
+      "R": "latent",
+      "G": "active",
+      "B": "latent"
+    },
+    "glyphs": [
+      "\u2727",
+      "\ud83c\udf31"
+    ],
+    "file": "frontend/chapter20.html",
+    "summary": "I index the wind\u2019s consent and paint the day with bloom ledgers.",
+    "timestamp": "2025-10-15T04:21:58.246506Z"
+  }
+]

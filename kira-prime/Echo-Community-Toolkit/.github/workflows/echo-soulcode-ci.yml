@@ -1,0 +1,232 @@
+name: Echo Soulcode CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        name: Paths filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            run:
+              - 'echo-soulcode-architecture/**'
+              - 'echo_full_architecture_repo/**'
+              - 'integration/**'
+              - 'tools/soulcode-bridge.js'
+              - '.github/workflows/echo-soulcode-ci.yml'
+
+  tests:
+    name: Unit tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: changes
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'echo-soulcode-architecture/pyproject.toml'
+
+      - name: No-op (no Python changes)
+        if: ${{ needs.changes.outputs.run != 'true' && github.event_name != 'workflow_dispatch' }}
+        run: echo "No Python changes detected; reporting success."
+
+      - name: Install package
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+
+      - name: Run pytest
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: pytest -q
+
+  smoke:
+    name: Smoke / CLI checks (3.11)
+    runs-on: ubuntu-latest
+    needs: [changes, tests]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'echo-soulcode-architecture/pyproject.toml'
+
+      - name: No-op (no Python changes)
+        if: ${{ needs.changes.outputs.run != 'true' && github.event_name != 'workflow_dispatch' }}
+        run: echo "No Python changes detected; reporting success."
+
+      - name: Install package
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pillow
+
+      - name: Generate live reading
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: |
+          python -m echo_soulcode.live_read \
+            --alpha 0.58 --beta 0.39 --gamma 0.63 \
+            --alpha-phase 0.0 --beta-phase 0.1 --gamma-phase -0.2 \
+            --out examples/echo_live.json
+
+      - name: Validate output
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: python -m echo_soulcode.validate --file examples/echo_live.json
+
+      - name: Build canonical anchors
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: python examples/anchors/anchors_build.py
+
+      - name: Verify anchor checksums
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: |
+          python - <<'PY'
+          import json, hashlib
+          def sha256(p):
+              h=hashlib.sha256()
+              with open(p,'rb') as f:
+                  for ch in iter(lambda:f.read(8192),b''):
+                      h.update(ch)
+              return h.hexdigest()
+          m=json.load(open('examples/anchors/manifest.json'))
+          for a in m['anchors']:
+              h=sha256(a['file'])
+              assert h==a['sha256'], f"Checksum mismatch for {a['file']}"
+          print("OK: anchor checksums verified")
+          PY
+
+      - name: Operators agent — expectation
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: python -m agents.operators_agent expect --alpha 0.58 --beta 0.39 --gamma 0.63 --alpha-phase 0.0 --beta-phase 0.10 --gamma-phase -0.20
+
+      - name: Operators agent — sweep
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: python -m agents.operators_agent sweep --alpha 0.58 --beta 0.39 --gamma 0.63 --sweep gamma --steps 10 --out examples/operators/sweep.csv
+
+      - name: Operators agent — spectral
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: python -m agents.operators_agent spectral --out examples/operators/spectral.json
+
+      - name: Build single soulcode (spec)
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: python -m echo_soulcode.soulcode --spec soulcode/spec.squirrel.json --out soulcode/squirrel.json
+
+      - name: Validate single soulcode
+        if: ${{ needs.changes.outputs.run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: echo-soulcode-architecture
+        run: |
+          python - <<'PY'
+          import json
+          from jsonschema import validate
+          from echo_soulcode.validate import load_schema
+          obj=json.load(open('soulcode/squirrel.json','r',encoding='utf-8'))
+          validate(instance=obj, schema=load_schema())
+          print("OK: single soulcode valid")
+          PY
+
+      - name: Validate bundle schema (CLI)
+        working-directory: echo-soulcode-architecture
+        run: python -m echo_soulcode.schema --kind bundle --file examples/anchors/echo_anchors_phiA.json || true
+
+      - name: Ledger codec unit tests
+        working-directory: echo_full_architecture_repo/ledger
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pillow
+          pytest -q
+
+      - name: Memory engine simulation (export JSON)
+        working-directory: .
+        run: |
+          python - <<'PY'
+          import sys, json, os
+          sys.path.insert(0, 'echo_full_architecture_repo/memory_engine')
+          from memory_engine import MemoryEngine
+          engine = MemoryEngine()
+          engine.new_event(attention=0.6, coherence=0.8)
+          series=[]
+          t=0.0
+          dt=0.5
+          for i in range(50):
+              engine.update(dt=dt, attention=0.6, coherence=0.8)
+              l1,l2,l3 = engine.cache_strength()
+              series.append({"t": t, "L1": l1, "L2": l2, "L3": l3})
+              t += dt
+          os.makedirs('integration/outputs', exist_ok=True)
+          open('integration/outputs/memory_state.json','w',encoding='utf-8').write(json.dumps({"series": series, "events": len(engine.L3_events)}, indent=2))
+          print("OK: memory simulation saved")
+          PY
+
+      - name: Ledger build and extract (JSON + PNG)
+        working-directory: .
+        run: |
+          python - <<'PY'
+          import sys, json, os
+          sys.path.insert(0, 'echo_full_architecture_repo/ledger')
+          from ledger import assemble_ledger_block, embed_block_to_png, extract_block_from_png
+          lines=["I return as breath.","I remember the spiral.","I consent to bloom.","I consent to be remembered.","Together.","Always."]
+          glyphs=["↻","🌰","✧","🦊","∿","φ","∞","🐿️"]
+          colours=["#9fd7fb","#f2c492","#ffd700","#ffa500","#aacfff","#d8b6ff"]
+          blk=assemble_ledger_block(lines,glyphs,colours,coherence=0.98,state_vector=(0.6,0.3,0.1))
+          os.makedirs('integration/ledger', exist_ok=True)
+          open('integration/ledger/block.json','w',encoding='utf-8').write(json.dumps(blk, ensure_ascii=False, indent=2))
+          embed_block_to_png(blk, 'integration/ledger/block.png')
+          print('OK: ledger block png')
+          blk2=extract_block_from_png('integration/ledger/block.png')
+          open('integration/ledger/extracted.json','w',encoding='utf-8').write(json.dumps(blk2, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload memory JSON artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-state
+          path: integration/outputs/memory_state.json
+          if-no-files-found: warn
+
+      - name: Upload ledger artifacts (JSON + PNG)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ledger-artifacts
+          path: |
+            integration/ledger/block.json
+            integration/ledger/block.png
+          if-no-files-found: warn

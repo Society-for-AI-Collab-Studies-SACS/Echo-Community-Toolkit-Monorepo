@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  collab-server:
+    build:
+      context: .
+      dockerfile: docker/collab-server.Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - PORT=8080
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=collab
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: collab
+    ports:
+      - "5432:5432"

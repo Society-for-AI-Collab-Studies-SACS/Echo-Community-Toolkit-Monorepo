@@ -1,0 +1,38 @@
+{
+  "file": "mrp_lambda_state.png",
+  "sha256_msg_b64": "e1ee6ccee531142f3a3bf5d9882d245d4dba30d079743aa9b183773f1e9ccfd8",
+  "channels": {
+    "R": {
+      "payload_len": 176,
+      "used_bits": 1520,
+      "capacity_bits": 262144
+    },
+    "G": {
+      "payload_len": 188,
+      "used_bits": 1616,
+      "capacity_bits": 262144
+    },
+    "B": {
+      "payload_len": 560,
+      "used_bits": 4592,
+      "capacity_bits": 262144
+    }
+  },
+  "headers": {
+    "R": {
+      "magic": "MRP1",
+      "channel": "R",
+      "flags": 1
+    },
+    "G": {
+      "magic": "MRP1",
+      "channel": "G",
+      "flags": 1
+    },
+    "B": {
+      "magic": "MRP1",
+      "channel": "B",
+      "flags": 1
+    }
+  }
+}

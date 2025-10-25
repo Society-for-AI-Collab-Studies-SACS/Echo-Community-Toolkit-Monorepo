@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: vesselos_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: vesselos_postgres
+    environment:
+      - POSTGRES_USER=vesselos
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=vesselos_collab
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  collab-server:
+    build: ./collab-server
+    container_name: vesselos_collab_server
+    environment:
+      - PORT=8000
+      - COLLAB_REDIS_URL=redis://redis:6379/0
+      - COLLAB_POSTGRES_DSN=postgresql://vesselos:password@postgres:5432/vesselos_collab
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+
+volumes:
+  redis-data:
+  pg-data:
+

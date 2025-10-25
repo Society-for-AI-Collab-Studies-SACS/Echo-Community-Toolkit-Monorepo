@@ -1,0 +1,10 @@
+# Code owners for core areas
+
+* @AceTheDactyl
+/src/ @AceTheDactyl
+/tests/ @AceTheDactyl
+/lambda-vite/ @AceTheDactyl
+/echo-soulcode-architecture/ @AceTheDactyl
+/echo_full_architecture_repo/ @AceTheDactyl
+/docs/ @AceTheDactyl
+/.github/ @AceTheDactyl

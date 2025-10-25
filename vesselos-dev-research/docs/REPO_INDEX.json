@@ -1,0 +1,561 @@
+{
+  "generated": "2025-10-18T02:29:04.337965+00:00",
+  "root": "/home/turne/vesselos-dev-research",
+  "files": [
+    {
+      "path": "requirements.txt",
+      "size": 72,
+      "mtime": "2025-10-18T02:13:28.647079+00:00"
+    },
+    {
+      "path": ".gitignore",
+      "size": 64,
+      "mtime": "2025-10-18T02:22:45.892612+00:00"
+    },
+    {
+      "path": "README.md",
+      "size": 1857,
+      "mtime": "2025-10-18T02:14:29.042717+00:00"
+    },
+    {
+      "path": "CONTRIBUTORS.MD",
+      "size": 1134,
+      "mtime": "2025-10-18T02:22:09.464408+00:00"
+    },
+    {
+      "path": "requirements-dev.txt",
+      "size": 69,
+      "mtime": "2025-10-18T02:13:32.662602+00:00"
+    },
+    {
+      "path": "package.json",
+      "size": 340,
+      "mtime": "2025-10-18T02:14:06.379148+00:00"
+    },
+    {
+      "path": "vesselos.py",
+      "size": 1277,
+      "mtime": "2025-10-18T02:22:03.871256+00:00"
+    },
+    {
+      "path": "src_py/__init__.py",
+      "size": 0,
+      "mtime": "2025-10-18T02:22:03.888167+00:00"
+    },
+    {
+      "path": "src_py/vesselos/__init__.py",
+      "size": 0,
+      "mtime": "2025-10-18T02:22:03.888167+00:00"
+    },
+    {
+      "path": "src_py/vesselos/cli/__init__.py",
+      "size": 0,
+      "mtime": "2025-10-18T02:22:03.888167+00:00"
+    },
+    {
+      "path": "src_py/vesselos/cli/audit_commands.py",
+      "size": 13999,
+      "mtime": "2025-10-18T02:22:03.883939+00:00"
+    },
+    {
+      "path": "src_py/vesselos/cli/__pycache__/__init__.cpython-312.pyc",
+      "size": 162,
+      "mtime": "2025-10-18T02:24:16.617369+00:00"
+    },
+    {
+      "path": "src_py/vesselos/cli/__pycache__/audit_commands.cpython-312.pyc",
+      "size": 23043,
+      "mtime": "2025-10-18T02:24:16.621596+00:00"
+    },
+    {
+      "path": "src_py/vesselos/__pycache__/__init__.cpython-312.pyc",
+      "size": 158,
+      "mtime": "2025-10-18T02:24:16.613142+00:00"
+    },
+    {
+      "path": "src_py/__pycache__/__init__.cpython-312.pyc",
+      "size": 149,
+      "mtime": "2025-10-18T02:24:16.613142+00:00"
+    },
+    {
+      "path": "docs/IN_DEV_SPECS.md",
+      "size": 9342,
+      "mtime": "2025-10-18T02:12:59.446610+00:00"
+    },
+    {
+      "path": "docs/REPO_INDEX.md",
+      "size": 3344,
+      "mtime": "2025-10-18T02:27:57.340667+00:00"
+    },
+    {
+      "path": "docs/BASE_STRUCTURE.md",
+      "size": 1729,
+      "mtime": "2025-10-18T02:14:38.117811+00:00"
+    },
+    {
+      "path": "library_core/storage.py",
+      "size": 1268,
+      "mtime": "2025-10-18T02:21:54.651773+00:00"
+    },
+    {
+      "path": "library_core/__init__.py",
+      "size": 289,
+      "mtime": "2025-10-18T02:21:54.664469+00:00"
+    },
+    {
+      "path": "library_core/workspace.py",
+      "size": 1785,
+      "mtime": "2025-10-18T02:21:54.660238+00:00"
+    },
+    {
+      "path": "library_core/agents/echo_agent.py",
+      "size": 2043,
+      "mtime": "2025-10-18T02:21:54.643309+00:00"
+    },
+    {
+      "path": "library_core/agents/limnus_agent.py",
+      "size": 4666,
+      "mtime": "2025-10-18T02:21:54.643309+00:00"
+    },
+    {
+      "path": "library_core/agents/garden_agent.py",
+      "size": 8697,
+      "mtime": "2025-10-18T02:21:54.643309+00:00"
+    },
+    {
+      "path": "library_core/agents/vessel_index_agent.py",
+      "size": 5987,
+      "mtime": "2025-10-18T02:21:54.651773+00:00"
+    },
+    {
+      "path": "library_core/agents/README.md",
+      "size": 207,
+      "mtime": "2025-10-18T02:13:19.273534+00:00"
+    },
+    {
+      "path": "library_core/agents/__init__.py",
+      "size": 411,
+      "mtime": "2025-10-18T02:21:54.634845+00:00"
+    },
+    {
+      "path": "library_core/agents/kira_agent.py",
+      "size": 3593,
+      "mtime": "2025-10-18T02:21:54.647541+00:00"
+    },
+    {
+      "path": "library_core/agents/base.py",
+      "size": 1828,
+      "mtime": "2025-10-18T02:21:54.634845+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/limnus_agent.cpython-312.pyc",
+      "size": 7791,
+      "mtime": "2025-10-18T02:24:16.655415+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/__init__.cpython-312.pyc",
+      "size": 574,
+      "mtime": "2025-10-18T02:24:16.642733+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/vessel_index_agent.cpython-312.pyc",
+      "size": 8819,
+      "mtime": "2025-10-18T02:24:16.655415+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/base.cpython-312.pyc",
+      "size": 3597,
+      "mtime": "2025-10-18T02:24:16.642733+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/garden_agent.cpython-312.pyc",
+      "size": 9465,
+      "mtime": "2025-10-18T02:24:16.646960+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/kira_agent.cpython-312.pyc",
+      "size": 5173,
+      "mtime": "2025-10-18T02:24:16.651187+00:00"
+    },
+    {
+      "path": "library_core/agents/__pycache__/echo_agent.cpython-312.pyc",
+      "size": 2749,
+      "mtime": "2025-10-18T02:24:16.642733+00:00"
+    },
+    {
+      "path": "library_core/__pycache__/__init__.cpython-312.pyc",
+      "size": 455,
+      "mtime": "2025-10-18T02:24:16.625823+00:00"
+    },
+    {
+      "path": "library_core/__pycache__/workspace.cpython-312.pyc",
+      "size": 3429,
+      "mtime": "2025-10-18T02:24:16.625823+00:00"
+    },
+    {
+      "path": "library_core/__pycache__/storage.cpython-312.pyc",
+      "size": 2589,
+      "mtime": "2025-10-18T02:24:16.630051+00:00"
+    },
+    {
+      "path": "memory/vector_store.py",
+      "size": 18708,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "memory/__init__.py",
+      "size": 79,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "memory/__pycache__/__init__.cpython-312.pyc",
+      "size": 235,
+      "mtime": "2025-10-18T02:24:10.498840+00:00"
+    },
+    {
+      "path": "memory/__pycache__/vector_store.cpython-312.pyc",
+      "size": 27600,
+      "mtime": "2025-10-18T02:24:10.507288+00:00"
+    },
+    {
+      "path": "cli/repl.py",
+      "size": 1960,
+      "mtime": "2025-10-18T02:22:03.875484+00:00"
+    },
+    {
+      "path": "cli/vscode_plugin.py",
+      "size": 1052,
+      "mtime": "2025-10-18T02:22:03.875484+00:00"
+    },
+    {
+      "path": "cli/commands.py",
+      "size": 13285,
+      "mtime": "2025-10-18T02:22:03.875484+00:00"
+    },
+    {
+      "path": "cli/prime.py",
+      "size": 10599,
+      "mtime": "2025-10-18T02:22:03.875484+00:00"
+    },
+    {
+      "path": "cli/plugins.py",
+      "size": 2477,
+      "mtime": "2025-10-18T02:22:03.875484+00:00"
+    },
+    {
+      "path": "cli/__init__.py",
+      "size": 415,
+      "mtime": "2025-10-18T02:22:03.871256+00:00"
+    },
+    {
+      "path": "cli/__pycache__/__init__.cpython-312.pyc",
+      "size": 597,
+      "mtime": "2025-10-18T02:23:11.702590+00:00"
+    },
+    {
+      "path": "cli/__pycache__/commands.cpython-312.pyc",
+      "size": 17215,
+      "mtime": "2025-10-18T02:23:11.711040+00:00"
+    },
+    {
+      "path": "cli/__pycache__/prime.cpython-312.pyc",
+      "size": 14167,
+      "mtime": "2025-10-18T02:23:11.706815+00:00"
+    },
+    {
+      "path": "cli/__pycache__/vscode_plugin.cpython-312.pyc",
+      "size": 1581,
+      "mtime": "2025-10-18T02:24:16.672324+00:00"
+    },
+    {
+      "path": "cli/__pycache__/plugins.cpython-312.pyc",
+      "size": 3627,
+      "mtime": "2025-10-18T02:24:16.608914+00:00"
+    },
+    {
+      "path": "cli/__pycache__/repl.cpython-312.pyc",
+      "size": 2853,
+      "mtime": "2025-10-18T02:24:16.613142+00:00"
+    },
+    {
+      "path": "state/garden_ledger.json",
+      "size": 141,
+      "mtime": "2025-10-18T02:24:16.680778+00:00"
+    },
+    {
+      "path": "state/prime_status.json",
+      "size": 62,
+      "mtime": "2025-10-18T02:24:16.680778+00:00"
+    },
+    {
+      "path": "state/voice_log.json",
+      "size": 209,
+      "mtime": "2025-10-18T02:24:16.680778+00:00"
+    },
+    {
+      "path": "agents/README.md",
+      "size": 1309,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/kira/AGENT.md",
+      "size": 4518,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/kira/kira_agent.py",
+      "size": 15445,
+      "mtime": "2025-10-18T01:39:29+00:00"
+    },
+    {
+      "path": "agents/kira/__pycache__/kira_agent.cpython-312.pyc",
+      "size": 19770,
+      "mtime": "2025-10-18T02:23:54.085600+00:00"
+    },
+    {
+      "path": "agents/vessel/AGENT.md",
+      "size": 3634,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/echo/AGENT.md",
+      "size": 3924,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/echo/echo_agent.py",
+      "size": 3695,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/echo/__pycache__/echo_agent.cpython-312.pyc",
+      "size": 6140,
+      "mtime": "2025-10-18T02:23:54.072904+00:00"
+    },
+    {
+      "path": "agents/limnus/AGENT.md",
+      "size": 4700,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/limnus/limnus_agent.py",
+      "size": 21981,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/limnus/__pycache__/limnus_agent.cpython-312.pyc",
+      "size": 29007,
+      "mtime": "2025-10-18T02:23:54.098296+00:00"
+    },
+    {
+      "path": "agents/garden/AGENT.md",
+      "size": 4153,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/garden/garden_agent.py",
+      "size": 3071,
+      "mtime": "2025-10-16T23:40:50+00:00"
+    },
+    {
+      "path": "agents/garden/__pycache__/garden_agent.cpython-312.pyc",
+      "size": 5519,
+      "mtime": "2025-10-18T02:23:54.077136+00:00"
+    },
+    {
+      "path": "scripts/bootstrap.sh",
+      "size": 937,
+      "mtime": "2025-10-18T02:13:26.743767+00:00"
+    },
+    {
+      "path": "pipeline/intent_parser.py",
+      "size": 2142,
+      "mtime": "2025-10-18T02:21:45.338611+00:00"
+    },
+    {
+      "path": "pipeline/dispatcher_enhanced.py",
+      "size": 11694,
+      "mtime": "2025-10-18T02:21:45.330159+00:00"
+    },
+    {
+      "path": "pipeline/metrics.py",
+      "size": 3834,
+      "mtime": "2025-10-18T02:21:45.347063+00:00"
+    },
+    {
+      "path": "pipeline/__init__.py",
+      "size": 783,
+      "mtime": "2025-10-18T02:21:45.321708+00:00"
+    },
+    {
+      "path": "pipeline/logger.py",
+      "size": 2614,
+      "mtime": "2025-10-18T02:21:45.342837+00:00"
+    },
+    {
+      "path": "pipeline/circuit_breaker.py",
+      "size": 2438,
+      "mtime": "2025-10-18T02:21:45.325933+00:00"
+    },
+    {
+      "path": "pipeline/dispatcher.py",
+      "size": 1836,
+      "mtime": "2025-10-18T02:21:45.334385+00:00"
+    },
+    {
+      "path": "pipeline/state/voice_log.json",
+      "size": 209,
+      "mtime": "2025-10-18T02:24:16.680778+00:00"
+    },
+    {
+      "path": "pipeline/state/.gitkeep",
+      "size": 0,
+      "mtime": "2025-10-18T02:21:45.351288+00:00"
+    },
+    {
+      "path": "pipeline/middleware/__init__.py",
+      "size": 4406,
+      "mtime": "2025-10-18T02:21:45.351288+00:00"
+    },
+    {
+      "path": "pipeline/middleware/__pycache__/__init__.cpython-312.pyc",
+      "size": 7294,
+      "mtime": "2025-10-18T02:24:16.663869+00:00"
+    },
+    {
+      "path": "pipeline/__pycache__/__init__.cpython-312.pyc",
+      "size": 743,
+      "mtime": "2025-10-18T02:24:16.630051+00:00"
+    },
+    {
+      "path": "pipeline/__pycache__/metrics.cpython-312.pyc",
+      "size": 5820,
+      "mtime": "2025-10-18T02:24:16.659642+00:00"
+    },
+    {
+      "path": "pipeline/__pycache__/dispatcher_enhanced.cpython-312.pyc",
+      "size": 18430,
+      "mtime": "2025-10-18T02:24:16.638505+00:00"
+    },
+    {
+      "path": "pipeline/__pycache__/intent_parser.cpython-312.pyc",
+      "size": 3419,
+      "mtime": "2025-10-18T02:24:16.634278+00:00"
+    },
+    {
+      "path": "pipeline/__pycache__/logger.cpython-312.pyc",
+      "size": 4213,
+      "mtime": "2025-10-18T02:24:16.663869+00:00"
+    },
+    {
+      "path": "pipeline/__pycache__/circuit_breaker.cpython-312.pyc",
+      "size": 3920,
+      "mtime": "2025-10-18T02:24:16.659642+00:00"
+    },
+    {
+      "path": "workspaces/example/state/garden_state.json",
+      "size": 3,
+      "mtime": "2025-10-18T02:13:39.608949+00:00"
+    },
+    {
+      "path": "workspaces/example/state/echo_state.json",
+      "size": 3,
+      "mtime": "2025-10-18T02:13:42.184660+00:00"
+    },
+    {
+      "path": "workspaces/example/state/limnus_memory.json",
+      "size": 3,
+      "mtime": "2025-10-18T02:13:44.334633+00:00"
+    },
+    {
+      "path": "workspaces/example/state/ledger.json",
+      "size": 3,
+      "mtime": "2025-10-18T02:13:47.202267+00:00"
+    },
+    {
+      "path": "workspaces/example/logs/echo.jsonl",
+      "size": 1,
+      "mtime": "2025-10-18T02:13:57.497513+00:00"
+    },
+    {
+      "path": "workspaces/example/logs/voice_log.json",
+      "size": 3,
+      "mtime": "2025-10-18T02:13:53.584616+00:00"
+    },
+    {
+      "path": "workspaces/example/logs/limnus.jsonl",
+      "size": 1,
+      "mtime": "2025-10-18T02:13:59.940645+00:00"
+    },
+    {
+      "path": "workspaces/example/logs/.gitkeep",
+      "size": 1,
+      "mtime": "2025-10-18T02:13:51.050207+00:00"
+    },
+    {
+      "path": "workspaces/example/logs/kira.jsonl",
+      "size": 1,
+      "mtime": "2025-10-18T02:14:01.966876+00:00"
+    },
+    {
+      "path": "workspaces/example/logs/garden.jsonl",
+      "size": 1,
+      "mtime": "2025-10-18T02:13:56.204970+00:00"
+    },
+    {
+      "path": "workspace/__init__.py",
+      "size": 0,
+      "mtime": "2025-10-18T02:21:54.672934+00:00"
+    },
+    {
+      "path": "workspace/manager.py",
+      "size": 2800,
+      "mtime": "2025-10-18T02:21:54.672934+00:00"
+    },
+    {
+      "path": "workspace/__pycache__/__init__.cpython-312.pyc",
+      "size": 152,
+      "mtime": "2025-10-18T02:24:16.625823+00:00"
+    },
+    {
+      "path": "workspace/__pycache__/manager.cpython-312.pyc",
+      "size": 5037,
+      "mtime": "2025-10-18T02:24:16.625823+00:00"
+    },
+    {
+      "path": "interface/listener.py",
+      "size": 397,
+      "mtime": "2025-10-18T02:22:03.905079+00:00"
+    },
+    {
+      "path": "interface/__init__.py",
+      "size": 0,
+      "mtime": "2025-10-18T02:22:03.905079+00:00"
+    },
+    {
+      "path": "interface/logger.py",
+      "size": 1416,
+      "mtime": "2025-10-18T02:22:03.900851+00:00"
+    },
+    {
+      "path": "interface/dispatcher.py",
+      "size": 2547,
+      "mtime": "2025-10-18T02:22:03.896623+00:00"
+    },
+    {
+      "path": "interface/__pycache__/__init__.cpython-312.pyc",
+      "size": 152,
+      "mtime": "2025-10-18T02:23:54.077136+00:00"
+    },
+    {
+      "path": "interface/__pycache__/dispatcher.cpython-312.pyc",
+      "size": 3620,
+      "mtime": "2025-10-18T02:24:16.608914+00:00"
+    },
+    {
+      "path": "interface/__pycache__/logger.cpython-312.pyc",
+      "size": 2470,
+      "mtime": "2025-10-18T02:23:54.077136+00:00"
+    }
+  ]
+}

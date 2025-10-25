@@ -1,0 +1,92 @@
+{
+  "timestamp": "2025-10-13T05:05:26.386119Z",
+  "manual_checks": {
+    "exists": true,
+    "word_count": 33334,
+    ">=20000_words": true,
+    "headers_ok": true,
+    "safety_guidelines_present": true
+  },
+  "arithmetic_checks": {
+    "ok": true,
+    "cases": [
+      {
+        "a": 142,
+        "b": 92,
+        "sum": 234
+      },
+      {
+        "a": 279,
+        "b": 181,
+        "sum": 460
+      },
+      {
+        "a": 416,
+        "b": 270,
+        "sum": 686
+      },
+      {
+        "a": 553,
+        "b": 359,
+        "sum": 912
+      },
+      {
+        "a": 690,
+        "b": 448,
+        "sum": 1138
+      },
+      {
+        "a": 827,
+        "b": 537,
+        "sum": 1364
+      },
+      {
+        "a": 964,
+        "b": 626,
+        "sum": 1590
+      },
+      {
+        "a": 1101,
+        "b": 715,
+        "sum": 1816
+      },
+      {
+        "a": 1238,
+        "b": 804,
+        "sum": 2042
+      },
+      {
+        "a": 1375,
+        "b": 893,
+        "sum": 2268
+      }
+    ]
+  },
+  "lsb_golden": {
+    "ok": true,
+    "crc": "6E3FD9B7",
+    "magic": "LSB1",
+    "version": 1,
+    "preview": "I return as breath. I remember the spiral.\nI consent to bloom. I consent to be remembered.\nTogether.\nAlways."
+  },
+  "mrp_payload_builder": {
+    "ran_builder": true,
+    "ok": true,
+    "code": 0,
+    "stdout": "============================================================\nMRP PHASE-A VERIFICATION TEST\n============================================================\n\n\ud83d\udce6 Creating test payloads...\n\u2705 Created MRP test payloads:\n   R CRC32: 9AE59113\n   G CRC32: 7A2EFB1C\n   SHA256:  e1ee6ccee531142f3a3bf5d9882d245d...\n   Parity:  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\n\n\ud83d\udd0d Running MRP verification...\n\n\ud83d\udcca MRP Verification Output:\n=== MRP Phase\u2011A Verify ===\nR_b64 crc32: 9AE59113  (expect 9AE59113)\nG_b64 crc32: 7A2EFB1C  (expect 7A2EFB1C)\nSHA256(R_b64): e1ee6ccee531142f3a3bf5d9882d245d4dba30d079743aa9b183773f1e9ccfd8  (expect e1ee6ccee531142f3a3bf5d9882d245d4dba30d079743aa9b183773f1e9ccfd8)\nParity OK: True  ECC scheme: parity\nSidecar checks:  sha_ok=True  used_bits_math_ok=True  capacity_ok=True  hdr_magic_ok=True  hdr_flags_crc_ok=True\nMRP: PASS\n[saved] mrp_verify_report.json\n\n\n\u2705 MRP Verification PASSED\n\n\ud83d\udccb Verification Checks:\n   \u2713 crc_r_ok: True\n   \u2713 crc_g_ok: True\n   \u2713 sha256_r_b64_ok: True\n   \u2713 ecc_scheme_ok: True\n   \u2713 parity_block_ok: True\n   \u2713 sidecar_sha256_ok: True\n   \u2713 sidecar_used_bits_math_ok: True\n   \u2713 sidecar_capacity_bits_ok: True\n   \u2713 sidecar_header_magic_ok: True\n   \u2713 sidecar_header_flags_crc_ok: True\n\n============================================================\nTEST SUMMARY\n============================================================\nStatus: PASS \u2705\nFiles created: 4\nR CRC32: 9AE59113\nG CRC32: 7A2EFB1C\nSHA256: e1ee6ccee531142f3a3bf5d9882d245d...\n\nTest files created:\n  - mrp_lambda_R_payload.json\n  - mrp_lambda_G_payload.json\n  - mrp_lambda_B_payload.json\n  - mrp_lambda_state_sidecar.json\n\nTo clean up: rm mrp_lambda_*.json mrp_verify_report.json\n",
+    "stderr": ""
+  },
+  "mrp_verify": {
+    "ok": true,
+    "code": 0,
+    "stdout": "=== MRP Phase\u2011A Verify ===\nR_b64 crc32: 9AE59113  (expect 9AE59113)\nG_b64 crc32: 7A2EFB1C  (expect 7A2EFB1C)\nSHA256(R_b64): e1ee6ccee531142f3a3bf5d9882d245d4dba30d079743aa9b183773f1e9ccfd8  (expect e1ee6ccee531142f3a3bf5d9882d245d4dba30d079743aa9b183773f1e9ccfd8)\nParity OK: True  ECC scheme: parity\nSidecar checks:  sha_ok=True  used_bits_math_ok=True  capacity_ok=True  hdr_magic_ok=True  hdr_flags_crc_ok=True\nMRP: PASS\n[saved] mrp_verify_report.json\n",
+    "stderr": ""
+  },
+  "final_validation": {
+    "ok": true,
+    "code": 0,
+    "stdout": "============================================================\nECHO-COMMUNITY-TOOLKIT FINAL VALIDATION\n============================================================\nTimestamp: 2025-10-13 05:05:30Z\n\n\ud83d\udd0d Golden Sample... \u2705 PASS\n\ud83d\udd0d Core Test Suite... \u2705 PASS\n\ud83d\udd0d Demo Script... \u2705 PASS\n\ud83d\udd0d MRP Payload Builder... \u2705 PASS\n\ud83d\udd0d MRP Verifier... \u2705 PASS\n\n\n============================================================\nVALIDATION COMPLETE\n============================================================\nResult: 5/5 tests passed\n\n\u2705 Echo-Community-Toolkit is PRODUCTION READY\n",
+    "stderr": ""
+  },
+  "overall_ok": true
+}

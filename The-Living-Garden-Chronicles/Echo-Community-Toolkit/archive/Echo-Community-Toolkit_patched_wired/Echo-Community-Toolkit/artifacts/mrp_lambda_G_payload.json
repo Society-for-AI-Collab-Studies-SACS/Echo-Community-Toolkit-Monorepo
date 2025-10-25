@@ -1,0 +1,10 @@
+{
+  "protocol": "MRP-Phase-A",
+  "channel": "G",
+  "message": "Secondary harmonic calibration",
+  "metadata": {
+    "version": 1,
+    "phase": "A",
+    "resonance_freq": 432
+  }
+}

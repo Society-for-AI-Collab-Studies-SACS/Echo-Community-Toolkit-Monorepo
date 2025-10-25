@@ -1,0 +1,41 @@
+name: HyperFollow Link Integration (Toolkit)
+
+on:
+  push:
+    paths:
+      - '**/*.html'
+      - 'hyperfollow-integration.js'
+      - 'tools/**'
+      - 'web/**'
+      - 'types/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/hyperfollow-integration.yml'
+  pull_request:
+    paths:
+      - '**/*.html'
+      - 'hyperfollow-integration.js'
+      - 'tools/**'
+      - 'web/**'
+      - 'types/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/hyperfollow-integration.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no changes)'
+        required: false
+        default: 'false'
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: node hyperfollow-integration.js $([ "${{ github.event.inputs.dry_run }}" = "true" ] && echo "--dry-run")
+      - run: node verify-integration.js

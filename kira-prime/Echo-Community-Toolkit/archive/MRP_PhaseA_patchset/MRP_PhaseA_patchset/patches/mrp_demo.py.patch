@@ -1,0 +1,42 @@
+From bccf054130b4632b19b4e4bc61d6705d019b1135 Mon Sep 17 00:00:00 2001
+From: MRP Stub Bot <mrp@echo.local>
+Date: 2025-10-13T05:14:22.138385Z
+Subject: [PATCH] add Echo-Community-Toolkit/examples/mrp_demo.py
+
+---
+ Echo-Community-Toolkit/examples/mrp_demo.py | 25 ++++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+ create mode 100644 Echo-Community-Toolkit/examples/mrp_demo.py
+
+diff --git a/Echo-Community-Toolkit/examples/mrp_demo.py b/Echo-Community-Toolkit/examples/mrp_demo.py
+new file mode 100644
+index 0000000..bccf054
+--- /dev/null
++++ b/Echo-Community-Toolkit/examples/mrp_demo.py
+@@ -0,0 +1,25 @@
++# Auto-generated MRP Phase A stubs — 2025-10-13T05:14:22.138385Z
++# SPDX-License-Identifier: MIT
++
++#!/usr/bin/env python3
++"""Minimal MRP Phase A demo (codec only; adapter is stubbed).
++"""
++import json, sys
++from src.mrp.codec import encode, decode
++
++def main():
++    if len(sys.argv) < 3:
++        print("Usage: python examples/mrp_demo.py <cover.png> <out.png>")
++        print("NOTE: Adapter is a stub; this will raise NotImplementedError until implemented.")
++        sys.exit(2)
++    cover, outp = sys.argv[1], sys.argv[2]
++    meta = {"tool": "echo-mrp", "phase": "A", "ts": "now"}
++    try:
++        info = encode(cover, outp, "Hello, Garden.", meta)
++        print("Encoded:", json.dumps(info, indent=2))
++    except NotImplementedError as e:
++        print("Adapter not implemented:", e)
++        sys.exit(3)
++
++if __name__ == "__main__":
++    main()
++

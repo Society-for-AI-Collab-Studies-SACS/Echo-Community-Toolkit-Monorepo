@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated
+schema/*.yaml
+schema/*.json
+frontend/*.html
+!frontend/index.html
+!frontend/limnus_ch1.html
+!frontend/garden_ch1.html
+!frontend/kira_ch1.html

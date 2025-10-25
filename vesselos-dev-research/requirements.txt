@@ -1,0 +1,2 @@
+# Synchronise with upstream VesselOS runtime requirements.
+click>=8.1.0

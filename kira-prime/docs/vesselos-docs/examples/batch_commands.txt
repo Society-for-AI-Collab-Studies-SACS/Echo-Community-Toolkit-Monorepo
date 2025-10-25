@@ -1,0 +1,120 @@
+# VesselOS Batch Command Examples
+
+# This file contains example command sequences for batch processing
+# Run with: vesselos batch examples/batch_commands.txt
+
+# ===========================
+# EXAMPLE 1: Morning Ritual
+# ===========================
+
+garden start
+echo mode balanced
+garden open scroll=proof
+limnus cache "Morning meditation complete" layer=L2 tags=morning,ritual
+garden next
+kira validate
+
+# ===========================
+# EXAMPLE 2: Quick Journal
+# ===========================
+
+echo mode paradox
+limnus cache "Today I learned about fractal patterns" layer=L2 tags=learning,journal
+limnus cache "Grateful for quiet morning time" layer=L2 tags=gratitude,journal
+limnus cache "Challenge: staying focused during distractions" layer=L2 tags=challenge,journal
+
+# ===========================
+# EXAMPLE 3: Project Setup
+# ===========================
+
+garden start
+garden log {"type":"project_init","name":"VesselOS","phase":"development"}
+limnus cache "Project: VesselOS - Goal: Unified narrative system" layer=L3 tags=project,vesselos,metadata
+echo mode fox
+echo say "Three key milestones for VesselOS development"
+limnus cache "Milestone 1: Complete four-agent architecture" layer=L3 tags=project,vesselos,milestone
+limnus cache "Milestone 2: Implement dictation pipeline" layer=L3 tags=project,vesselos,milestone
+limnus cache "Milestone 3: GitHub integration and publishing" layer=L3 tags=project,vesselos,milestone
+
+# ===========================
+# EXAMPLE 4: Memory Review
+# ===========================
+
+limnus recall keyword=learning limit=5
+limnus recall tag=gratitude limit=3
+limnus recall tag=project limit=10
+
+# ===========================
+# EXAMPLE 5: Ritual Completion
+# ===========================
+
+garden next
+garden next
+garden next
+garden next
+kira validate
+kira seal
+
+# ===========================
+# EXAMPLE 6: Persona Exploration
+# ===========================
+
+echo mode squirrel
+echo say "Let's explore all the possibilities!"
+echo mode fox
+echo say "Now let's focus on what matters most."
+echo mode paradox
+echo say "In the space between, mysteries unfold."
+echo mode balanced
+echo say "All voices blend in harmony."
+
+# ===========================
+# EXAMPLE 7: Backup Routine
+# ===========================
+
+kira validate strict=true
+limnus commit {"type":"backup","timestamp":"2025-10-15T00:00:00Z"}
+limnus encode-ledger output=backup.png
+kira publish
+
+# ===========================
+# EXAMPLE 8: Collaborative Session
+# ===========================
+
+garden start
+garden log {"type":"collab_start","session":"story_circle","participants":"Alice,Bob,Carol"}
+limnus cache "[Alice]: Once upon a time in a digital garden..." layer=L2 tags=collab,story_circle,alice
+limnus cache "[Bob]: ...a curious fox discovered an ancient scroll." layer=L2 tags=collab,story_circle,bob
+limnus cache "[Carol]: The scroll whispered secrets of the spiral." layer=L2 tags=collab,story_circle,carol
+garden next
+kira mentor
+
+# ===========================
+# EXAMPLE 9: Creative Writing
+# ===========================
+
+echo mode paradox
+garden open scroll=chronicle
+limnus cache "Scene: A threshold between worlds" layer=L3 tags=writing,scene,threshold
+limnus cache "Character: The Wanderer seeks integration" layer=L3 tags=writing,character
+limnus cache "Conflict: Trust the known path or venture into mystery" layer=L3 tags=writing,conflict
+garden next
+
+# ===========================
+# EXAMPLE 10: System Maintenance
+# ===========================
+
+kira validate
+limnus trim layer=L1 older-than=1h
+kira mentor apply=true
+limnus encode-ledger output=maintenance_backup.png
+kira publish
+
+# ===========================
+# Notes:
+# - Lines starting with # are comments (ignored)
+# - Empty lines are ignored
+# - Commands are processed sequentially
+# - Error in one command doesn't stop the batch
+# - Use --parallel flag for concurrent execution
+# ===========================

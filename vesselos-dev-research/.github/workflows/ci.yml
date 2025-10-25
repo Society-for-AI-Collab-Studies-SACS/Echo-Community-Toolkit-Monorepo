@@ -1,0 +1,61 @@
+name: CI - Tests and Audits
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CI: "1"
+      CI_SKIP_SBERT: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          fi
+
+      - name: Run Python tests
+        run: python -m pytest -q
+
+      - name: Run Kira integrity tests
+        run: python3 vesselos.py kira test
+
+      - name: Run audit checks (non-blocking)
+        run: python3 vesselos.py audit full --workspace example || true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build collab-server
+        working-directory: collab-server
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload audit logs (if present)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-audit-logs
+          path: |
+            workspaces/example/logs/**
+            workspaces/example/state/**
+          if-no-files-found: ignore

@@ -1,0 +1,21 @@
+{
+  "cover": "/mnt/data/mrp_cover.png",
+  "stego": "/mnt/data/mrp_stego.png",
+  "sizes_bits": {
+    "R": 1264,
+    "G": 2288,
+    "B": 2608
+  },
+  "payload_lengths": {
+    "R": 144,
+    "G": 272,
+    "B": 312
+  },
+  "ecc": {
+    "crc_r": "9858A46B",
+    "crc_g": "B91A3E15",
+    "sha256_msg": "4b3ef7ea0921b003eb6a0d25bfe7c71eecae559424dcc7df661aabd83f7071f0",
+    "parity_block": 8,
+    "parity_over_rg_b64": "WnYtCgwNPScnWkoXDTAyJSwjfkw4FWdzCTgrNy0qGxR6eWAeeGcOc0phJUleS2dsPnA8Vw=="
+  }
+}

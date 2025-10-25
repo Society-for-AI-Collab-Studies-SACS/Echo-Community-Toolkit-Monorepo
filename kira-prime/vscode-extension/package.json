@@ -1,0 +1,72 @@
+{
+  "name": "kira-prime-vscode",
+  "displayName": "Kira Prime",
+  "description": "VesselOS integration for VSCode",
+  "version": "0.1.0",
+  "publisher": "vesselos",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/voice_log.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "kiraPrime.route",
+        "title": "Kira Prime: Route Selection"
+      },
+      {
+        "command": "kiraPrime.status",
+        "title": "Kira Prime: Show Status"
+      },
+      {
+        "command": "kiraPrime.validate",
+        "title": "Kira Prime: Validate System"
+      },
+      {
+        "command": "kiraPrime.recall",
+        "title": "Kira Prime: Semantic Recall"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "kiraPrime.route",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Kira Prime",
+      "properties": {
+        "kiraPrime.cliPath": {
+          "type": "string",
+          "default": "prime",
+          "description": "Path to prime CLI"
+        },
+        "kiraPrime.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-refresh status on file changes"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.80.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.0"
+  }
+}

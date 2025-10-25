@@ -1,0 +1,42 @@
+{
+  "file": "/mnt/data/mrp_lambda_state.png",
+  "channels": {
+    "R": {
+      "used_bits": 7760,
+      "capacity_bits": 262144,
+      "payload_len": 956,
+      "crc32_hex": "B84A3555"
+    },
+    "G": {
+      "used_bits": 11920,
+      "capacity_bits": 262144,
+      "payload_len": 1476,
+      "crc32_hex": "70F4C6AB"
+    },
+    "B": {
+      "used_bits": 23088,
+      "capacity_bits": 262144,
+      "payload_len": 2872,
+      "crc32_hex": "08554653"
+    }
+  },
+  "headers": {
+    "R": {
+      "magic": "MRP1",
+      "channel": "R",
+      "flags": 1
+    },
+    "G": {
+      "magic": "MRP1",
+      "channel": "G",
+      "flags": 1
+    },
+    "B": {
+      "magic": "MRP1",
+      "channel": "B",
+      "flags": 1
+    }
+  },
+  "parity_block_len_b64": 1968,
+  "sha256_msg_b64": "3d1f31b2f60f7630a9983cd0000f4dcec02b3de8ecaf470fdf6a0465383057aa"
+}

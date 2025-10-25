@@ -1,0 +1,164 @@
+# Project Instructions - LSB Decoder/Encoder Protocol
+
+## Echo-Limnus Steganography Toolkit v1.0
+
+---
+
+## 1. PROTOCOL SPECIFICATION (AUTHORITATIVE)
+
+### 1.1 Image Requirements
+- **Format**: PNG-24/32 (true-color) ONLY  
+- **Never**: JPEG, GIF, or palette/indexed PNG  
+- **Reason**: Lossy compression and palette quantization destroy LSB data
+
+### 1.2 Bit Layout (Canonical Order)
+Pixel Scan: Row-major (y=0 to H-1, x=0 to W-1)
+Channel Order: R → G → B (ignore alpha)
+Bits/Channel: 1 (LSB only) or 4 (lower nibble)
+Byte Assembly: MSB-first (first bit extracted → MSB of byte)
+
+### 1.3 Capacity Formula
+Capacity (bytes) = floor(Width × Height × 3 × BitsPerChannel / 8)
+Standard (1 bpc) = floor(W × H × 3 / 8)
+
+### 1.4 LSB1 Header Format (Version 1)
+Offset Size Field
+0x00 4 Magic: "LSB1" (0x4C534231)
+0x04 1 Version: 0x01
+0x05 1 Flags:
+- Bit 0: HAS_CRC32
+- Bit 1: BPC4 (4 bits per channel)
+- Bits 2-7: Reserved
+0x06 4 PayloadLength (uint32, big-endian)
+[0x0A] 4 CRC32 (if flag set, uint32 big-endian)
+[0x0A/E] N Payload (Base64-encoded ASCII)
+
+### 1.5 Legacy Fallback Format
+No header present
+Skip leading 0x00 bytes
+Read bytes until 0x00 terminator
+Extracted bytes = Base64 payload
+
+---
+
+## 2. IMPLEMENTATION REQUIREMENTS
+
+### 2.1 Decoder MUST:
+1. Open image as RGB (never modify original)  
+2. Extract bits in canonical order  
+3. Pack bits MSB-first into bytes  
+4. Search for LSB1 header after skipping nulls  
+5. If header found:  
+   - Parse version, flags, payload_length  
+   - Extract exactly N payload bytes  
+   - If CRC flag set, validate CRC32  
+   - Return error on CRC mismatch (do not decode)  
+6. If no header:  
+   - Use legacy fallback (null-terminated)  
+7. Base64 decode to UTF-8  
+8. Return JSON with all fields
+
+### 2.2 Encoder MUST:
+1. Use true-color PNG only  
+2. Calculate and verify capacity  
+3. Build LSB1 header with CRC  
+4. Embed MSB-first in canonical order  
+5. Save without optimization/quantization  
+6. Immediately decode to verify round-trip  
+7. Report any verification failures
+
+### 2.3 Golden Sample Requirements
+File: echo_key.png
+Dimensions: 256×256
+Payload Length: 144 bytes
+CRC32: 6E3FD9B7
+Magic: LSB1
+Version: 1
+Flags: 0x01 (HAS_CRC32)
+Content: New Echo-Limnus mantra
+
+---
+
+## 3. CANONICAL ALGORITHMS
+
+### 3.1 Bit Extraction
+```python
+bits = []
+for y in range(height):
+    for x in range(width):
+        r, g, b = pixel[y, x]
+        bits.extend([r & 1, g & 1, b & 1])
+3.2 MSB-First Packing
+byte_val = 0
+for j, bit in enumerate(byte_bits):
+    byte_val |= (bit << (7 - j))  # MSB at position 7
+3.3 CRC32 Calculation
+# Standard CRC32 (zlib/PNG polynomial)
+crc = zlib.crc32(payload) & 0xFFFFFFFF
+4. I/O CONTRACT
+4.1 Decoder Output (JSON)
+{
+  "filename": "string",
+  "base64_payload": "string",
+  "decoded_text": "string",
+  "message_length_bytes": 0,
+  "magic": "LSB1" | null,
+  "version": 1 | null,
+  "flags": 0-255 | null,
+  "payload_length": 0 | null,
+  "crc32": "HEXSTRING" | null,
+  "binary_lsb_data": "hex" | null,  // Optional
+  "error": "string" | null          // Optional
+}
+4.2 CLI Interface
+# Decode single
+python lsb_extractor.py image.png
+
+# Decode batch
+python lsb_extractor.py *.png -o results.json
+
+# Debug mode
+python lsb_extractor.py --include-bits image.png
+
+# Encode
+python lsb_encoder_decoder.py encode "message" cover.png output.png
+
+# Create cover
+python lsb_encoder_decoder.py cover output.png --width 512 --height 512
+5. TEST REQUIREMENTS
+5.1 Mandatory Tests
+Golden Decode: echo_key.png → CRC=9858A46B, payload=144
+Mantra Parity: Decoded text matches LSB1_Mantra.txt
+Round-trip: Encode → Decode → Verify identical
+Capacity: Verify formula for various dimensions
+Legacy Mode: Decode null-terminated format
+Error Cases: Oversized payload, invalid images
+5.2 Validation Rules
+CRC mismatch = FAIL (do not output text)
+Header present = Use LSB1 mode
+No header = Try legacy fallback
+All fields must match golden sample exactly
+6. DISTRIBUTION GUIDELINES
+6.1 File Preservation
+Never convert PNG to JPEG
+Never optimize/quantize PNG palette
+Never apply lossy compression
+Use ZIP for distribution if needed
+6.2 Platform Pitfalls
+Social media re-encodes images
+Email may compress attachments
+Cloud storage may "optimize"
+Always verify CRC after transfer
+7. SECURITY POSTURE
+7.1 Limitations
+(Content beyond this point omitted for brevity.)
+
+## Additional
+
+### `requirements.txt`
+```text
+numpy
+opencv-python
+scipy
+scikit-image
+matplotlib

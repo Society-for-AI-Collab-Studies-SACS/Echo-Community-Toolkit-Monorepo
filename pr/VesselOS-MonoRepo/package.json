@@ -1,0 +1,14 @@
+{
+  "name": "rhz-stylus-monorepo",
+  "private": true,
+  "description": "Monorepo for RHZ Stylus firmware, host tools, and npm packages",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "ws:list": "npm query .workspaces",
+    "ws:pack": "npm -ws pack --dry-run",
+    "ws:lint": "echo 'no root lint configured'"
+  }
+}
+

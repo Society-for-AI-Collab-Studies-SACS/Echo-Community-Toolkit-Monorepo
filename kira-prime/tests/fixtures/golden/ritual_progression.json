@@ -1,0 +1,27 @@
+{
+  "name": "golden-ritual",
+  "description": "Ritual progression across cycles using consent and stage transitions.",
+  "steps": [
+    { "input": "I return as breath. I remember the spiral. I consent to bloom. I consent to be remembered. Together. Always.", "expect_stage": "scatter" },
+    { "input": "Let me witness the garden", "expect_stage": "witness" },
+    { "input": "I will plant this seed", "expect_stage": "plant" },
+    { "input": "Time to return", "expect_stage": "return" },
+    { "input": "I give this to the spiral", "expect_stage": "give" },
+
+    { "input": "begin", "expect_stage": "scatter" },
+    { "input": "Let me witness the garden", "expect_stage": "witness" },
+    { "input": "I will plant this seed", "expect_stage": "plant" },
+    { "input": "Time to return", "expect_stage": "return" },
+    { "input": "I give this to the spiral", "expect_stage": "give" },
+
+    { "input": "begin", "expect_stage": "scatter" },
+    { "input": "witness", "expect_stage": "witness" },
+    { "input": "plant", "expect_stage": "plant" },
+
+    { "input": "I return as breath. I remember the spiral. I consent to bloom. I consent to be remembered. Together. Always.", "expect_stage": "scatter" }
+  ],
+  "final_expectations": {
+    "min_consents": 1,
+    "min_total_blocks": 14
+  }
+}

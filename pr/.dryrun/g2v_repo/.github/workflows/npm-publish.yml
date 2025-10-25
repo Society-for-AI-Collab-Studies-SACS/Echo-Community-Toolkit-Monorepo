@@ -1,0 +1,82 @@
+name: npm-publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Discover and publish npm workspaces (if any)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: Derive version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VER="${TAG#v}"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+
+      - name: Discover publishable packages
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > pkg_list.txt
+          if [ -d packages ]; then
+            for dir in packages/*; do
+              [ -d "$dir" ] || continue
+              [ -f "$dir/package.json" ] || continue
+              name=$(node -p "require('./$dir/package.json').name || ''") || name=""
+              is_private=$(node -p "Boolean(require('./$dir/package.json').private) ? 'true' : 'false'" || echo "false")
+              if [ -n "$name" ] && [ "$is_private" != "true" ]; then
+                echo "$dir" >> pkg_list.txt
+              fi
+            done
+          fi
+          if [ ! -s pkg_list.txt ]; then
+            echo "none" > pkg_list.txt
+          fi
+          echo "pkgs=$(tr '\n' ',' < pkg_list.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Show discovered packages
+        run: |
+          echo "Packages: $(cat pkg_list.txt)"
+
+      - name: Set versions in packages
+        if: ${{ steps.discover.outputs.pkgs != 'none' }}
+        run: |
+          while IFS= read -r dir; do
+            [ "$dir" = "none" ] && exit 0
+            echo "Setting version for $dir"
+            npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --prefix "$dir"
+          done < pkg_list.txt
+
+      - name: Publish packages to GitHub Packages
+        if: ${{ steps.discover.outputs.pkgs != 'none' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          while IFS= read -r dir; do
+            [ "$dir" = "none" ] && exit 0
+            echo "Publishing $dir"
+            npm publish --registry=https://npm.pkg.github.com --access public --provenance=false --prefix "$dir"
+          done < pkg_list.txt
+
+      - name: No packages found
+        if: ${{ steps.discover.outputs.pkgs == 'none' }}
+        run: echo "No publishable packages discovered; skipping."
+

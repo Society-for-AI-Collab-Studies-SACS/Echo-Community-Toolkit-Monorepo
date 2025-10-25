@@ -1,0 +1,18 @@
+{
+  "echo": {
+    "alpha": 0.34,
+    "beta": 0.33,
+    "gamma": 0.33,
+    "last_mode": "mix"
+  },
+  "garden": {
+    "stage": "scatter",
+    "entries": 4
+  },
+  "memory": {
+    "count": 13
+  },
+  "contract": {
+    "sealed": false
+  }
+}

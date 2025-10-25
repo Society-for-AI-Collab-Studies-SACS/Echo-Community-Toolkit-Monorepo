@@ -1,0 +1,31 @@
+{
+  "name": "echo-garden-hyperfollow-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Automates insertion of Crystalline Echo HyperFollow links across scrolls/UI/docs.",
+  "scripts": {
+    "integrate": "node hyperfollow-integration.js",
+    "verify": "node verify-integration.js",
+    "clean": "node clean-integration.js",
+    "soulcode:emit-schema": "node tools/soulcode-bridge.js emit-schema",
+    "soulcode:types": "node tools/generate-soulcode-types.js",
+    "soulcode:bundle": "node tools/soulcode-bridge.js live-read",
+    "soulcode:validate": "node tools/soulcode-bridge.js validate-bundle",
+    "mem:simulate": "node tools/soulcode-bridge.js memory:simulate",
+    "ledger:build": "node tools/soulcode-bridge.js ledger:build",
+    "ledger:extract": "node tools/soulcode-bridge.js ledger:extract",
+    "serve": "node tools/serve.js -p 8080",
+    "serve:py": "python3 -m http.server 8080"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "codex": "^0.2.3"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "json-schema-to-typescript": "^13.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

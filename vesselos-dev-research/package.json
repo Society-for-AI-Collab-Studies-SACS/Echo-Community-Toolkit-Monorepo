@@ -1,0 +1,12 @@
+{
+  "name": "vesselos-dev-research",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Scaffold repository for VesselOS command research.",
+  "scripts": {
+    "lint": "echo \"Add lint scripts once upstream tooling is linked\"",
+    "build": "echo \"Add build steps as needed\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

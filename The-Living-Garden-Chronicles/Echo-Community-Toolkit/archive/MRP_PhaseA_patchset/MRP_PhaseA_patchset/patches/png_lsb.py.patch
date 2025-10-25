@@ -1,0 +1,30 @@
+From 9eef98079742e388b24900cdc54a9f4d8765e044 Mon Sep 17 00:00:00 2001
+From: MRP Stub Bot <mrp@echo.local>
+Date: 2025-10-13T05:14:22.138385Z
+Subject: [PATCH] add Echo-Community-Toolkit/src/mrp/adapters/png_lsb.py
+
+---
+ Echo-Community-Toolkit/src/mrp/adapters/png_lsb.py | 13 ++++++++++++++
+ 1 file changed, 13 insertions(+)
+ create mode 100644 Echo-Community-Toolkit/src/mrp/adapters/png_lsb.py
+
+diff --git a/Echo-Community-Toolkit/src/mrp/adapters/png_lsb.py b/Echo-Community-Toolkit/src/mrp/adapters/png_lsb.py
+new file mode 100644
+index 0000000..9eef980
+--- /dev/null
++++ b/Echo-Community-Toolkit/src/mrp/adapters/png_lsb.py
+@@ -0,0 +1,13 @@
++# Auto-generated MRP Phase A stubs — 2025-10-13T05:14:22.138385Z
++# SPDX-License-Identifier: MIT
++
++"""PNG LSB adapter (Phase A stub)
++Bridges MRP frames into per-channel LSB1 carriers using canonical bit order.
++NOTE: This is a stub. Replace with real LSB plane I/O binding to your existing LSB code.
++"""
++from typing import Dict
++def embed_frames(cover_png: str, out_png: str, frames: Dict[str, bytes]) -> None:
++    raise NotImplementedError("png_lsb.embed_frames: Phase A stub — implement LSB plane mapping")
++
++def extract_frames(stego_png: str) -> Dict[str, bytes]:
++    raise NotImplementedError("png_lsb.extract_frames: Phase A stub — implement LSB plane mapping")
++

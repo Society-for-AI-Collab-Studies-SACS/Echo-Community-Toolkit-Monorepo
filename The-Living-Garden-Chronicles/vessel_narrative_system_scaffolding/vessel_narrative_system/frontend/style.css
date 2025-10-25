@@ -1,0 +1,23 @@
+:root{
+  --bg: #0b0b12;
+  --text: #d7dde8;
+  --limnus: #ff99ff;
+  --garden: #ffe066;
+  --kira: #66ffe0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.badge{padding:.25rem .5rem;border:1px solid rgba(255,255,255,.15);border-radius:6px;font-size:.8rem;opacity:.85}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav a{padding:.5rem .75rem;border:1px solid rgba(255,255,255,.15);border-radius:8px;text-decoration:none;color:var(--text);opacity:.9}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.hero{padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:16px}
+.flags{margin-top:12px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;opacity:.8}
+.footer{margin-top:24px;opacity:.7;font-size:.9rem}
+.limnus h2,.limnus .chip{color:var(--limnus)}
+.garden h2,.garden .chip{color:var(--garden)}
+.kira h2,.kira .chip{color:var(--kira)}
+.chip{display:inline-block;padding:.15rem .5rem;border:1px solid currentColor;border-radius:999px;font-size:.75rem;margin-right:.35rem}
+.content p{line-height:1.6}

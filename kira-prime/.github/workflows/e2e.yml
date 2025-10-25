@@ -1,0 +1,71 @@
+name: VesselOS E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - chore/**
+      - feature/**
+      - fix/**
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      CI: "1"
+      CI_SKIP_SBERT: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f kira-prime/requirements.txt ]; then
+            pip install -r kira-prime/requirements.txt
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install VSCode extension deps
+        working-directory: vscode-extension
+        run: npm install
+
+      - name: Prepare prime CLI wrapper
+        run: |
+          mkdir -p "$HOME/bin"
+          cat <<'EOF' > "$HOME/bin/prime"
+#!/usr/bin/env bash
+set -euo pipefail
+REPO_ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
+node "$REPO_ROOT/tools/codex-cli/bin/codex.js" "$@"
+EOF
+          chmod +x "$HOME/bin/prime"
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Configure git and remote
+        run: |
+          git config user.name "CI Bot"
+          git config user.email "ci@example.com"
+          git remote remove origin || true
+          git init --bare /tmp/origin.git
+          git remote add origin /tmp/origin.git
+          git push -u origin HEAD
+
+      - name: Make e2e script executable
+        run: chmod +x tests/e2e_test.sh
+
+      - name: Run e2e script
+        env:
+          PRIME_CLI: "prime"
+        run: ./tests/e2e_test.sh

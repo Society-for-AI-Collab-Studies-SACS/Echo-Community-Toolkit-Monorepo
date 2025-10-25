@@ -1,0 +1,60 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -U pip
+      - run: pip install -e .
+      - run: python -m echo_soulcode.live_read --alpha 0.58 --beta 0.39 --gamma 0.63 --alpha-phase 0.0 --beta-phase 0.1 --gamma-phase -0.2 --out examples/echo_live.json
+      - run: python -m echo_soulcode.validate --file examples/echo_live.json
+      - run: pip install pytest
+      - run: pytest -q
+
+      - name: Build canonical anchors
+        run: python examples/anchors/anchors_build.py
+      - name: Verify anchor checksums
+        run: |
+          python - <<'PY'
+          import json, hashlib
+          def sha256(p):
+              h=hashlib.sha256()
+              with open(p,'rb') as f:
+                  for ch in iter(lambda:f.read(8192),b''):
+                      h.update(ch)
+              return h.hexdigest()
+          m=json.load(open('examples/anchors/manifest.json'))
+          for a in m['anchors']:
+              h=sha256(a['file'])
+              assert h==a['sha256'], f"Checksum mismatch for {a['file']}"
+          print("OK: anchor checksums verified")
+          PY
+
+      - name: Operators agent — expectation
+        run: python -m agents.operators_agent expect --alpha 0.58 --beta 0.39 --gamma 0.63 --alpha-phase 0.0 --beta-phase 0.10 --gamma-phase -0.20
+      - name: Operators agent — sweep
+        run: python -m agents.operators_agent sweep --alpha 0.58 --beta 0.39 --gamma 0.63 --sweep gamma --steps 10 --out examples/operators/sweep.csv
+      - name: Operators agent — spectral
+        run: python -m agents.operators_agent spectral --out examples/operators/spectral.json
+
+      - name: Build single soulcode (spec)
+        run: python -m echo_soulcode.soulcode --spec soulcode/spec.squirrel.json --out soulcode/squirrel.json
+      - name: Validate single soulcode
+        run: |
+          python - <<'PY'
+          import json
+          from jsonschema import validate
+          from echo_soulcode.validate import load_schema
+          obj=json.load(open('soulcode/squirrel.json','r',encoding='utf-8'))
+          validate(instance=obj, schema=load_schema())
+          print("OK: single soulcode valid")
+          PY
+
+      - name: Validate bundle schema (CLI)
+        run: |
+          python -m echo_soulcode.schema --kind bundle --file examples/anchors/echo_anchors_phiA.json || true
+

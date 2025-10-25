@@ -1,0 +1,664 @@
+# VesselOS Workflow Examples
+
+Complete, real-world workflow patterns for VesselOS.
+
+## Table of Contents
+
+1. [Daily Ritual Practice](#daily-ritual-practice)
+2. [Memory Journaling](#memory-journaling)
+3. [Creative Writing Session](#creative-writing-session)
+4. [Code Documentation](#code-documentation)
+5. [Project Planning](#project-planning)
+6. [Collaborative Narrative](#collaborative-narrative)
+7. [Backup & Recovery](#backup--recovery)
+8. [Publishing Workflow](#publishing-workflow)
+
+---
+
+## Daily Ritual Practice
+
+**Goal**: Establish consistent daily practice with VesselOS
+
+### Morning Ritual
+
+```bash
+#!/bin/bash
+# morning_ritual.sh
+
+echo "🌅 Morning Ritual Starting..."
+
+# 1. Start new ritual cycle
+vesselos garden start
+
+# 2. Set balanced persona
+vesselos echo mode balanced
+
+# 3. Open proof scroll
+vesselos garden open --scroll proof
+
+# 4. Capture morning intention
+read -p "Morning intention: " intention
+vesselos limnus cache "$intention" --layer L2 --tags morning,intention,$(date +%Y-%m-%d)
+
+# 5. Advance to witness stage
+vesselos garden next
+
+# 6. Validate system
+vesselos kira validate
+
+echo "✅ Morning ritual complete"
+```
+
+### Evening Reflection
+
+```bash
+#!/bin/bash
+# evening_ritual.sh
+
+echo "🌙 Evening Reflection Starting..."
+
+# 1. Set contemplative mode
+vesselos echo mode paradox
+
+# 2. Capture day's insights
+read -p "Key insight from today: " insight
+vesselos limnus cache "$insight" --layer L3 --tags evening,wisdom,$(date +%Y-%m-%d)
+
+# 3. Recall today's memories
+echo "Today's memories:"
+vesselos limnus recall --tag "$(date +%Y-%m-%d)" --limit 10
+
+# 4. Advance ritual
+vesselos garden next
+
+# 5. If at harvest, seal the cycle
+stage=$(vesselos garden status | jq -r '.current_stage')
+if [ "$stage" == "harvest" ]; then
+    echo "🌾 Sealing ritual cycle..."
+    vesselos kira seal
+fi
+
+echo "✅ Evening reflection complete"
+```
+
+### Full Day Script
+
+```bash
+#!/bin/bash
+# daily_practice.sh
+
+# Morning
+./morning_ritual.sh
+
+# Midday check-in
+echo "☀️ Midday Check..."
+vesselos kira mentor
+vesselos garden next
+
+# Evening
+./evening_ritual.sh
+
+# Backup
+vesselos limnus encode-ledger --output "backups/ledger_$(date +%Y%m%d).png"
+```
+
+---
+
+## Memory Journaling
+
+**Goal**: Use VesselOS for continuous thought capture and organization
+
+### Continuous Listening Setup
+
+```bash
+# Start in continuous mode
+vesselos listen --continuous
+
+# Or create a session script
+cat > journal_session.sh << 'EOF'
+#!/bin/bash
+echo "📓 Journal Session - Press Ctrl+C to exit"
+vesselos listen --continuous --auto-tag journal,$(date +%Y-%m-%d)
+EOF
+
+chmod +x journal_session.sh
+./journal_session.sh
+```
+
+### Structured Journaling
+
+```bash
+#!/bin/bash
+# structured_journal.sh
+
+echo "📓 Structured Journal Entry"
+
+# Set persona
+echo "1. Select mode:"
+echo "  1) Balanced"
+echo "  2) Exploratory (squirrel)"
+echo "  3) Focused (fox)"
+echo "  4) Reflective (paradox)"
+read -p "Choice: " choice
+
+case $choice in
+    1) vesselos echo mode balanced ;;
+    2) vesselos echo mode squirrel ;;
+    3) vesselos echo mode fox ;;
+    4) vesselos echo mode paradox ;;
+esac
+
+# Prompt structure
+read -p "Gratitude: " gratitude
+vesselos limnus cache "$gratitude" --layer L2 --tags gratitude,journal
+
+read -p "Challenge: " challenge
+vesselos limnus cache "$challenge" --layer L2 --tags challenge,journal
+
+read -p "Learning: " learning
+vesselos limnus cache "$learning" --layer L3 --tags learning,journal
+
+read -p "Intention: " intention
+vesselos limnus cache "$intention" --layer L2 --tags intention,journal
+
+# Summarize
+echo "📝 Journal entry saved to memory layers"
+vesselos kira validate
+```
+
+### Weekly Review
+
+```bash
+#!/bin/bash
+# weekly_review.sh
+
+echo "📊 Weekly Review"
+
+# Get date range
+start_date=$(date -d "7 days ago" +%Y-%m-%d)
+end_date=$(date +%Y-%m-%d)
+
+echo "Reviewing: $start_date to $end_date"
+
+# Recall by category
+echo "=== GRATITUDES ==="
+vesselos limnus recall --tag gratitude | grep -A 2 "$start_date\|$end_date"
+
+echo "=== CHALLENGES ==="
+vesselos limnus recall --tag challenge | grep -A 2 "$start_date\|$end_date"
+
+echo "=== LEARNINGS ==="
+vesselos limnus recall --tag learning | grep -A 2 "$start_date\|$end_date"
+
+# Generate summary
+echo "=== WEEKLY SUMMARY ==="
+# TODO: Use Echo to generate summary
+```
+
+---
+
+## Creative Writing Session
+
+**Goal**: Use persona modes for creative narrative development
+
+### Character Development
+
+```bash
+#!/bin/bash
+# character_dev.sh
+
+echo "✍️ Character Development Session"
+
+read -p "Character name: " character
+
+# Explore character through different personas
+echo "1. PLAYFUL EXPLORATION (Squirrel)"
+vesselos echo mode squirrel
+vesselos echo say "Who is $character when nobody's watching?"
+read -p "Response: " resp1
+vesselos limnus cache "$character: $resp1" --layer L2 --tags character,$character,playful
+
+echo "2. STRATEGIC ANALYSIS (Fox)"
+vesselos echo mode fox
+vesselos echo say "What does $character want most?"
+read -p "Response: " resp2
+vesselos limnus cache "$character: $resp2" --layer L2 --tags character,$character,goals
+
+echo "3. DEEP REFLECTION (Paradox)"
+vesselos echo mode paradox
+vesselos echo say "What contradiction lives in $character's heart?"
+read -p "Response: " resp3
+vesselos limnus cache "$character: $resp3" --layer L3 --tags character,$character,depth
+
+echo "✅ Character exploration complete"
+vesselos limnus recall --tag $character
+```
+
+### Scene Writing
+
+```bash
+#!/bin/bash
+# scene_writer.sh
+
+echo "🎬 Scene Writing"
+
+read -p "Scene setting: " setting
+read -p "Scene goal: " goal
+
+# Open creative scroll
+vesselos garden open --scroll chronicle
+
+# Use balanced mode for scene
+vesselos echo mode balanced
+
+# Interactive writing
+echo "Start writing. Type 'DONE' when finished."
+scene=""
+while true; do
+    read -p "> " line
+    if [ "$line" == "DONE" ]; then
+        break
+    fi
+    scene="$scene\n$line"
+done
+
+# Save scene
+echo -e "$scene" | vesselos limnus cache --layer L3 --tags scene,writing,"$setting"
+
+echo "✅ Scene saved"
+```
+
+---
+
+## Code Documentation
+
+**Goal**: Document code with rich context
+
+### Function Documentation
+
+```bash
+#!/bin/bash
+# document_function.sh
+
+read -p "Function name: " func_name
+read -p "Purpose: " purpose
+
+# Use fox mode for technical documentation
+vesselos echo mode fox
+
+# Cache function metadata
+vesselos limnus cache "Function: $func_name - $purpose" --layer L3 --tags code,function,$func_name
+
+# Generate docstring
+vesselos echo say "Document this function: $func_name which $purpose"
+
+# Save to code scroll
+vesselos garden log "{\"type\": \"function_doc\", \"name\": \"$func_name\", \"purpose\": \"$purpose\"}"
+```
+
+### Project Context
+
+```bash
+#!/bin/bash
+# project_context.sh
+
+echo "📦 Project Context Setup"
+
+read -p "Project name: " project
+read -p "Project goal: " goal
+
+# Cache project metadata
+vesselos limnus cache "Project: $project - Goal: $goal" --layer L3 --tags project,$project,metadata
+
+# Create project ritual
+vesselos garden start
+vesselos garden log "{\"type\": \"project_init\", \"name\": \"$project\", \"goal\": \"$goal\"}"
+
+# Initialize project memory space
+echo "Creating project memory tags..."
+vesselos limnus cache "Project $project initialized" --layer L3 --tags project,$project,init
+
+echo "✅ Project context ready"
+```
+
+---
+
+## Project Planning
+
+**Goal**: Strategic project planning with VesselOS
+
+### Brainstorming Phase
+
+```bash
+#!/bin/bash
+# brainstorm.sh
+
+echo "💡 Brainstorming Session"
+
+read -p "Topic: " topic
+
+# Use squirrel mode for brainstorming
+vesselos echo mode squirrel
+
+# Start scatter stage
+vesselos garden start  # Ensures scatter stage
+
+echo "Generating ideas for: $topic"
+echo "Type ideas (one per line), DONE when finished:"
+
+while true; do
+    read -p "💡 " idea
+    if [ "$idea" == "DONE" ]; then
+        break
+    fi
+    vesselos limnus cache "$idea" --layer L2 --tags brainstorm,$topic,idea
+done
+
+echo "📝 Ideas captured. Reviewing..."
+vesselos limnus recall --tag "brainstorm,$topic"
+```
+
+### Strategy Planning
+
+```bash
+#!/bin/bash
+# strategy.sh
+
+echo "🎯 Strategy Planning"
+
+read -p "Goal: " goal
+
+# Use fox mode for strategy
+vesselos echo mode fox
+
+# Move to plant stage
+vesselos garden next
+vesselos garden next
+
+echo "Breaking down: $goal"
+
+read -p "Key milestone 1: " m1
+vesselos limnus cache "Milestone: $m1" --layer L3 --tags strategy,$goal,milestone
+
+read -p "Key milestone 2: " m2
+vesselos limnus cache "Milestone: $m2" --layer L3 --tags strategy,$goal,milestone
+
+read -p "Key milestone 3: " m3
+vesselos limnus cache "Milestone: $m3" --layer L3 --tags strategy,$goal,milestone
+
+echo "✅ Strategy documented"
+vesselos kira validate
+```
+
+---
+
+## Collaborative Narrative
+
+**Goal**: Multi-person collaborative storytelling
+
+### Session Init
+
+```bash
+#!/bin/bash
+# collab_init.sh
+
+echo "👥 Collaborative Session Init"
+
+read -p "Session name: " session
+read -p "Participants (comma-separated): " participants
+
+# Start collaborative ritual
+vesselos garden start
+vesselos garden log "{\"type\": \"collab_start\", \"session\": \"$session\", \"participants\": \"$participants\"}"
+
+# Initialize shared state
+vesselos limnus cache "Session: $session | Participants: $participants" --layer L3 --tags collab,$session,meta
+
+echo "✅ Session initialized: $session"
+```
+
+### Turn-Based Contribution
+
+```bash
+#!/bin/bash
+# collab_turn.sh
+
+read -p "Your name: " name
+read -p "Session name: " session
+
+# Get current narrative state
+vesselos limnus recall --tag $session --limit 5
+
+# Contribute
+read -p "Your contribution: " contribution
+
+# Cache with attribution
+vesselos limnus cache "[$name]: $contribution" --layer L2 --tags collab,$session,$name
+
+# Advance narrative
+vesselos garden next
+
+echo "✅ Turn complete"
+```
+
+---
+
+## Backup & Recovery
+
+**Goal**: Ensure narrative persistence
+
+### Daily Backup
+
+```bash
+#!/bin/bash
+# daily_backup.sh
+
+BACKUP_DIR="backups/$(date +%Y/%m)"
+mkdir -p "$BACKUP_DIR"
+
+echo "💾 Daily Backup Starting..."
+
+# 1. Encode ledger to image
+vesselos limnus encode-ledger --output "$BACKUP_DIR/ledger_$(date +%Y%m%d).png"
+
+# 2. Copy state files
+cp state/*.json "$BACKUP_DIR/"
+
+# 3. Compress logs
+tar -czf "$BACKUP_DIR/logs_$(date +%Y%m%d).tar.gz" logs/
+
+# 4. Git commit
+vesselos kira publish
+
+echo "✅ Backup complete: $BACKUP_DIR"
+```
+
+### Recovery
+
+```bash
+#!/bin/bash
+# restore.sh
+
+read -p "Backup date (YYYYMMDD): " backup_date
+BACKUP_DIR="backups/$(date -d $backup_date +%Y/%m)"
+
+echo "🔄 Restoring from: $BACKUP_DIR"
+
+# 1. Decode ledger
+vesselos limnus decode-ledger --input "$BACKUP_DIR/ledger_$backup_date.png" --output state/garden_ledger.json
+
+# 2. Restore state files
+cp "$BACKUP_DIR"/*.json state/
+
+# 3. Validate
+vesselos kira validate
+
+if [ $? -eq 0 ]; then
+    echo "✅ Restore successful"
+else
+    echo "❌ Restore failed - validation errors"
+    exit 1
+fi
+```
+
+---
+
+## Publishing Workflow
+
+**Goal**: Prepare and publish narrative
+
+### Pre-Publish Checklist
+
+```bash
+#!/bin/bash
+# pre_publish.sh
+
+echo "📋 Pre-Publish Checklist"
+
+# 1. Validate everything
+echo "1. Validating system..."
+vesselos kira validate --strict
+if [ $? -ne 0 ]; then
+    echo "❌ Validation failed"
+    exit 1
+fi
+
+# 2. Get mentor review
+echo "2. Getting mentor feedback..."
+vesselos kira mentor
+
+# 3. Check memory balance
+echo "3. Checking memory distribution..."
+vesselos limnus stats
+
+# 4. Review ritual completion
+echo "4. Reviewing ritual state..."
+vesselos garden status
+
+echo "✅ Pre-publish checks complete"
+```
+
+### Publish & Release
+
+```bash
+#!/bin/bash
+# publish.sh
+
+read -p "Version (e.g., v1.0.0): " version
+read -p "Release notes: " notes
+
+echo "📦 Publishing version: $version"
+
+# 1. Final validation
+vesselos kira validate --strict
+
+# 2. Seal ritual if complete
+vesselos kira seal
+
+# 3. Commit locally
+vesselos kira publish
+
+# 4. Create GitHub release
+vesselos kira publish --release --version "$version"
+
+# 5. Create backup
+./daily_backup.sh
+
+echo "✅ Published: $version"
+echo "📝 Release notes: $notes"
+```
+
+---
+
+## Advanced Patterns
+
+### Pipeline Processing
+
+```bash
+#!/bin/bash
+# pipeline.sh
+
+# Process multiple inputs through agents
+cat inputs.txt | while read line; do
+    echo "$line" | \
+        vesselos garden log --stdin | \
+        vesselos echo say --stdin | \
+        vesselos limnus cache --stdin --layer L2
+done
+```
+
+### Scheduled Ritual
+
+```bash
+# Add to crontab
+crontab -e
+
+# Morning ritual at 7am
+0 7 * * * /path/to/morning_ritual.sh
+
+# Evening ritual at 9pm
+0 21 * * * /path/to/evening_ritual.sh
+
+# Daily backup at midnight
+0 0 * * * /path/to/daily_backup.sh
+```
+
+### API Integration
+
+```python
+# api_workflow.py
+import requests
+
+API_URL = "http://localhost:8000"
+
+# Start ritual via API
+response = requests.post(f"{API_URL}/garden/start")
+print(response.json())
+
+# Cache memory via API
+response = requests.post(f"{API_URL}/limnus/cache", json={
+    "text": "API-sourced memory",
+    "layer": "L2",
+    "tags": ["api", "automated"]
+})
+print(response.json())
+
+# Validate via API
+response = requests.get(f"{API_URL}/kira/validate")
+print(response.json())
+```
+
+---
+
+## Tips & Best Practices
+
+1. **Always validate before publishing**
+   ```bash
+   vesselos kira validate && vesselos kira publish --release
+   ```
+
+2. **Use appropriate memory layers**
+   - L1: Temporary thoughts (1 hour)
+   - L2: Daily work (24 hours)
+   - L3: Permanent records
+
+3. **Tag consistently**
+   ```bash
+   vesselos limnus cache "text" --tags project,milestone,2025-10
+   ```
+
+4. **Backup regularly**
+   - Daily: Encode ledger to PNG
+   - Weekly: Full state export
+   - Monthly: GitHub release
+
+5. **Follow ritual sequence**
+   - Don't skip stages
+   - Let the spiral guide you
+   - Seal when harvest completes
+
+---
+
+**More workflows coming soon!**
+
+See [CLI Reference](./CLI_REFERENCE.md) for complete command documentation.

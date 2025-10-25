@@ -1,0 +1,36 @@
+{
+  "vesselos.py": "Unified CLI entry (Prime CLI + audit)",
+  "cli": {
+    "prime.py": "CLI groups and subcommands",
+    "commands.py": "Implements Garden/Echo/Limnus/Kira verbs"
+  },
+  "library_core/agents": {
+    "garden_agent.py": "Ritual stages, consent, stage ledger refs",
+    "echo_agent.py": "Styled text, persona, quantum state",
+    "limnus_agent.py": "Memory cache, hash-chained ledger, stats",
+    "kira_agent.py": "Integrity validation, coherence summary"
+  },
+  "pipeline": {
+    "dispatcher_enhanced.py": "EnhancedMRPDispatcher (Garden→Echo→Limnus→Kira)",
+    "intent_parser.py": "Ritual stages, mantras, slash-commands",
+    "middleware": "Logging/Metrics/Validation middleware"
+  },
+  "interface": "Dispatch/logging bridges",
+  "memory": "Vector store backends and utils",
+  "workspaces/<id>": {
+    "state": [
+      "garden_state.json",
+      "echo_state.json",
+      "limnus_memory.json",
+      "ledger.json"
+    ],
+    "logs": [
+      "voice_log.json",
+      "<agent>.jsonl"
+    ]
+  },
+  "frontend/assets": ["ledger.json"],
+  "scripts/integration_complete.py": "Full pipeline integration validator",
+  "tests": "Unit + integration suite",
+  ".github/workflows": "CI (validate, e2e, release)"
+}

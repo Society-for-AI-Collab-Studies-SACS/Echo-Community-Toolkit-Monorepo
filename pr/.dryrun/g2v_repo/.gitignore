@@ -1,0 +1,25 @@
+# PlatformIO / Arduino build output
+.pio/
+.pioenvs/
+.piolibdeps/
+build/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+env/
+
+# Logs and captures
+logs/
+*.csv
+*.json
+!package.json
+!**/package.json
+*.bin
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
