@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install root requirements
+        run: |
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Install g2v toolkit (if present)
+        run: |
+          if [ -f g2v_repo/pyproject.toml ]; then \
+            pip install -r g2v_repo/requirements.txt || true; \
+            pip install -e ./g2v_repo; \
+          fi
+
+      - name: Run tests
+        run: |
+          if [ -d g2v_repo/tests ]; then pytest -q g2v_repo/tests; fi
+          if [ -d tests ]; then pytest -q; fi
+
