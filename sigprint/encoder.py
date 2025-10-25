@@ -244,3 +244,105 @@ def signature_distance(code1: str, code2: str) -> int:
 
 # Threshold for gate detection (number of differing digits)
 GATE_THRESHOLD = 5
+
+
+# ----------------------------- CLI helpers ---------------------------------- #
+def _simulate_epoch(channels: Iterable[str], sr: int, freq: float, noise_amp: float = 0.2) -> Dict[str, np.ndarray]:
+    """Generate a simple synthetic epoch with mild phase/amp differences."""
+    t = np.arange(sr) / float(sr)
+    epoch: Dict[str, np.ndarray] = {}
+    for ch in channels:
+        ch_u = ch.upper()
+        # Basic per-region phase/amp profile (tweak as needed)
+        if ch_u.startswith("F"):
+            phase = np.deg2rad(0.0); amp = 0.7
+        elif ch_u.startswith("O"):
+            phase = np.deg2rad(10.0); amp = 1.0
+        else:
+            phase = np.deg2rad(5.0); amp = 0.8
+        sig = amp * np.sin(2 * np.pi * freq * t + phase)
+        if noise_amp > 0:
+            sig = sig + noise_amp * np.random.randn(sr)
+        epoch[ch] = sig.astype(float)
+    return epoch
+
+
+def _cli_main(argv: list[str] | None = None) -> int:
+    import argparse, json, sys
+    from datetime import datetime, timezone
+
+    ap = argparse.ArgumentParser(prog="python -m sigprint.encoder", description="SIGPRINT encoder CLI")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_demo = sub.add_parser("demo", help="simulate epochs and print signatures")
+    p_demo.add_argument("--channels", default="F3,F4,Pz,Oz")
+    p_demo.add_argument("--sample-rate", type=int, default=250)
+    p_demo.add_argument("--lockin-freq", type=float, default=8.0)
+    p_demo.add_argument("--epochs", type=int, default=5)
+    p_demo.add_argument("--noise", type=float, default=0.2)
+    p_demo.add_argument("--stage", type=int, default=None)
+    p_demo.add_argument("--json", action="store_true", help="emit JSON objects instead of plain codes")
+
+    p_stdin = sub.add_parser("stdin", help="read JSON epochs from stdin, one per line; print codes")
+    p_stdin.add_argument("--channels", required=True, help="Comma-separated channel list to expect")
+    p_stdin.add_argument("--sample-rate", type=int, default=250)
+    p_stdin.add_argument("--lockin-freq", type=float, default=8.0)
+    p_stdin.add_argument("--json", action="store_true", help="emit JSON objects instead of plain codes")
+
+    ns = ap.parse_args(argv)
+
+    if ns.cmd == "demo":
+        chans = [c.strip() for c in ns.channels.split(",") if c.strip()]
+        enc = SigprintEncoder(chans, sample_rate=ns.sample_rate, lockin_freq=ns.lockin_freq)
+        reserved = reserved_from_stylus(ns.stage) if ns.stage is not None else None
+        for _ in range(ns.epochs):
+            epoch = _simulate_epoch(chans, ns.sample_rate, ns.lockin_freq, noise_amp=ns.noise)
+            code = enc.process_epoch(epoch, reserved_digits=reserved)
+            ts = datetime.now(timezone.utc).isoformat()
+            if ns.json:
+                print(json.dumps({"time": ts, "sigprint": code}, ensure_ascii=False))
+            else:
+                print(code)
+        return 0
+
+    if ns.cmd == "stdin":
+        chans = [c.strip() for c in ns.channels.split(",") if c.strip()]
+        enc = SigprintEncoder(chans, sample_rate=ns.sample_rate, lockin_freq=ns.lockin_freq)
+        for line in sys.stdin:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            # Map to expected channels; missing channels get zeros
+            epoch: Dict[str, np.ndarray] = {}
+            N = enc.sample_rate
+            for ch in chans:
+                arr = obj.get(ch)
+                if isinstance(arr, list):
+                    sig = np.asarray(arr, dtype=float)
+                else:
+                    sig = np.zeros(N, dtype=float)
+                if sig.ndim != 1:
+                    sig = sig.ravel()
+                if len(sig) != N:
+                    if len(sig) > N:
+                        sig = sig[:N]
+                    else:
+                        sig = np.pad(sig, (0, N - len(sig)))
+                epoch[ch] = sig
+            code = enc.process_epoch(epoch)
+            if ns.json:
+                print(json.dumps({"sigprint": code}, ensure_ascii=False))
+            else:
+                print(code)
+        return 0
+
+    ap.error("unknown command")
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(_cli_main())

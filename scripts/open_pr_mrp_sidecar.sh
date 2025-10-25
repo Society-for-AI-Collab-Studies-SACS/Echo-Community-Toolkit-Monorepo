@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Open a PR for Phase‑A sidecar changes using gh and Acead_TOKEN
+# Open a PR for Phase‑A sidecar changes using gh and a token from:
+#   1) $ACEDAD_gh, or 2) $Acead_TOKEN, or 3) token file ("Acead gh.txt" / "ACEAD_GH.txt" / "ACEDAD_gh.txt")
 
-if [[ -z "${Acead_TOKEN:-}" ]]; then
-  echo "ERROR: Acead_TOKEN is not set in the environment." >&2
-  echo "Export your GitHub token, then re-run: export Acead_TOKEN=ghp_xxx" >&2
+TOKEN="${ACEDAD_gh:-${Acead_TOKEN:-}}"
+if [[ -z "$TOKEN" ]]; then
+  for f in "Acead gh.txt" "ACEAD_GH.txt" "ACEDAD_gh.txt"; do
+    if [[ -f "$f" ]]; then
+      TOKEN=$(tr -d ' \r\n' < "$f")
+      break
+    fi
+  done
+fi
+if [[ -z "$TOKEN" ]]; then
+  echo "ERROR: Token not found. Set ACEDAD_gh (or Acead_TOKEN), or create 'Acead gh.txt' with your GitHub token." >&2
   exit 1
 fi
 
@@ -15,7 +24,7 @@ if gh auth status >/dev/null 2>&1; then
 else
   : # not authenticated
 fi
-printf "%s" "$Acead_TOKEN" | gh auth login --hostname github.com --with-token >/dev/null
+printf "%s" "$TOKEN" | gh auth login --hostname github.com --with-token >/dev/null
 gh config set git_protocol https -h github.com >/dev/null
 gh auth setup-git >/dev/null
 
@@ -54,4 +63,3 @@ gh pr create \
   --body-file "$body_file"
 
 echo "Done."
-

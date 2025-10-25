@@ -59,9 +59,9 @@ def test_reserved_digits_injection():
     }
     enc = SigprintEncoder(["F3", "F4"], sample_rate=sr, lockin_freq=f)
     code_default = enc.process_epoch(epoch)
-    code_stage5 = enc.process_epoch(epoch, reserved_digits=[0,5])
+    code_stage5 = enc.process_epoch(epoch, reserved_digits=[0, 5])
     assert len(code_default) == 20 and len(code_stage5) == 20
     # Digits 13-14 reside at indices 12 and 13
     assert code_stage5[12:14] != code_default[12:14]
-    # Ensure codes differ by at least one digit (likely many)
-    assert c1 != c2
+    # Ensure codes differ by at least one digit
+    assert code_default != code_stage5
