@@ -1,9 +1,9 @@
 numpy
+opencv-python
+scipy
+scikit-image
+matplotlib
 pillow
 pyserial
 PyYAML
-cryptography
-pyzmq
 aiohttp
-prometheus-client
-requests
