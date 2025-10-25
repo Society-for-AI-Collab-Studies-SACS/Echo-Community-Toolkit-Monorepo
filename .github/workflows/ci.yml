@@ -8,7 +8,7 @@ on:
       auto_push:
         description: Enable auto push + PR after tests
         required: false
-        default: "false"
+        default: "true"
       branch:
         description: Branch name for auto-push
         required: false
