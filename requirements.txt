@@ -7,3 +7,4 @@ pillow
 pyserial
 PyYAML
 aiohttp
+jsonschema
