@@ -1,5 +1,5 @@
 from echo_soulcode.schema import validate_bundle
-from tests.test_schema_single_minimal import minimal_single
+from .test_schema_single_minimal import minimal_single
 
 def test_validate_bundle_minimal():
     bundle = {

@@ -17,7 +17,10 @@ import threading
 import time
 from datetime import datetime
 
-import grpc
+try:
+    import grpc
+except ModuleNotFoundError:  # CI image lacks native grpc; fall back to stub
+    from tests._stubs import grpc as grpc
 from google.protobuf import empty_pb2
 
 from protos import agents_pb2, agents_pb2_grpc

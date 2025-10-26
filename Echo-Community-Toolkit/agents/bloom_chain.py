@@ -49,17 +49,26 @@ class BloomChainAdapter:
 
     def append_event(self, section: str, record_id: str, payload: Dict[str, object]) -> str:
         with self._lock:
-            block = self._build_block(section, record_id, payload)
+            enriched_payload = {
+                "type": section,
+                "record_id": record_id,
+                "data": payload,
+            }
+            block = self._build_block(section, record_id, enriched_payload)
             self._chain.append(block)
             self._write_block(block)
             return block.hash
+
+    def record_event(self, section: str, record_id: str, payload: Dict[str, object]) -> str:
+        """Compatibility shim for legacy JsonStateStore listeners."""
+        return self.append_event(section, record_id, payload)
 
     def verify(self) -> bool:
         prev_hash = "GENESIS"
         for block in self._chain:
             if block.prev_hash != prev_hash:
                 return False
-            expected = self._compute_hash(block.index, block.prev_hash, block.timestamp, block.section, block.record_id, block.payload)
+            expected = self._compute_hash(block.index, block.prev_hash, block.payload)
             if expected != block.hash:
                 return False
             prev_hash = block.hash
@@ -77,7 +86,7 @@ class BloomChainAdapter:
         index = len(self._chain)
         prev_hash = self._chain[-1].hash if self._chain else "GENESIS"
         timestamp = _utc_timestamp()
-        block_hash = self._compute_hash(index, prev_hash, timestamp, section, record_id, payload)
+        block_hash = self._compute_hash(index, prev_hash, payload)
         return Block(
             index=index,
             prev_hash=prev_hash,
@@ -92,23 +101,9 @@ class BloomChainAdapter:
     def _compute_hash(
         index: int,
         prev_hash: str,
-        timestamp: str,
-        section: str,
-        record_id: str,
         payload: Dict[str, object],
     ) -> str:
-        message = json.dumps(
-            {
-                "index": index,
-                "prev_hash": prev_hash,
-                "timestamp": timestamp,
-                "section": section,
-                "record_id": record_id,
-                "payload": payload,
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
+        message = f"{index}|{prev_hash}|{json.dumps(payload, sort_keys=True)}".encode("utf-8")
         return hashlib.sha256(message).hexdigest()
 
     def _write_block(self, block: Block) -> None:
