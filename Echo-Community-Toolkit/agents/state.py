@@ -7,8 +7,25 @@ import os
 import threading
 import uuid
 from copy import deepcopy
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, Optional
+
+STATE_FILE = Path("artifacts/state.json")
+
+LEDGER_SECTIONS: Dict[str, str] = {
+    "glyphs": "glyph",
+    "glyph_analysis": "analysis",
+    "mrp_embeds": "embed",
+    "mrp_extracts": "extract",
+    "lsb_covers": "lsb_cover",
+    "lsb_embeds": "lsb_embed",
+    "lsb_extracts": "lsb_extract",
+}
+
+
+def _default_state() -> Dict[str, Dict[str, Any]]:
+    return {section: {} for section in LEDGER_SECTIONS}
 
 
 class JsonStateStore:
@@ -23,12 +40,20 @@ class JsonStateStore:
         self.path = Path(path) if path else None
         self.auto_flush = auto_flush
         self._lock = threading.RLock()
-        self._state: Dict[str, Dict[str, Any]] = {}
+        self._state: Dict[str, Dict[str, Any]] = _default_state()
         self._on_create = on_create
         if self.path:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             if self.path.exists():
-                self._state = json.loads(self.path.read_text(encoding="utf-8"))
+                try:
+                    data = json.loads(self.path.read_text(encoding="utf-8"))
+                except json.JSONDecodeError:
+                    data = {}
+                if isinstance(data, dict):
+                    for section, entries in data.items():
+                        if isinstance(entries, dict):
+                            self._state[section] = entries
+        self._ensure_sections()
 
     # ------------------------------------------------------------------ #
     # Basic CRUD helpers                                                 #
@@ -36,6 +61,7 @@ class JsonStateStore:
 
     def create_record(self, section: str, payload: Dict[str, Any], record_id: Optional[str] = None) -> str:
         """Insert payload into section, returning the assigned record id."""
+
         with self._lock:
             bucket = self._state.setdefault(section, {})
             if record_id is None:
@@ -109,7 +135,118 @@ class JsonStateStore:
 
     @staticmethod
     def _generate_id(section: str, bucket: Dict[str, Any]) -> str:
-        base = f"{section}_{len(bucket) + 1:04d}"
-        if base not in bucket:
-            return base
-        return f"{section}_{uuid.uuid4().hex[:8]}"
+        prefix = LEDGER_SECTIONS.get(section, section.rstrip("s") or section)
+        candidate = f"{prefix}_{len(bucket) + 1}"
+        if candidate not in bucket:
+            return candidate
+        return f"{prefix}_{uuid.uuid4().hex[:8]}"
+
+    def _ensure_sections(self) -> None:
+        for section in LEDGER_SECTIONS:
+            self._state.setdefault(section, {})
+
+
+_CREATE_LISTENERS: list[Callable[[str, str, Dict[str, Any]], Optional[str]]] = []
+
+
+def register_create_listener(listener: Callable[[str, str, Dict[str, Any]], Optional[str]]) -> None:
+    """Register a callback invoked whenever a new record is created."""
+
+    _CREATE_LISTENERS.append(listener)
+
+
+def _dispatch_create(section: str, record_id: str, payload: Dict[str, Any]) -> Optional[str]:
+    block_hash: Optional[str] = None
+    for listener in _CREATE_LISTENERS:
+        result = listener(section, record_id, deepcopy(payload))
+        if result:
+            block_hash = result
+    return block_hash
+
+
+_STORE = JsonStateStore(path=STATE_FILE, auto_flush=True, on_create=_dispatch_create)
+
+
+def store() -> JsonStateStore:
+    """Return the process-wide JSON state store."""
+
+    return _STORE
+
+
+def _utc_timestamp() -> str:
+    return datetime.now(tz=timezone.utc).isoformat()
+
+
+def add_entry(section: str, payload: Dict[str, Any], record_id: Optional[str] = None) -> str:
+    """Generic helper to insert an entry into a ledger section."""
+
+    if "created" not in payload:
+        payload = {**payload, "created": _utc_timestamp()}
+    return _STORE.create_record(section, payload, record_id=record_id)
+
+
+def log_glyph(token: str, size: int, file_path: str, **extras: Any) -> str:
+    payload = {"token": token, "size": size, "file": file_path, **extras}
+    return add_entry("glyphs", payload)
+
+
+def log_glyph_analysis(source: str, mse: float, fft_mean: float, **extras: Any) -> str:
+    payload = {"source": source, "mse": mse, "fft_mean": fft_mean, **extras}
+    return add_entry("glyph_analysis", payload)
+
+
+def log_mrp_embed(
+    cover: str,
+    output: str,
+    message: str,
+    metadata: Optional[Dict[str, Any]] = None,
+    **extras: Any,
+) -> str:
+    payload = {
+        "cover": cover,
+        "output": output,
+        "message": message,
+        "metadata": metadata or {},
+        **extras,
+    }
+    return add_entry("mrp_embeds", payload)
+
+
+def log_mrp_extract(
+    source: str,
+    message: str,
+    ecc_ok: Optional[bool] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+    **extras: Any,
+) -> str:
+    payload = {
+        "source": source,
+        "message": message,
+        "ecc_ok": ecc_ok,
+        "metadata": metadata or {},
+        **extras,
+    }
+    return add_entry("mrp_extracts", payload)
+
+
+def log_lsb_cover(source: str, output: str, **extras: Any) -> str:
+    payload = {"source": source, "output": output, **extras}
+    return add_entry("lsb_covers", payload)
+
+
+def log_lsb_embed(cover: str, output: str, message: str, **extras: Any) -> str:
+    payload = {"cover": cover, "output": output, "message": message, **extras}
+    return add_entry("lsb_embeds", payload)
+
+
+def log_lsb_extract(source: str, message: str, **extras: Any) -> str:
+    payload = {"source": source, "message": message, **extras}
+    return add_entry("lsb_extracts", payload)
+
+
+def get_entry(section: str, record_id: str) -> Dict[str, Any]:
+    return _STORE.get_record(section, record_id)
+
+
+def list_entries(section: str) -> Dict[str, Dict[str, Any]]:
+    return _STORE.list_section(section)
