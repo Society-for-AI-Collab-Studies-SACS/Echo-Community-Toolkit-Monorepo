@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Any, Tuple, List
-import base64, zlib
+import base64, binascii, zlib
 from PIL import Image
 
 MAGIC = b"LSB1"
@@ -34,6 +34,23 @@ def _find_magic(buf: bytes) -> int | None:
     i = buf.find(MAGIC)
     return None if i < 0 else i
 
+
+def _decode_base64_payload(payload: bytes) -> Tuple[str, str]:
+    """Return (base64_text, decoded_utf8) or raise ValueError."""
+    try:
+        payload_ascii = payload.decode('ascii')
+    except UnicodeDecodeError as exc:
+        raise ValueError('Payload is not ASCII') from exc
+    try:
+        decoded_bytes = base64.b64decode(payload, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError(f'Base64 decode failed: {exc}') from exc
+    try:
+        decoded_text = decoded_bytes.decode('utf-8')
+    except UnicodeDecodeError as exc:
+        raise ValueError(f'UTF-8 decode failed: {exc}') from exc
+    return payload_ascii, decoded_text
+
 class LSBExtractor:
     """Extracts LSB1 payloads from PNG files."""
     def extract_from_image(self, path: Path | str, include_bits: bool = False) -> Dict[str, Any]:
@@ -56,12 +73,12 @@ class LSBExtractor:
                 j += 1
             payload_b64 = data[i:j]
             try:
-                decoded_text = base64.b64decode(payload_b64).decode("utf-8", errors="replace")
+                base64_text, decoded_text = _decode_base64_payload(payload_b64)
             except Exception as e:
                 return {"filename": str(p), "error": f"No header and legacy decode failed: {e}"}
             out = {
                 "filename": str(p),
-                "base64_payload": payload_b64.decode("ascii", errors="ignore"),
+                "base64_payload": base64_text,
                 "decoded_text": decoded_text,
                 "message_length_bytes": len(payload_b64),
                 "magic": None,
@@ -100,10 +117,10 @@ class LSBExtractor:
                 if calc != int(crc_hex, 16):
                     raise ValueError("CRC mismatch")
             # Decode payload as base64 text
-            decoded_text = base64.b64decode(payload).decode("utf-8", errors="replace")
+            base64_text, decoded_text = _decode_base64_payload(payload)
             out = {
                 "filename": str(p),
-                "base64_payload": payload.decode("ascii", errors="ignore"),
+                "base64_payload": base64_text,
                 "decoded_text": decoded_text,
                 "message_length_bytes": len(payload),
                 "magic": magic.decode("ascii", errors="ignore"),

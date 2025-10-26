@@ -31,6 +31,7 @@ REQUIRED_FIELDS: tuple[str, ...] = (
     "crc_g",
     "parity",
     "ecc_scheme",
+    "sha256_msg",
     "sha256_msg_b64",
 )
 
@@ -81,25 +82,14 @@ def generate_sidecar(
     include_schema: bool = False,
     schema: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    """Build a Phase‑A sidecar document from decoded headers.
+    """Build a Phase‑A sidecar document from decoded headers."""
 
-    Args:
-        r: Decoded R-channel header (message payload).
-        g: Decoded G-channel header (metadata payload).
-        b: Optional decoded B-channel header (existing sidecar payload); any
-           additional keys found here are preserved where they do not collide
-           with the canonical fields.
-        include_schema: When true, merge the Phase‑A schema preamble into the
-           generated document.
-        schema: Override schema mapping; defaults to ``PHASE_A_SCHEMA``.
-    """
     schema_doc = schema if schema is not None else PHASE_A_SCHEMA
     document: Dict[str, Any] = {}
 
     if include_schema and schema_doc:
         document.update(schema_doc)
 
-    # Preserve any non-canonical keys from the provided B payload.
     if b is not None:
         b_payload = _try_parse_header_json(b)
         if isinstance(b_payload, dict):
@@ -109,14 +99,16 @@ def generate_sidecar(
                 document.setdefault(key, value)
 
     r_bytes = _decode_payload_bytes(r)
-    sha_hex, _ = _sha256_digest(r_bytes)
+    g_bytes = _decode_payload_bytes(g)
+    sha_hex, sha_b64 = _sha256_digest(r_bytes)
 
-    # Canonical verification fields.
     document["crc_r"] = _normalised_crc(r)
     document["crc_g"] = _normalised_crc(g)
-    document["parity"] = parity_hex((r.payload_b64 + g.payload_b64).encode("utf-8"))
-    document["ecc_scheme"] = "parity"
-    document["sha256_msg_b64"] = sha_hex
+    document["parity"] = parity_hex(r_bytes, g_bytes)
+    document["parity_len"] = max(len(r_bytes), len(g_bytes))
+    document["ecc_scheme"] = "xor"
+    document["sha256_msg"] = sha_hex
+    document["sha256_msg_b64"] = sha_b64
 
     return document
 
@@ -188,20 +180,22 @@ def validate_sidecar(
 
     r_bytes = _decode_payload_bytes(r)
     sha_hex, sha_b64 = _sha256_digest(r_bytes)
-    sha_provided = provided.get("sha256_msg_b64")
-    checks["sha256_match"] = isinstance(sha_provided, str) and (
-        sha_provided.lower() == sha_hex or sha_provided == sha_b64
+    sha_hex_provided = provided.get("sha256_msg")
+    sha_b64_provided = provided.get("sha256_msg_b64")
+    checks["sha256_match"] = (
+        isinstance(sha_hex_provided, str) and sha_hex_provided.lower() == sha_hex
+    ) or (
+        isinstance(sha_b64_provided, str) and sha_b64_provided == sha_b64
     )
     if not checks["sha256_match"]:
-        errors["sha256_match"] = f"expected sha256_msg_b64 {sha_hex}"
+        errors["sha256_match"] = f"expected sha256_msg {sha_hex}"
 
-    # Optional schema checks: only evaluate when present in the provided payload.
     if schema_doc:
         for key, expected_value in schema_doc.items():
             if key not in provided:
                 continue
             checks[f"schema_{key}"] = provided[key] == expected_value
 
-    core_valid = all(checks[name] for name in ("has_required_fields", *core_checks))
+    core_valid = all(checks.get(name, False) for name in ("has_required_fields", *core_checks))
 
     return SidecarValidation(core_valid, checks, errors, expected, provided, schema_doc)

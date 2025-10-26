@@ -1,4 +1,4 @@
 # Core Python dependencies will be added as modules land.
-zeromq
+pyzmq
 requests
 pytest
