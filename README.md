@@ -67,6 +67,29 @@ Unified living workspace for VesselOS, Echo Community Toolkit, narrative engines
 > - [`agents/`](agents) – entrypoints for standalone services.  
 > - [`protos/agents.proto`](protos/agents.proto) – gRPC contract for cross-agent communication.  
 > - [`docs/`](docs) – shared documentation bundle (see module sections for specifics).
+> - [`docs/phase-0-prep.md`](docs/phase-0-prep.md) – current Phase 0 workspace state and daily operations checklist.
+> - [`docs/phase-1-legacy-refresh.md`](docs/phase-1-legacy-refresh.md) – LSB extractor refactor plan and regression requirements.
+> - [`docs/phase-2-frame-infrastructure.md`](docs/phase-2-frame-infrastructure.md) – MRP frame builder, multi-frame layout scope.
+> - [`docs/phase-3-integrity-ecc.md`](docs/phase-3-integrity-ecc.md) – Sidecar integrity metadata and parity-based recovery.
+> - [`docs/phase-4-ritual-ledger.md`](docs/phase-4-ritual-ledger.md) – Ritual gating, consent flow, ledger obligations.
+> - [`docs/phase-5-polish-ux.md`](docs/phase-5-polish-ux.md) – Documentation/CLI polish and ritual visualization.
+> - [`docs/phase-6-guardrails-roadmap.md`](docs/phase-6-guardrails-roadmap.md) – CI guardrails and ECC roadmap guidance.
+
+### Phase Playbook for LLM Assistants
+
+Automation-friendly checkpoints for each phase:
+
+| Phase | Goal | LLM Tasks |
+| --- | --- | --- |
+| 0 – Prep | Establish clean workspace and baseline QA signals | Run remote/venv/bootstrap checks, execute golden sample + mantra parity tests, report validation outcomes, highlight missing consent hooks or failing suites. |
+| 1 – Legacy Refresh | Modularise LSB extractor while keeping legacy decode intact | Refactor `lsb_extractor.py` into header/legacy parsers, add targeted unit tests, verify golden sample & legacy fixtures, ensure error semantics documented. |
+| 2 – Frame Infrastructure | Add `MRPFrame` and multi-frame encode/decode support | Implement frame builder/parser, extend codec strategies, update capacity helpers, exercise single/multi-frame matrices in tests. |
+| 3 – Integrity + ECC | Embed parity/CRC/SHA metadata and self-healing decoder | Augment sidecar JSON, add parity repair logic, create corruption fixtures, surface integrity reports via CLI/SDK, expand parity tests. |
+| 4 – Ritual & Ledger | Enforce consent-driven rituals and persistent ledger logging | Implement `RitualState`, gate encode/decode flows, prompt for mantra lines, append ledger entries, add ritual unit + CLI tests. |
+| 5 – Polish & UX | Ship refined documentation, CLI ergonomics, and ritual visuals | Update diagrams and error tables, add full CLI flag support, build ritual demo scripts, provide API quickstarts and doc-driven tests. |
+| 6 – Guardrails & Roadmap | Harden CI and sketch Phase B/C roadmap | Configure lint/type/corruption matrices, document monitoring metrics, author guardrail playbook, draft advanced ECC & multi-image design notes. |
+
+When a phase is in progress, the assistant should read the corresponding document, list the checklist items it will execute, run/tests as required, and summarise outcomes with links to code changes and follow-up actions.
 
 ## Repository Constellation
 
@@ -80,6 +103,7 @@ Monorepo Root
 ├─ kira-prime/                    Unified CLI, agents, and collab server
 ├─ vessel-narrative-mrp/          Minimal narrative payload generator
 ├─ vesselos-dev-research/         Research-grade VesselOS CLI & docs
+├─ archives/                      Archived toolkit tarballs (compressed, excluded from pytest)
 ├─ agents/                        Standalone gRPC agents (garden, limnus, kira…)
 ├─ docker/                        Dockerfiles and compose stacks
 ├─ protos/                        gRPC/Protobuf interface contracts
@@ -160,7 +184,7 @@ SIGPRINT Streams
   - Listen to free-form input: `python3 vesselos.py listen --text "Always."`  
   - Collab server: `(cd collab-server && npm ci && npm run build && npm start)`  
   - Docker stack: `(cd docker && docker compose up -d)`
-- **Docs:** See `README.md`, `agents/README.md`, and `docs/` for deep dives.
+- **Docs:** See `README.md`, `agents/README.md`, and `docs/` for deep dives. For bilateral narrative cadence guidance, refer to [`docs/kira-prime-integration-protocol.md`](docs/kira-prime-integration-protocol.md) and the companion tension analysis in [`docs/kira-prime-tension-analysis.md`](docs/kira-prime-tension-analysis.md).
 
 ### Vessel Narrative MRP (`vessel-narrative-mrp/`)
 - **Purpose:** Lightweight narrative generator + validator used by other modules.
@@ -225,12 +249,71 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 
 > Tip: all scripts support `--help` or inline usage comments; inspect them before running against production data.
 
+## CI Pipeline Quicklinks
+
+| Module | Actions Dashboard |
+| --- | --- |
+| Echo-Community-Toolkit Monorepo | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions> |
+| Kira Prime CLI | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AKira> |
+| The Living Garden Chronicles | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AGarden> |
+| VesselOS Dev Research | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AResearch> |
+
+Use the filters (pre-applied above) to jump directly to the workflow history for each module. A green pipeline in every module is the minimum bar before coordinating a combined release.
+
+## Configuration Reference
+
+All configuration is injected via environment variables to keep secrets and deploy-specific values out of source control. Populate these variables in your shell, `.env` files, or CI secrets before running agents and scripts.
+
+### Agent Environment Variables
+
+| Agent | Variable | Purpose |
+| --- | --- | --- |
+| Garden (`agents/garden/narrative_agent.py`) | – | No environment overrides required; relies on local state files. |
+| Echo (`agents/echo/echo_agent.py`) | – | No environment overrides required. |
+| Limnus (`agents/limnus/ledger_agent.py`) | `KIRA_VECTOR_BACKEND` | Selects the semantic vector backend (e.g. `faiss`, defaults to in-memory). |
+|  | `KIRA_VECTOR_MODEL` | Overrides the embedding model used for vector storage. |
+|  | `KIRA_SBERT_MODEL` | Legacy alias for the SentenceTransformer model (default `all-MiniLM-L6-v2`). |
+|  | `KIRA_FAISS_INDEX` | Custom path for FAISS index storage when the FAISS backend is enabled. |
+|  | `KIRA_FAISS_META` | Companions the FAISS index with metadata (IDs, dimensions). |
+| Kira (`agents/kira/kira_agent.py`) | `GH_TOKEN` / `GITHUB_TOKEN` | Provides GitHub credentials for release/publish flows executed via `gh`. |
+| Journal (`agents/journal/journal_agent.py`)\* | – | No environment configuration required in the current design. |
+| Sigprint Bridge (`agents/sigprint_bridge/bridge_agent.py`)\* | – | No environment configuration required in the current design. |
+
+\* Planned / auxiliary agents; they currently operate purely on local state or CLI arguments.
+
+All agents expect workspace-local state under `workspaces/<id>/state/`. Introduce new variables using the same `UPPER_SNAKE_CASE` pattern as integrations expand.
+
+### Script & Service Environment Variables
+
+| Script / Service | Variable | Purpose & Default |
+| --- | --- | --- |
+| `scripts/bootstrap.sh` | `PYTHON_VERSION` | Python version used by the bootstrap helper (default `3.10`). |
+|  | `NODE_VERSION` | Node.js version required for toolkit automation (default `20`). |
+| `scripts/deploy_to_production.sh`\* | `ENVIRONMENT` (argument) | Targets a deployment environment such as `production`; defaults to production when omitted. |
+| Collab server (`kira-prime/collab-server/src/server.ts`) | `PORT` | HTTP/WebSocket port (default `8000`). |
+|  | `COLLAB_REDIS_URL` | Redis connection string (default `redis://localhost:6379/0`). |
+|  | `COLLAB_POSTGRES_DSN` | Postgres DSN for collaboration persistence (default `postgresql://vesselos:password@localhost:5432/vesselos_collab`). |
+| CI toggles | `COLLAB_SMOKE_ENABLED` | When `1`, enables Dockerized collab smoke tests in CI. |
+
+\* Part of the Kira Prime deployment toolchain; substitute equivalent flags if using a simplified deploy script.
+
+Secrets (API keys, tokens) should only be supplied via environment variables or your CI secret store—never commit them to the repository.
+
+## Testing Matrix
+
+The CI strategy exercises the stack from unit logic through containerized smoke tests:
+
+- **Unit tests:** Every module contributes unit suites (pytest for Python, Jest/Vite for Node) that execute on each push/PR. Run `python3 -m pytest -q` at the root or the module-specific equivalents listed in the playbook.
+- **Integration validator:** `scripts/integration_complete.py` orchestrates the Garden → Echo → Limnus → Kira pipeline, validating rituals, ledger chains, persona dynamics, and recovery paths. This scenario must pass before any coordinated release.
+- **CLI smoke (Docker):** Containerized jobs build the toolkit, bring up Redis/Postgres via `docker compose`, and run key CLI workflows (`vesselos.py garden start`, `... echo summon`, `... kira validate`). The smoke harness also hits the collab server `/health` endpoint when enabled.
+- **Collab loopback:** With `COLLAB_SMOKE_ENABLED=1`, CI performs a WebSocket round trip against the collaborative server to confirm Redis/Postgres wiring.
+- **Matrix execution:** Workflows fan out across backends (e.g., in-memory vs FAISS for Limnus) and module combinations. Treat a fully green matrix as a release gate across the monorepo.
+
+Reproducing locally: mirror the CI matrix by running module unit tests, invoking `scripts/integration_complete.py`, and (optionally) bringing up the Docker stack to execute smoke tests before pushing changes.
+
 ## README Improvement Backlog
 
 - [ ] Embed rendered architecture diagrams (replace ASCII once stabilized).
-- [ ] Add quicklinks to GitHub Actions dashboards per module.
-- [ ] Document expected environment variables for each agent and script.
-- [ ] Expand testing matrix section with containerized smoke instructions.
 
 ## Appendix: Legacy Monorepo Generator
 

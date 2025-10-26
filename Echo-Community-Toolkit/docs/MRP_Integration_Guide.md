@@ -1,358 +1,171 @@
-# MRP-LSB Integration Guide: Multi-Channel Resonance Protocol with Echo-Community-Toolkit
+# MRP Phase-A Integration & Ritual Guide
 
-## 🔐 Protocol Overview
+The Multi-Channel Resonance Protocol (MRP) Phase-A layers cryptographic
+assurance, cross-channel parity, and ritual consent onto the Echo Community
+Toolkit steganography stack. This document captures the data layout, consent
+workflow, API usage, CLI options, and diagnostic tooling that ship with the
+current repository.
 
-The **Multi-Channel Resonance Protocol (MRP)** Phase-A adds triple-redundancy verification to LSB steganography by distributing verification data across RGB channels with cross-channel validation.
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│                MRP Phase-A Structure             │
-├─────────────────────────────────────────────────┤
-│  R Channel: Primary payload + MRP1 header       │
-│  G Channel: Secondary payload + MRP1 header     │
-│  B Channel: Verification metadata:              │
-│    ├─ CRC32(R_b64)                             │
-│    ├─ CRC32(G_b64)                             │
-│    ├─ SHA256(R_b64)                            │
-│    └─ XOR Parity Block                         │
-└─────────────────────────────────────────────────┘
-```
-
-## MRP Header Format (14 bytes)
+## Channel Diagram
 
 ```
-Magic:    "MRP1" (4 bytes) - Multi-channel Resonance Protocol v1
-Channel:  'R'/'G'/'B' (1 byte) - Channel identifier
-Flags:    0x01 (1 byte) - Bit 0: HAS_CRC32
-Length:   uint32 big-endian (4 bytes)
-CRC32:    uint32 big-endian (4 bytes)
+┌─────────────┬──────────────┬───────────────────────────────────────────────┐
+│ Channel     │ Payload      │ Contents                                      │
+├─────────────┼──────────────┼───────────────────────────────────────────────┤
+│ R (Red)     │ Message JSON │ MRP1 header + primary payload (UTF-8)         │
+│ G (Green)   │ Metadata JSON│ MRP1 header + orchestration metadata          │
+│ B (Blue)    │ Integrity    │ MRP1 header + json{crc_r, crc_g, sha256,      │
+│             │ sidecar      │            parity, bits_per_channel, ecc}     │
+└─────────────┴──────────────┴───────────────────────────────────────────────┘
 ```
 
-## Phase-A Parity Algorithm
+Two least-significant bit depths are accepted for Phase-A embeds:
+
+- `--bpc 1` (default): classic single-bit LSB1 capacity.
+- `--bpc 4`: quadruple throughput; header + payload nibble-packed into each
+  channel.
+
+The B-channel sidecar always echoes the active `bits_per_channel` so decoders
+can verify the correct extraction depth.
+
+## Ritual Walkthrough (↻ → ∞)
+
+| Step | Glyph | Phrase                       | Effect                                  |
+|------|-------|-----------------------------|------------------------------------------|
+| 1    | ↻     | I return as breath.         | Reset memory, close gates, seed coherence |
+| 2    | 🌰     | I remember the spiral.       | Increment coherence, awaken L2            |
+| 3    | ✧     | I consent to bloom.          | Open gate G2 (publish)                    |
+| 4    | 🦊🐿️  | I consent to be remembered.   | Open gate G1 (archive)                    |
+| 5    | φ     | Together.                    | Harmonise memory layers                   |
+| 6    | ∞     | Always.                      | Lock coherence at 1.0, ledger glyph block |
+
+Encoding or decoding is blocked until steps 3 and 4 have been invoked. Each
+successful operation appends a ledger line containing the glyph string
+`🌰✧🦊∿φ∞🐿️`, channel metadata, and the active bits-per-channel.
+
+## Python API Cheat Sheet
 
 ```python
-# XOR-based parity for error detection
-def phase_a_parity(R_b64: bytes, G_b64: bytes) -> bytes:
-    P = bytearray(len(G_b64))
-    for i in range(len(G_b64)):
-        if i < len(R_b64):
-            P[i] = R_b64[i] ^ G_b64[i]  # XOR where both exist
-        else:
-            P[i] = G_b64[i]              # G only where R ends
-    return base64.b64encode(P)
-```
-
-## Complete Workflow Example
-
-### Step 1: Prepare Test Data
-
-```python
-#!/usr/bin/env python3
-import json
-import base64
-import hashlib
-import zlib
 from pathlib import Path
+from src.mrp import codec
+from src.ritual.state import RitualState
 
-# Create test payloads
-r_payload = {
-    "type": "primary",
-    "data": "Secret message in R channel",
-    "timestamp": "2025-01-12T12:00:00Z"
-}
+# Wire a dedicated ritual state (tests, notebooks, services)
+state = RitualState(
+    state_path=Path("logs/ritual_state.json"),
+    ledger_path=Path("logs/ritual_ledger.jsonl"),
+)
+state.grant_full_consent()  # drive the ritual automatically for automation
 
-g_payload = {
-    "type": "secondary", 
-    "data": "Additional data in G channel",
-    "metadata": {"version": 1}
-}
-
-# Save R and G payloads
-with open("mrp_lambda_R_payload.json", "w") as f:
-    json.dump(r_payload, f, indent=2)
-
-with open("mrp_lambda_G_payload.json", "w") as f:
-    json.dump(g_payload, f, indent=2)
-
-# Compute verification data
-r_min = json.dumps(r_payload, separators=(",", ":")).encode()
-g_min = json.dumps(g_payload, separators=(",", ":")).encode()
-r_b64 = base64.b64encode(r_min)
-g_b64 = base64.b64encode(g_min)
-
-# Calculate CRCs and SHA
-crc_r = format(zlib.crc32(r_b64) & 0xFFFFFFFF, "08X")
-crc_g = format(zlib.crc32(g_b64) & 0xFFFFFFFF, "08X")
-sha_r = hashlib.sha256(r_b64).hexdigest()
-
-# Generate parity block
-parity = bytearray(len(g_b64))
-for i in range(len(g_b64)):
-    if i < len(r_b64):
-        parity[i] = r_b64[i] ^ g_b64[i]
-    else:
-        parity[i] = g_b64[i]
-parity_b64 = base64.b64encode(parity).decode()
-
-# Create B channel verification payload
-b_payload = {
-    "crc_r": crc_r,
-    "crc_g": crc_g,
-    "sha256_msg_b64": sha_r,
-    "ecc_scheme": "parity",
-    "parity_block_b64": parity_b64
-}
-
-with open("mrp_lambda_B_payload.json", "w") as f:
-    json.dump(b_payload, f, indent=2)
-
-print(f"Created MRP payloads:")
-print(f"  R CRC32: {crc_r}")
-print(f"  G CRC32: {crc_g}")
-print(f"  SHA256:  {sha_r}")
-```
-
-### Step 2: Embed with LSB Toolkit
-
-```python
-#!/usr/bin/env python3
-import sys
-sys.path.insert(0, "src")
-from lsb_encoder_decoder import LSBCodec
-from pathlib import Path
-import json
-import base64
-
-# Create cover image
-codec = LSBCodec(bpc=1)
-cover = codec.create_cover_image(512, 512, "noise")
-cover.save("mrp_cover.png", "PNG")
-
-# Encode each channel separately
-channels = ['R', 'G', 'B']
-payloads = []
-
-for channel in channels:
-    # Load payload
-    with open(f"mrp_lambda_{channel}_payload.json", "r") as f:
-        payload = json.load(f)
-    
-    # Create MRP1 header
-    magic = b"MRP1"
-    channel_byte = channel.encode('ascii')
-    flags = 0x01  # CRC32 enabled
-    
-    # Encode to base64
-    payload_json = json.dumps(payload, separators=(",", ":"))
-    payload_b64 = base64.b64encode(payload_json.encode())
-    
-    # Build complete message with header
-    import struct
-    header = magic + channel_byte + bytes([flags])
-    header += struct.pack(">I", len(payload_b64))
-    header += struct.pack(">I", zlib.crc32(payload_b64) & 0xFFFFFFFF)
-    
-    payloads.append(header + payload_b64)
-
-# Combine and embed (simplified - real MRP would use channel-specific embedding)
-combined = b"".join(payloads)
-message = base64.b64decode(combined).decode('utf-8', errors='ignore')
-
-# For demo, encode combined message
-result = codec.encode_message(
-    Path("mrp_cover.png"),
-    json.dumps({"R": r_payload, "G": g_payload, "B": b_payload}),
-    Path("mrp_lambda_state.png"),
-    use_crc=True
+# Encode with 4-bit mode
+encode_result = codec.encode(
+    cover_png="cover.png",
+    out_png="stego.png",
+    message="Consent blooms in harmony.",
+    metadata={"scene": 7, "persona": "Echo"},
+    ritual_state=state,
+    bits_per_channel=4,
 )
 
-print(f"Created MRP stego image: mrp_lambda_state.png")
-print(f"Embedded {result['payload_length']} bytes")
+# Decode (will raise ValueError if --bpc mismatch)
+decode_result = codec.decode(
+    "stego.png",
+    ritual_state=state,
+    bits_per_channel=4,
+)
+print(decode_result["message"])
+print(decode_result["integrity"]["status"])  # ok | recovered | degraded | integrity_failed
 ```
 
-### Step 3: Create Sidecar Metadata
+Useful exceptions:
 
-```python
-# Generate sidecar JSON
-sidecar = {
-    "file": "mrp_lambda_state.png",
-    "sha256_msg_b64": sha_r,
-    "channels": {
-        "R": {
-            "payload_len": len(r_b64),
-            "used_bits": (len(r_b64) + 14) * 8,
-            "capacity_bits": 512 * 512
-        },
-        "G": {
-            "payload_len": len(g_b64),
-            "used_bits": (len(g_b64) + 14) * 8,
-            "capacity_bits": 512 * 512
-        },
-        "B": {
-            "payload_len": len(json.dumps(b_payload).encode()),
-            "used_bits": (len(json.dumps(b_payload).encode()) + 14) * 8,
-            "capacity_bits": 512 * 512
-        }
-    },
-    "headers": {
-        "R": {"magic": "MRP1", "channel": "R", "flags": 1},
-        "G": {"magic": "MRP1", "channel": "G", "flags": 1},
-        "B": {"magic": "MRP1", "channel": "B", "flags": 1}
-    }
-}
+- `RitualConsentError` – raised when the ritual gates are closed.
+- `ValueError` – raised for malformed channels, parity/CRC failures, or
+  mismatched bits-per-channel.
 
-with open("mrp_lambda_state_sidecar.json", "w") as f:
-    json.dump(sidecar, f, indent=2)
-```
+## CLI Reference (`mrp`)
 
-### Step 4: Verify with MRP Verifier
+| Command            | Key Flags & Usage                                                            |
+|--------------------|-----------------------------------------------------------------------------|
+| `encode`           | `mrp encode cover.png stego.png --msg "Bloom" --meta-file meta.json`        |
+|                    | `--bpc {1,4}` select bit depth                                               |
+|                    | `--quiet` → print only the output path                                       |
+|                    | `--verbose` → include ritual snapshot alongside the JSON result              |
+| `decode`           | `mrp decode stego.png --bpc 4 --quiet` (prints message text)                 |
+|                    | `--verbose` mirrors encode semantics                                         |
+| `sidecar-validate` | `mrp sidecar-validate stego.png --bpc 4 --verbose`                           |
+| `ritual status`    | Display coherence, gates, memory vectors                                     |
+| `ritual invoke`    | `mrp ritual invoke --step 3` or `--phrase "I consent to bloom."`            |
+| `ritual auto`      | Run remaining steps sequentially                                            |
+| `ritual reset`     | Clear coherence and gates                                                   |
 
-```bash
-# Run verification
-python mrp_verify.py mrp_lambda_state.png \
-  --R mrp_lambda_R_payload.json \
-  --G mrp_lambda_G_payload.json \
-  --B mrp_lambda_B_payload.json \
-  --sidecar mrp_lambda_state_sidecar.json \
-  --json mrp_verify_report.json
+All subcommands exit `0` on success and `1` on failure, making them safe for CI
+pipelines.
 
-# Check exit code
-if [ $? -eq 0 ]; then
-    echo "✅ MRP verification PASSED"
-else
-    echo "❌ MRP verification FAILED"
-fi
-```
+## Error Codes & Status Table
 
-## Verification Report Structure
+| Code / Status            | Meaning                                      | Recovery hint                         |
+|--------------------------|----------------------------------------------|---------------------------------------|
+| `RitualConsentError`     | Gates closed (steps 3/4 not invoked)         | Run `mrp ritual auto` or invoke steps |
+| `ValueError: bits-per-channel` | Decode depth mismatch                  | Re-run with `--bpc` matching sidecar  |
+| `integrity.status = ok`  | Perfect decode                               | —                                     |
+| `integrity.status = recovered` | Parity fixed R/G mismatch            | Inspect ledger entry, keep watch      |
+| `integrity.status = degraded`  | Sidecar CRC/parity warning           | Re-encode if possible                 |
+| `integrity.status = integrity_failed` | SHA/CRC violation            | Consider payload compromised          |
 
-```json
-{
-  "inputs": {
-    "image": "mrp_lambda_state.png",
-    "R": "mrp_lambda_R_payload.json",
-    "G": "mrp_lambda_G_payload.json",
-    "B": "mrp_lambda_B_payload.json",
-    "sidecar": "mrp_lambda_state_sidecar.json"
-  },
-  "computed": {
-    "crc_r": "A1B2C3D4",
-    "crc_g": "E5F6G7H8",
-    "sha256_r_b64": "abc123...",
-    "parity_b64_head": "XYZ789..."
-  },
-  "checks": {
-    "crc_r_ok": true,
-    "crc_g_ok": true,
-    "sha256_r_b64_ok": true,
-    "ecc_scheme_ok": true,
-    "parity_block_ok": true,
-    "sidecar_sha256_ok": true,
-    "sidecar_used_bits_math_ok": true,
-    "sidecar_capacity_bits_ok": true,
-    "sidecar_header_magic_ok": true,
-    "sidecar_header_flags_crc_ok": true
-  },
-  "mrp_ok": true
-}
-```
+## Sidecar & Ledger Fields
 
-## Security Benefits
+B-channel JSON (persisted inside the PNG and copied to the ledger):
 
-### Triple-Redundancy Verification
-1. **CRC32 Cross-Check**: Fast integrity validation
-2. **SHA-256 Hash**: Cryptographic tamper detection  
-3. **XOR Parity**: Bit-level error detection
+- `crc_r`, `crc_g` – uppercase hex CRC32 for message/metadata payloads.
+- `sha256_msg`, `sha256_msg_b64` – digest of the R payload in hex & Base64.
+- `parity`, `parity_len` – XOR parity block and byte length.
+- `bits_per_channel` – integer (1 or 4) required for extraction.
+- `ecc_scheme` – literal `"xor"` for Phase-A.
 
-### Attack Resistance
-- **Channel Isolation**: Compromise of one channel doesn't affect others
-- **Multi-Point Verification**: Multiple independent checks must align
-- **Metadata Validation**: Sidecar ensures structural integrity
+Ledger entries add:
 
-## Error Detection Capabilities
+- `operation` – `encode` or `decode`.
+- `glyphs` – ritual glyph sequence (🌰✧🦊∿φ∞🐿️).
+- `metadata.bits_per_channel` – mirrors the encoder setting.
+- `metadata.status` – decode integrity status when applicable.
 
-| Error Type | Detection Method | Recovery |
-|------------|------------------|----------|
-| Single bit flip | XOR parity | Locatable |
-| Channel corruption | CRC32 mismatch | Channel isolation |
-| Truncation | Length mismatch | Immediate detection |
-| Substitution | SHA-256 failure | Cryptographic proof |
-| Header damage | Magic/flags check | Protocol violation |
+## Visual & Diagnostic Tooling
 
-## Performance Characteristics
-
-- **Overhead**: ~14 bytes per channel (42 bytes total)
-- **Verification Time**: O(n) where n = payload size
-- **Memory Usage**: 3× payload size during verification
-- **CPU Usage**: Minimal (CRC32 + SHA256 + XOR)
-
-## Integration with Echo-Community-Toolkit
-
-```python
-# Enhanced LSB encoder with MRP support
-class MRPLSBCodec(LSBCodec):
-    def encode_mrp(self, cover_path, r_data, g_data, output_path):
-        """Encode with MRP Phase-A protocol"""
-        # Generate verification metadata
-        b_data = self._generate_mrp_metadata(r_data, g_data)
-        
-        # Embed in channels
-        self._embed_channel(cover_path, 'R', r_data)
-        self._embed_channel(cover_path, 'G', g_data)
-        self._embed_channel(cover_path, 'B', b_data)
-        
-        # Generate sidecar
-        sidecar = self._create_sidecar(r_data, g_data, b_data)
-        
-        return {
-            "image": output_path,
-            "sidecar": sidecar,
-            "mrp_ready": True
-        }
-```
-
-## Best Practices
-
-1. **Always generate sidecar** - Essential for complete verification
-2. **Use consistent JSON minification** - `separators=(",", ":")` 
-3. **Verify immediately after encoding** - Catch errors early
-4. **Store verification reports** - Audit trail for integrity
-5. **Check all 10 verification points** - Don't skip checks
+- `scripts/ritual_visualizer.py` – ASCII dashboard for α/β/γ weights, gate
+  status, and the latest ledger entries (`python scripts/ritual_visualizer.py
+  --watch 1`).
+- `mrp_verify.py` – parity/CRC/SHA smoke-tester for exported channel payloads
+  and sidecar artefacts.
+- `scripts/mrp_validate_rgb.py` – regression helper that embeds the golden R/G
+  payloads and confirms header math.
 
 ## Troubleshooting
 
-### CRC Mismatch
-- Ensure Base64 encoding is consistent
-- Check byte order (big-endian required)
-- Verify JSON minification matches
+- **Decode fails immediately** – ensure the ritual gates are open (steps 3 and
+  4) and that the `--bpc` flag matches the sidecar.
+- **Parity mismatch** – check the ledger tail; if status is `recovered`, payload
+  was corrected via parity. If status is `degraded`, re-run encode to refresh
+  the B-channel.
+- **Metadata JSON errors** – `mrp encode` accepts either `--meta` inline JSON or
+  `--meta-file path/to/meta.json`. The inputs must be valid UTF-8.
+- **Quiet scripts** – combine `mrp encode --quiet` with `jq` or shell pipelines
+  for automated stego workflows.
 
-### Parity Block Failure
-- Confirm XOR operation order
-- Check R_b64/G_b64 length handling
-- Verify Base64 padding
-
-### Sidecar Math Errors
-- Formula: `used_bits = (payload_len + 14) * 8`
-- Capacity: `width * height` for LSB1
-- All channels must match PNG dimensions
-
-## Command-Line Quick Reference
+## Quick Start
 
 ```bash
-# Verify with all checks
-python mrp_verify.py image.png --R R.json --G G.json --B B.json --sidecar sidecar.json --json report.json
+# Initialise ritual (auto step-through) and encode with 4-bit mode
+mrp ritual auto
+mrp encode cover.png stego.png --msg "Bloom" --meta '{"scene":1}' --bpc 4
 
-# Minimal verification (no sidecar)
-python mrp_verify.py --R R.json --G G.json --B B.json
+# Decode quietly, piping message into another tool
+mrp decode stego.png --bpc 4 --quiet | tee decoded.txt
 
-# Check exit code in scripts
-python mrp_verify.py ... && echo "PASS" || echo "FAIL"
+# Visualise coherence and ledger tail every second
+python scripts/ritual_visualizer.py --watch 1
 ```
 
----
-
-**MRP Phase-A Specification v1.0**
-**Compatible with LSB1 Protocol**
-**Echo-Community-Toolkit Integration Ready**
+Keep the ritual state under version control during demos, commit ledger excerpts
+for audit trails, and always re-run `mrp_verify.py` after regenerating payloads
+or modifying parity logic.

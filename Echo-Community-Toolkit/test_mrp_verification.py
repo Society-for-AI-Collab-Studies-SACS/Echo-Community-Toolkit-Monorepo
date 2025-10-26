@@ -32,26 +32,35 @@ def create_test_payloads(outdir: Path) -> Dict[str, str]:
         "metadata": {"version": 1, "phase": "A", "resonance_freq": 432},
     }
 
-    r_min = json.dumps(r_payload, separators=(",", ":")).encode("utf-8")
-    g_min = json.dumps(g_payload, separators=(",", ":")).encode("utf-8")
-    r_b64 = base64.b64encode(r_min)
-    g_b64 = base64.b64encode(g_min)
+    r_min = json.dumps(r_payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    g_min = json.dumps(g_payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
-    crc_r = format(zlib.crc32(r_b64) & 0xFFFFFFFF, "08X")
-    crc_g = format(zlib.crc32(g_b64) & 0xFFFFFFFF, "08X")
-    sha_r = hashlib.sha256(r_b64).hexdigest()
+    crc_r = format(zlib.crc32(r_min) & 0xFFFFFFFF, "08X")
+    crc_g = format(zlib.crc32(g_min) & 0xFFFFFFFF, "08X")
 
-    parity = bytearray(len(g_b64))
-    for i in range(len(g_b64)):
-        parity[i] = r_b64[i] ^ g_b64[i] if i < len(r_b64) else g_b64[i]
-    parity_b64 = base64.b64encode(parity).decode("ascii")
+    sha_r_digest = hashlib.sha256(r_min).digest()
+    sha_r_hex = sha_r_digest.hex()
+    sha_r_b64 = base64.b64encode(sha_r_digest).decode("ascii")
+
+    parity_len = max(len(r_min), len(g_min))
+    parity_bytes = bytearray(parity_len)
+    for i in range(parity_len):
+        r_val = r_min[i] if i < len(r_min) else 0
+        g_val = g_min[i] if i < len(g_min) else 0
+        parity_bytes[i] = r_val ^ g_val
+    parity_hex = bytes(parity_bytes).hex().upper()
+
+    bits_per_channel = 1
 
     b_payload = {
         "crc_r": crc_r,
         "crc_g": crc_g,
-        "sha256_msg_b64": sha_r,
-        "ecc_scheme": "parity",
-        "parity_block_b64": parity_b64,
+        "sha256_msg": sha_r_hex,
+        "sha256_msg_b64": sha_r_b64,
+        "ecc_scheme": "xor",
+        "parity": parity_hex,
+        "parity_len": parity_len,
+        "bits_per_channel": bits_per_channel,
     }
 
     payload_paths = {
@@ -67,21 +76,29 @@ def create_test_payloads(outdir: Path) -> Dict[str, str]:
 
     sidecar = {
         "file": "mrp_lambda_state.png",
-        "sha256_msg_b64": sha_r,
+        "sha256_msg": sha_r_hex,
+        "sha256_msg_b64": sha_r_b64,
+        "parity": parity_hex,
+        "parity_len": parity_len,
+        "ecc_scheme": "xor",
+        "bits_per_channel": bits_per_channel,
         "channels": {
             "R": {
-                "payload_len": len(r_b64),
-                "used_bits": (len(r_b64) + 14) * 8,
+                "payload_len": len(r_min),
+                "used_bits": (len(r_min) + 14) * 8,
                 "capacity_bits": 512 * 512,
             },
             "G": {
-                "payload_len": len(g_b64),
-                "used_bits": (len(g_b64) + 14) * 8,
+                "payload_len": len(g_min),
+                "used_bits": (len(g_min) + 14) * 8,
                 "capacity_bits": 512 * 512,
             },
             "B": {
-                "payload_len": len(base64.b64encode(json.dumps(b_payload, separators=(",", ":")).encode())),
-                "used_bits": (len(base64.b64encode(json.dumps(b_payload, separators=(",", ":")).encode())) + 14) * 8,
+                "payload_len": len(json.dumps(b_payload, separators=(",", ":"), sort_keys=True).encode("utf-8")),
+                "used_bits": (
+                    len(json.dumps(b_payload, separators=(",", ":"), sort_keys=True).encode("utf-8")) + 14
+                )
+                * 8,
                 "capacity_bits": 512 * 512,
             },
         },
@@ -96,8 +113,8 @@ def create_test_payloads(outdir: Path) -> Dict[str, str]:
     print("✅ Created MRP test payloads in", outdir)
     print(f"   R CRC32: {crc_r}")
     print(f"   G CRC32: {crc_g}")
-    print(f"   SHA256:  {sha_r[:32]}…")
-    print(f"   Parity:  {parity_b64[:32]}…")
+    print(f"   SHA256:  {sha_r_hex[:32]}…")
+    print(f"   Parity:  {parity_hex[:32]}… (len={parity_len})")
 
     return {k: str(v) for k, v in payload_paths.items()}
 

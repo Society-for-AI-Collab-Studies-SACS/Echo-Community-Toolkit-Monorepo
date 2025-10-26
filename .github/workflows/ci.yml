@@ -2,205 +2,71 @@ name: CI
 
 on:
   push:
+    paths:
+      - 'audio-visual-script-repo/**'
+      - '.github/workflows/ci.yml'
   pull_request:
-  workflow_dispatch:
-    inputs:
-      auto_push:
-        description: Enable auto push + PR after tests
-        required: false
-        default: "true"
-      branch:
-        description: Branch name for auto-push
-        required: false
-        default: "ci/auto-updates"
-      base:
-        description: Base branch for PR
-        required: false
-        default: "main"
-      pr_title:
-        description: PR title
-        required: false
-        default: "ci: automated maintenance updates"
-      push_tags:
-        description: Push tags as well
-        required: false
-        default: "false"
-      nested_push:
-        description: Also push nested monorepo branch
-        required: false
-        default: "false"
-      nested_branch:
-        description: Branch name for nested repo
-        required: false
-        default: "ci/auto-updates"
-      nested_base:
-        description: Base branch for nested PR
-        required: false
-        default: "master"
-  schedule:
-    - cron: '0 6 * * *'
-
-permissions:
-  contents: write
-  pull-requests: write
+    paths:
+      - 'audio-visual-script-repo/**'
+      - '.github/workflows/ci.yml'
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
     steps:
-      - name: Checkout (SSH)
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-          persist-credentials: false
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            audio-visual-script-repo/package-lock.json
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: audio-visual-script-repo/python/requirements.txt
 
-      - name: Install root requirements
-        run: |
-          python -m pip install -U pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install Node dependencies
+        working-directory: audio-visual-script-repo
+        run: npm ci
 
-      - name: Install g2v toolkit (if present)
-        run: |
-          if [ -f g2v_repo/pyproject.toml ]; then \
-            pip install -r g2v_repo/requirements.txt || true; \
-            pip install -e ./g2v_repo; \
-          fi
+      - name: Install Python dependencies
+        working-directory: audio-visual-script-repo
+        run: pip install -r python/requirements.txt
 
-      - name: Run tests
-        run: |
-          if [ -d g2v_repo/tests ]; then pytest -q g2v_repo/tests; fi
-          if [ -d tests ]; then pytest -q; fi
+      - name: Lint backend
+        working-directory: audio-visual-script-repo
+        run: npm run lint --workspace backend
 
-  autopush:
-    name: Auto push + PR (SSH)
-    needs: test
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.auto_push == 'true') || github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout (SSH)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+      - name: Type-check backend
+        working-directory: audio-visual-script-repo
+        run: npm run type-check --workspace backend
 
-      - name: Configure Git author
-        run: |
-          git config user.name "ci-push-bot"
-          git config user.email "ci-push-bot@users.noreply.github.com"
+      - name: Lint frontend
+        working-directory: audio-visual-script-repo
+        run: npm run lint --workspace frontend
 
-      - name: Create/update branch and push
-        env:
-          BRANCH: ${{ inputs.branch || 'ci/auto-updates' }}
-          PUSH_TAGS: ${{ inputs.push_tags || 'false' }}
-        run: |
-          set -e
-          git checkout -B "$BRANCH"
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore: automated updates"
-          fi
-          if [ "$PUSH_TAGS" = "true" ]; then
-            git push -u origin "$BRANCH" --tags
-          else
-            git push -u origin "$BRANCH"
-          fi
+      - name: Type-check frontend
+        working-directory: audio-visual-script-repo
+        run: npm run type-check --workspace frontend
 
-      - name: Open PR (root)
-        uses: actions/github-script@v7
-        env:
-          BRANCH: ${{ inputs.branch || 'ci/auto-updates' }}
-          BASE: ${{ inputs.base || 'main' }}
-          TITLE: ${{ inputs.pr_title || 'ci: automated maintenance updates' }}
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const head = `${owner}:${process.env.BRANCH}`;
-            const base = process.env.BASE;
-            const title = process.env.TITLE || 'Automated updates';
-            const prs = await github.rest.pulls.list({ owner, repo, state: 'open', head });
-            if (prs.data.length > 0) {
-              core.info(`PR already exists: ${prs.data[0].html_url}`);
-            } else {
-              const pr = await github.rest.pulls.create({ owner, repo, head: process.env.BRANCH, base, title, body: 'Automated push using deploy key from CI.' });
-              core.info(`PR created: ${pr.data.html_url}`);
-            }
+      - name: Build backend
+        working-directory: audio-visual-script-repo
+        run: npm run build --workspace backend
 
-  nested:
-    name: Nested repo push + PR (optional)
-    needs: autopush
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.auto_push == 'true' && inputs.nested_push == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout (SSH)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+      - name: Build frontend
+        working-directory: audio-visual-script-repo
+        run: npm run build --workspace frontend
 
-      - name: Configure Git author
-        run: |
-          git config user.name "ci-push-bot"
-          git config user.email "ci-push-bot@users.noreply.github.com"
-
-      - name: Push nested repo branch
-        id: nestedpush
-        env:
-          NESTED_BRANCH: ${{ inputs.nested_branch }}
-          PUSH_TAGS: ${{ inputs.push_tags }}
-        run: |
-          set -e
-          if [ ! -d vesselos_unified_monorepo/vesselos-monorepo/.git ]; then
-            echo "found=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          cd vesselos_unified_monorepo/vesselos-monorepo
-          git config --global --add safe.directory "$(pwd)"
-          git fetch --tags origin || true
-          git checkout -B "$NESTED_BRANCH"
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore: automated updates"
-          fi
-          if [ "$PUSH_TAGS" = "true" ]; then
-            git push -u origin "$NESTED_BRANCH" --tags
-          else
-            git push -u origin "$NESTED_BRANCH"
-          fi
-          url=$(git remote get-url origin)
-          path=${url#*github.com[:/]}
-          path=${path%.git}
-          echo "found=true" >> $GITHUB_OUTPUT
-          echo "repo_path=$path" >> $GITHUB_OUTPUT
-          echo "nested_branch=$NESTED_BRANCH" >> $GITHUB_OUTPUT
-
-      - name: Open PR (nested)
-        if: steps.nestedpush.outputs.found == 'true' && secrets.NESTED_REPO_TOKEN != ''
-        uses: actions/github-script@v7
-        env:
-          REPO_PATH: ${{ steps.nestedpush.outputs.repo_path }}
-          BRANCH: ${{ steps.nestedpush.outputs.nested_branch }}
-          BASE: ${{ inputs.nested_base }}
-          TITLE: ${{ inputs.pr_title }}
-        with:
-          github-token: ${{ secrets.NESTED_REPO_TOKEN }}
-          script: |
-            const [owner, repo] = process.env.REPO_PATH.split('/');
-            const head = `${owner}:${process.env.BRANCH}`;
-            const base = process.env.BASE;
-            const title = process.env.TITLE || 'Automated updates (nested repo)';
-            const prs = await github.rest.pulls.list({ owner, repo, state: 'open', head });
-            if (prs.data.length > 0) {
-              core.info(`Nested PR already exists: ${prs.data[0].html_url}`);
-            } else {
-              const pr = await github.rest.pulls.create({ owner, repo, head: process.env.BRANCH, base, title, body: 'Automated push from CI using deploy key.' });
-              core.info(`Nested PR created: ${pr.data.html_url}`);
-            }
+      - name: Run Python tests
+        working-directory: audio-visual-script-repo
+        run: pytest python

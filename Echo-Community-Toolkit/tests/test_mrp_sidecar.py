@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 
@@ -24,13 +25,19 @@ def _build_headers():
 
 def test_generate_sidecar_produces_expected_fields():
     r_header, g_header, _, sidecar_doc = _build_headers()
-    expected_sha = hashlib.sha256(b"Hello, Garden.").hexdigest()
+    payload_bytes = b"Hello, Garden."
+    expected_sha_hex = hashlib.sha256(payload_bytes).hexdigest()
+    expected_sha_b64 = base64.b64encode(hashlib.sha256(payload_bytes).digest()).decode("ascii")
+    expected_parity_len = max(r_header.length, g_header.length)
 
     assert sidecar_doc["crc_r"] == r_header.crc32
     assert sidecar_doc["crc_g"] == g_header.crc32
-    assert sidecar_doc["ecc_scheme"] == "parity"
-    assert sidecar_doc["sha256_msg_b64"] == expected_sha
-    assert len(sidecar_doc["parity"]) == 2
+    assert sidecar_doc["ecc_scheme"] == "xor"
+    assert sidecar_doc["sha256_msg"] == expected_sha_hex
+    assert sidecar_doc["sha256_msg_b64"] == expected_sha_b64
+    assert len(sidecar_doc["parity"]) == expected_parity_len * 2
+    assert sidecar_doc["parity_len"] == expected_parity_len
+    assert sidecar_doc["bits_per_channel"] == 1
 
 
 def test_validate_sidecar_passes_for_canonical_payload():
@@ -38,7 +45,10 @@ def test_validate_sidecar_passes_for_canonical_payload():
     validation = validate_sidecar(sidecar_doc, r_header, g_header, b_header)
 
     assert validation.valid
-    assert all(validation.checks.get(key, False) for key in ("crc_match", "parity_match", "sha256_match"))
+    assert all(
+        validation.checks.get(key, False)
+        for key in ("crc_match", "parity_match", "sha256_match", "bits_per_channel_match")
+    )
 
 
 def test_validate_sidecar_flags_bad_crc():

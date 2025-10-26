@@ -31,6 +31,7 @@ REQUIRED_FIELDS: tuple[str, ...] = (
     "crc_g",
     "parity",
     "ecc_scheme",
+    "sha256_msg",
     "sha256_msg_b64",
 )
 
@@ -80,6 +81,7 @@ def generate_sidecar(
     *,
     include_schema: bool = False,
     schema: Mapping[str, Any] | None = None,
+    bits_per_channel: int | None = None,
 ) -> Dict[str, Any]:
     """Build a Phase‑A sidecar document from decoded headers.
 
@@ -100,6 +102,7 @@ def generate_sidecar(
         document.update(schema_doc)
 
     # Preserve any non-canonical keys from the provided B payload.
+    preserved_bits_per_channel = bits_per_channel
     if b is not None:
         b_payload = _try_parse_header_json(b)
         if isinstance(b_payload, dict):
@@ -107,16 +110,26 @@ def generate_sidecar(
                 if key in REQUIRED_FIELDS:
                     continue
                 document.setdefault(key, value)
+            preserved_bits_per_channel = preserved_bits_per_channel or b_payload.get("bits_per_channel")
+    if isinstance(preserved_bits_per_channel, str):
+        try:
+            preserved_bits_per_channel = int(preserved_bits_per_channel)
+        except ValueError:
+            preserved_bits_per_channel = None
 
     r_bytes = _decode_payload_bytes(r)
-    sha_hex, _ = _sha256_digest(r_bytes)
+    g_bytes = _decode_payload_bytes(g)
+    sha_hex, sha_b64 = _sha256_digest(r_bytes)
 
     # Canonical verification fields.
     document["crc_r"] = _normalised_crc(r)
     document["crc_g"] = _normalised_crc(g)
-    document["parity"] = parity_hex((r.payload_b64 + g.payload_b64).encode("utf-8"))
-    document["ecc_scheme"] = "parity"
-    document["sha256_msg_b64"] = sha_hex
+    document["parity"] = parity_hex(r_bytes, g_bytes)
+    document["parity_len"] = max(len(r_bytes), len(g_bytes))
+    document["ecc_scheme"] = "xor"
+    document["sha256_msg"] = sha_hex
+    document["sha256_msg_b64"] = sha_b64
+    document["bits_per_channel"] = preserved_bits_per_channel or 1
 
     return document
 
@@ -132,12 +145,20 @@ def validate_sidecar(
     b: Optional[MRPHeader] = None,
     *,
     schema: Mapping[str, Any] | None = None,
+    bits_per_channel: int | None = None,
 ) -> SidecarValidation:
     """Validate a Phase‑A sidecar payload against decoded channel headers."""
 
     provided = dict(sidecar or {})
     schema_doc = schema if schema is not None else PHASE_A_SCHEMA
-    expected = generate_sidecar(r, g, b, include_schema=False, schema=schema_doc)
+    expected = generate_sidecar(
+        r,
+        g,
+        b,
+        include_schema=False,
+        schema=schema_doc,
+        bits_per_channel=bits_per_channel,
+    )
 
     checks: Dict[str, bool] = {}
     errors: Dict[str, str] = {}
@@ -152,7 +173,14 @@ def validate_sidecar(
     if missing:
         errors["has_required_fields"] = f"missing keys: {', '.join(missing)}"
 
-    core_checks = ("crc_format", "crc_match", "parity_match", "ecc_scheme_ok", "sha256_match")
+    core_checks = (
+        "crc_format",
+        "crc_match",
+        "parity_match",
+        "ecc_scheme_ok",
+        "sha256_match",
+        "bits_per_channel_match",
+    )
 
     if not checks["has_required_fields"]:
         for name in core_checks:
@@ -188,12 +216,30 @@ def validate_sidecar(
 
     r_bytes = _decode_payload_bytes(r)
     sha_hex, sha_b64 = _sha256_digest(r_bytes)
-    sha_provided = provided.get("sha256_msg_b64")
-    checks["sha256_match"] = isinstance(sha_provided, str) and (
-        sha_provided.lower() == sha_hex or sha_provided == sha_b64
+    sha_hex_provided = provided.get("sha256_msg")
+    sha_b64_provided = provided.get("sha256_msg_b64")
+    checks["sha256_match"] = (
+        isinstance(sha_hex_provided, str) and sha_hex_provided.lower() == sha_hex
+    ) or (
+        isinstance(sha_b64_provided, str) and sha_b64_provided == sha_b64
     )
     if not checks["sha256_match"]:
-        errors["sha256_match"] = f"expected sha256_msg_b64 {sha_hex}"
+        errors["sha256_match"] = f"expected sha256_msg {sha_hex}"
+
+    expected_bpc = expected.get("bits_per_channel")
+    provided_bpc = provided.get("bits_per_channel")
+    if isinstance(provided_bpc, str):
+        try:
+            provided_bpc = int(provided_bpc)
+        except ValueError:
+            provided_bpc = None
+    checks["bits_per_channel_match"] = (
+        provided_bpc is None
+        or expected_bpc is None
+        or provided_bpc == expected_bpc
+    )
+    if not checks["bits_per_channel_match"]:
+        errors["bits_per_channel_match"] = f"expected bits_per_channel {expected_bpc}"
 
     # Optional schema checks: only evaluate when present in the provided payload.
     if schema_doc:

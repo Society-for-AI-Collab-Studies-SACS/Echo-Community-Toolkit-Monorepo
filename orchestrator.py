@@ -138,7 +138,7 @@ class AgentProcess:
     async def _connect(self) -> bool:
         try:
             self.channel = grpc.aio.insecure_channel(f"{self.config.host}:{self.config.grpc_port}")
-            await asyncio.wait_for(self.channel.channel_ready_future(), timeout=10.0)
+            await asyncio.wait_for(self.channel.channel_ready(), timeout=10.0)
         except (asyncio.TimeoutError, grpc.FutureTimeoutError):
             logging.error("Timed out connecting to %s agent on port %s", self.agent_type, self.config.grpc_port)
             self.status = "UNAVAILABLE"

@@ -1,61 +1,333 @@
 from __future__ import annotations
-import json, base64
-from typing import Dict, Any, Tuple, Callable
-from .headers import make_frame, parse_frame, MRPHeader
-from .meta import sidecar_from_headers
+
+import base64
+import json
+from hashlib import sha256
+from typing import Any, Callable, Dict, Optional
+
 from .adapters import png_lsb
+from .ecc import xor_parity_bytes
+from .headers import MRPHeader, crc32_hex, make_frame
+from .meta import sidecar_from_headers
+from ..ritual.state import (
+    RitualConsentError,
+    RitualState,
+    default_ritual_state,
+)
 
-def encode(cover_png: str, out_png: str, message: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
-    r = make_frame("R", message.encode(), True)
-    g = make_frame("G", json.dumps(metadata, separators=(",", ":"), sort_keys=True).encode(), True)
-    b = make_frame("B", json.dumps(sidecar_from_headers(parse_frame(r), parse_frame(g))).encode(), True)
-    png_lsb.embed_frames(cover_png, out_png, {"R": r, "G": g, "B": b})
-    return {"out": out_png}
 
-def decode(stego_png: str) -> Tuple[str, Dict[str, Any], Dict[str, Any]]:
-    f = png_lsb.extract_frames(stego_png)
-    r, g, b = parse_frame(f["R"]), parse_frame(f["G"]), parse_frame(f["B"])
-    msg = base64.b64decode(r.payload_b64).decode()
-    meta = json.loads(base64.b64decode(g.payload_b64).decode())
-    b_json = json.loads(base64.b64decode(b.payload_b64).decode())
-    ecc = {
-        "crc_match": (b_json.get("crc_r") == r.crc32 and b_json.get("crc_g") == g.crc32),
-        "parity_match": bool(b_json.get("parity")),
-        "ecc_scheme": b_json.get("ecc_scheme", "none")
+def _load_channel(frame_bytes: bytes) -> Dict[str, Any]:
+    header = MRPHeader.from_json_bytes(frame_bytes)
+    payload = base64.b64decode(header.payload_b64.encode("utf-8"))
+    calc_crc = crc32_hex(payload)
+    expected = (header.crc32 or calc_crc).upper()
+    return {
+        "header": header,
+        "payload": payload,
+        "crc_expected": expected,
+        "crc_actual": calc_crc,
+        "crc_ok": expected == calc_crc,
+        "recovered": False,
     }
-    return msg, meta, ecc
+
+
+def _parity_bytes(hex_value: str) -> bytes:
+    if not hex_value:
+        return b""
+    try:
+        return bytes.fromhex(hex_value)
+    except ValueError:
+        return b""
+
+
+def _xor_recover(parity: bytes, other_payload: bytes, length: int) -> bytes:
+    if not parity:
+        return b""
+    if len(other_payload) < len(parity):
+        other_payload = other_payload + b"\x00" * (len(parity) - len(other_payload))
+    recovered = bytes(p ^ o for p, o in zip(parity, other_payload))
+    return recovered[:length]
+
+
+def _recover_channel(target: Dict[str, Any], other: Dict[str, Any], parity: bytes) -> bool:
+    recovered = _xor_recover(parity, other["payload"], target["header"].length)
+    if not recovered:
+        return False
+    calc_crc = crc32_hex(recovered)
+    if calc_crc != target["crc_expected"]:
+        return False
+    target["payload"] = recovered
+    target["crc_actual"] = calc_crc
+    target["crc_ok"] = True
+    target["recovered"] = True
+    return True
+
+
+def _resolve_state(state: Optional[RitualState]) -> RitualState:
+    return state or default_ritual_state
+
+
+def encode(
+    cover_png: str,
+    out_png: str,
+    message: str,
+    metadata: Dict[str, Any],
+    *,
+    ritual_state: Optional[RitualState] = None,
+    bits_per_channel: int = 1,
+) -> Dict[str, Any]:
+    state = _resolve_state(ritual_state)
+    state.require_publish_ready()
+
+    if bits_per_channel not in png_lsb.SUPPORTED_BPC:
+        raise ValueError(f"Unsupported bits_per_channel: {bits_per_channel}")
+
+    message_bytes = message.encode("utf-8")
+    metadata_bytes = json.dumps(metadata, separators=(",", ":"), sort_keys=True).encode("utf-8")
+
+    r_frame = make_frame("R", message_bytes, True)
+    g_frame = make_frame("G", metadata_bytes, True)
+
+    r_header = MRPHeader.from_json_bytes(r_frame)
+    g_header = MRPHeader.from_json_bytes(g_frame)
+    sidecar = sidecar_from_headers(r_header, g_header, bits_per_channel=bits_per_channel)
+
+    b_frame = make_frame(
+        "B",
+        json.dumps(sidecar, separators=(",", ":"), sort_keys=True).encode("utf-8"),
+        True,
+    )
+
+    png_lsb.embed_frames(
+        cover_png,
+        out_png,
+        {"R": r_frame, "G": g_frame, "B": b_frame},
+        bits_per_channel=bits_per_channel,
+    )
+    state.record_operation(
+        "encode",
+        {
+            "cover": cover_png,
+            "out": out_png,
+            "message_length": len(message_bytes),
+            "metadata_keys": sorted(metadata.keys()),
+            "bits_per_channel": bits_per_channel,
+        },
+    )
+    return {
+        "out": out_png,
+        "integrity": sidecar,
+    }
+
+
+def decode(
+    stego_png: str,
+    *,
+    ritual_state: Optional[RitualState] = None,
+    bits_per_channel: int = 1,
+) -> Dict[str, Any]:
+    state = _resolve_state(ritual_state)
+    state.require_publish_ready()
+
+    if bits_per_channel not in png_lsb.SUPPORTED_BPC:
+        raise ValueError(f"Unsupported bits_per_channel: {bits_per_channel}")
+
+    try:
+        frames = png_lsb.extract_frames(stego_png, bits_per_channel=bits_per_channel)
+    except (ValueError, IndexError) as exc:
+        raise ValueError(
+            f"Unable to extract frames with bits_per_channel={bits_per_channel}. "
+            "If this is a Phase-A image encoded with a different depth, rerun with the matching --bpc value."
+        ) from exc
+    channels = {ch: _load_channel(frames[ch]) for ch in ("R", "G", "B")}
+
+    try:
+        sidecar = json.loads(channels["B"]["payload"].decode("utf-8"))
+    except Exception as exc:
+        raise ValueError(f"Invalid B-channel payload: {exc}") from exc
+
+    sidecar_bpc = sidecar.get("bits_per_channel")
+    if isinstance(sidecar_bpc, str):
+        try:
+            sidecar_bpc = int(sidecar_bpc)
+        except ValueError:
+            sidecar_bpc = None
+    if sidecar_bpc not in (None, bits_per_channel):
+        raise ValueError(
+            f"Bits-per-channel mismatch (sidecar={sidecar_bpc}, requested={bits_per_channel}). "
+            "Re-run decode with the correct --bpc flag."
+        )
+
+    expected_crc_r = (sidecar.get("crc_r") or channels["R"]["crc_expected"]).upper()
+    expected_crc_g = (sidecar.get("crc_g") or channels["G"]["crc_expected"]).upper()
+    parity_hex_value = (sidecar.get("parity") or "").upper()
+    parity_bytes = _parity_bytes(parity_hex_value)
+
+    channels["R"]["crc_expected"] = expected_crc_r
+    channels["G"]["crc_expected"] = expected_crc_g
+
+    recovery_performed = False
+    if not channels["R"]["crc_ok"] and channels["G"]["crc_ok"]:
+        recovery_performed |= _recover_channel(channels["R"], channels["G"], parity_bytes)
+    if not channels["G"]["crc_ok"] and channels["R"]["crc_ok"]:
+        recovery_performed |= _recover_channel(channels["G"], channels["R"], parity_bytes)
+
+    if not channels["R"]["crc_ok"] or not channels["G"]["crc_ok"]:
+        raise ValueError("Unrecoverable channel corruption detected")
+
+    try:
+        message_text = channels["R"]["payload"].decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError("Message payload is not valid UTF-8") from exc
+
+    try:
+        metadata = json.loads(channels["G"]["payload"].decode("utf-8"))
+    except Exception as exc:
+        raise ValueError("Metadata payload is not valid JSON") from exc
+
+    digest = sha256(channels["R"]["payload"]).digest()
+    sha_actual_hex = digest.hex()
+    sha_actual_b64 = base64.b64encode(digest).decode("ascii")
+    sha_expected_hex = (sidecar.get("sha256_msg") or "").lower()
+    sha_expected_b64 = sidecar.get("sha256_msg_b64") or ""
+    sha_ok = (
+        (sha_expected_hex and sha_actual_hex == sha_expected_hex)
+        or (sha_expected_b64 and sha_actual_b64 == sha_expected_b64)
+        or (not sha_expected_hex and not sha_expected_b64)
+    )
+
+    parity_ok = True
+    parity_actual = b""
+    if parity_hex_value:
+        parity_actual = xor_parity_bytes(channels["R"]["payload"], channels["G"]["payload"])
+        parity_ok = parity_bytes == parity_actual
+
+    b_crc_ok = channels["B"]["crc_ok"]
+
+    if not sha_ok:
+        status = "integrity_failed"
+    elif recovery_performed:
+        status = "recovered"
+    elif not b_crc_ok or not parity_ok:
+        status = "degraded"
+    else:
+        status = "ok"
+
+    integrity = {
+        "status": status,
+        "sha256": {
+            "expected": sha_expected_hex or sha_expected_b64 or sha_actual_hex,
+            "actual": sha_actual_hex,
+            "ok": sha_ok,
+        },
+        "parity": {
+            "expected": parity_hex_value,
+            "actual": parity_actual.hex().upper() if parity_actual else "",
+            "ok": parity_ok,
+        },
+        "channels": {
+            ch: {
+                "crc_expected": info["crc_expected"],
+                "crc_actual": info["crc_actual"],
+                "crc_ok": info["crc_ok"],
+                "recovered": info["recovered"],
+            }
+            for ch, info in channels.items()
+        },
+        "sidecar": sidecar,
+    }
+
+    state.record_operation(
+        "decode",
+        {
+            "stego": stego_png,
+            "status": integrity["status"],
+            "message_length": len(channels["R"]["payload"]),
+            "bits_per_channel": bits_per_channel,
+        },
+    )
+    return {
+        "message": message_text,
+        "metadata": metadata,
+        "integrity": integrity,
+    }
 
 
 # --- Experimental Expansion Entry Point -------------------------------------
 
-def _encode_phase_a(cover_png: str, out_png: str, message: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
-    return encode(cover_png, out_png, message, metadata)
+def _encode_phase_a(
+    cover_png: str,
+    out_png: str,
+    message: str,
+    metadata: Dict[str, Any],
+    *,
+    ritual_state: Optional[RitualState] = None,
+    bits_per_channel: int = 1,
+) -> Dict[str, Any]:
+    return encode(
+        cover_png,
+        out_png,
+        message,
+        metadata,
+        ritual_state=ritual_state,
+        bits_per_channel=bits_per_channel,
+    )
 
 
-def _encode_sigprint(cover_png: str, out_png: str, message: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+def _encode_sigprint(
+    cover_png: str,
+    out_png: str,
+    message: str,
+    metadata: Dict[str, Any],
+    *,
+    ritual_state: Optional[RitualState] = None,
+    bits_per_channel: int = 1,
+) -> Dict[str, Any]:
     enriched_meta = {
         **metadata,
         "sigprint_id": metadata.get("sigprint_id", "SIG001"),
         "pen_pressure": metadata.get("pen_pressure", "medium"),
         "intent": metadata.get("intent", "symbolic_transfer"),
     }
-    return encode(cover_png, out_png, message.upper(), enriched_meta)
+    return encode(
+        cover_png,
+        out_png,
+        message.upper(),
+        enriched_meta,
+        ritual_state=ritual_state,
+        bits_per_channel=bits_per_channel,
+    )
 
 
 def _encode_entropic(*_args, **_kwargs):
     raise NotImplementedError("Entropic mode not yet implemented")
 
 
-def _encode_bloom(cover_png: str, out_png: str, message: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+def _encode_bloom(
+    cover_png: str,
+    out_png: str,
+    message: str,
+    metadata: Dict[str, Any],
+    *,
+    ritual_state: Optional[RitualState] = None,
+    bits_per_channel: int = 1,
+) -> Dict[str, Any]:
     bloom_meta = {
         **metadata,
         "quantum_signature": metadata.get("quantum_signature", "bloom-a"),
         "resonance_phase": metadata.get("resonance_phase", "alpha"),
     }
-    return encode(cover_png, out_png, message, bloom_meta)
+    return encode(
+        cover_png,
+        out_png,
+        message,
+        bloom_meta,
+        ritual_state=ritual_state,
+        bits_per_channel=bits_per_channel,
+    )
 
 
-_MODE_HANDLERS: Dict[str, Callable[[str, str, str, Dict[str, Any]], Dict[str, Any]]] = {
+_MODE_HANDLERS: Dict[str, Callable[..., Dict[str, Any]]] = {
     "phaseA": _encode_phase_a,
     "sigprint": _encode_sigprint,
     "entropic": _encode_entropic,
@@ -69,6 +341,9 @@ def encode_with_mode(
     message: str,
     metadata: Dict[str, Any],
     mode: str = "phaseA",
+    *,
+    ritual_state: Optional[RitualState] = None,
+    bits_per_channel: int = 1,
 ) -> Dict[str, Any]:
     """
     Encode with an optional alternate mode (default: 'phaseA').
@@ -81,4 +356,19 @@ def encode_with_mode(
         handler = _MODE_HANDLERS[mode]
     except KeyError as exc:
         raise ValueError(f"Unknown mode: {mode}") from exc
-    return handler(cover_png, out_png, message, metadata)
+    return handler(
+        cover_png,
+        out_png,
+        message,
+        metadata,
+        ritual_state=ritual_state,
+        bits_per_channel=bits_per_channel,
+    )
+
+
+__all__ = [
+    "RitualConsentError",
+    "encode",
+    "encode_with_mode",
+    "decode",
+]
