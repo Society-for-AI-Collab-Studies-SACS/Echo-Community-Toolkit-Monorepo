@@ -31,7 +31,7 @@ This guide captures the baseline state of the living workspace and the routines 
 - Running `venv/bin/python -m pytest -q` currently yields **45 collection errors**. Primary causes:
   - **Resolved:** toolkit archives have been compressed into tarballs under `archives/` (excluded via `pytest.ini`), eliminating the import mismatch spam and keeping the workspace light.
   - **Resolved:** vendored `echo_soulcode/` into the repo (root package + docs) and added `jsonschema` to the shared requirements; architecture suites now import successfully.
-  - **Resolved:** renamed module-specific collab smoke tests (`test_collab_workspace.py`, `test_collab_health_kira.py`, `test_collab_health_research.py`) so Pytest no longer hits duplicate-module import errors. They still require their runtime stacks (e.g., `library_core`, live HTTP endpoint) to pass. The MRP codec tests also report a missing `xor_parity_bytes` helper (investigate Phase 1).
+  - **Resolved:** renamed module-specific collab smoke tests (`test_collab_workspace.py`, `test_collab_health_kira.py`, `test_collab_health_research.py`) so Pytest no longer hits duplicate-module import errors. They still require their runtime stacks (e.g., `library_core`, live HTTP endpoint) to pass. The restored `xor_parity_bytes` helper now unblocks the MRP codec path; deeper validation shifts to Phase 1.
 - **Action queue for future phases:**
   1. Provide dependency stubs or toggleable skips for the collab smoke tests so they run without the full stack (`library_core`, external services).
   2. Create a lean smoke-selection that Phase 0 can run without pulling historical artifacts.

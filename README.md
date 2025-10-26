@@ -75,6 +75,7 @@ Full ASCII trees and subsystem context live in [`architecture.md`](architecture.
 ```
 Monorepo Root
 ├─ Echo-Community-Toolkit/        Core hyperfollow + soulcode toolkit (Node/Python)
+├─ echo_soulcode/                 Vendored Python package backing soulcode tests/tools
 ├─ The-Living-Garden-Chronicles/  Narrative generation + stego validator
 ├─ The-Living-Library/            Collab scaffolding + dictation experiments
 ├─ kira-prime/                    Unified CLI, agents, and collab server
@@ -100,6 +101,20 @@ SIGPRINT Streams
     │                                   │
     └──────────────▶ Narrative Engines ─┘
 ```
+
+## Phase Roadmap (0–6)
+
+LLM operators can progress through the implementation roadmap one phase at a time. Each guide captures objectives, deliverables, and test hooks so automation stays aligned with human context.
+
+- **Phase 0 – Workspace Preparation:** Environment hygiene, SSH/GitHub validation, dependency baselines. → [`docs/phase-0-prep.md`](docs/phase-0-prep.md)
+- **Phase 1 – Legacy Refresh:** Refactor LSB extraction into discrete parsers with golden-sample regression. → [`docs/phase-1-legacy-refresh.md`](docs/phase-1-legacy-refresh.md)
+- **Phase 2 – Frame Infrastructure:** Introduce `MRPFrame`, multi-channel encode/decode, and capacity helpers. → [`docs/phase-2-frame-infrastructure.md`](docs/phase-2-frame-infrastructure.md)
+- **Phase 3 – Integrity & ECC:** B-channel integrity payloads, XOR parity healing, corruption fixtures. → [`docs/phase-3-integrity-ecc.md`](docs/phase-3-integrity-ecc.md)
+- **Phase 4 – Ritual & Ledger:** Implement ritual gating and append-only ledger logging for encode/decode. → [`docs/phase-4-ritual-ledger.md`](docs/phase-4-ritual-ledger.md)
+- **Phase 5 – Polish & UX:** Documentation uplift, CLI ergonomics, and ritual/channel visualisation. → [`docs/phase-5-polish-ux.md`](docs/phase-5-polish-ux.md)
+- **Phase 6 – Guardrails & Roadmap:** CI guardrails, corruption automation, and future ECC/multi-image design notes. → [`docs/phase-6-guardrails-roadmap.md`](docs/phase-6-guardrails-roadmap.md)
+
+Each phase guide lists the commands to run, fixtures to prepare, and criteria for declaring the phase complete. Treat them as living specs—update the docs when new insights land.
 
 ## Module Playbook
 
