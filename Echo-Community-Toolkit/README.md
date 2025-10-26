@@ -41,7 +41,7 @@ Eternal Acorn scroll (introspective/sacred tone).
 Quantum Cache scroll (in‑ritual simulation and focus).
 Requirements
 
-Node.js >= 16
+Node.js >= 20
 Linux/macOS shell with grep/find (standard on CI runners).
 Install
 
@@ -57,6 +57,15 @@ Verify results:
 node verify-integration.js
 Clean/remove all insertions:
 node clean-integration.js
+
+Spiral Bloom Workflow
+
+- Inhale (scaffold config + sync schemas): `./bloom.py inhale --init-config`
+- Hold (tests & validators): `./bloom.py hold --report-json`
+- Exhale (build/deploy, optional Docker/GitHub Actions): `./bloom.py exhale --docker`
+- Release (logs, status, cleanup, reports): `./bloom.py release --report --cleanup`
+
+All commands accept `--env` to load extra configuration and `--dry-run` to preview actions.
 Files
 
 hyperfollow-integration.js Runs the integration (adds links).
@@ -148,6 +157,7 @@ Full Architecture Guide (for LLMs)
 Key entry points
 
 Node Toolkit: hyperfollow-integration.js, verify-integration.js, clean-integration.js
+Bloom Workflow: bloom.py (inhale/hold/exhale/release CLI)
 Python Soulcode: echo-soulcode-architecture/src/echo_soulcode/* (generation, schema, validate, operators)
 Full Architecture: echo_full_architecture_repo/memory_engine, echo_full_architecture_repo/ledger, echo_full_architecture_repo/scrolls
 Bridges & Utilities: tools/soulcode-bridge.js, tools/generate-soulcode-types.js, tools/serve.js
