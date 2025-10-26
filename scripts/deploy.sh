@@ -109,6 +109,13 @@ setup_python_environment() {
     echo
 }
 
+link_monorepo_packages() {
+    # Ensure local module imports (library_core from vesselos-dev-research, agents from kira-prime)
+    if [ -x "$PROJECT_ROOT/scripts/link_dev_packages.sh" ]; then
+        bash "$PROJECT_ROOT/scripts/link_dev_packages.sh" --venv "$VENV_PATH" || true
+    fi
+}
+
 generate_protobuf() {
     status_line "${COLOR_YELLOW}" "Generating protobuf stubs..."
     activate_venv
@@ -268,11 +275,19 @@ full_deployment() {
     check_prerequisites
     create_directories
     setup_python_environment
+    link_monorepo_packages
     generate_protobuf
     build_firmware
     run_tests
     upload_firmware
     start_orchestrator
+}
+
+bootstrap_only() {
+    print_header
+    check_prerequisites
+    create_directories
+    setup_python_environment
 }
 
 ###############################################################################
@@ -281,6 +296,10 @@ full_deployment() {
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --bootstrap-only)
+            bootstrap_only
+            exit 0
+            ;;
         --full)
             full_deployment
             exit 0
@@ -288,6 +307,7 @@ while [[ $# -gt 0 ]]; do
         --orchestrator)
             check_prerequisites
             setup_python_environment
+            link_monorepo_packages
             generate_protobuf
             start_orchestrator
             exit 0
@@ -305,9 +325,10 @@ while [[ $# -gt 0 ]]; do
 Living Library SIGPRINT Deployment Script
 
 Usage:
-  $0 [--full] [--orchestrator] [--skip-firmware] [--clean]
+  $0 [--bootstrap-only] [--full] [--orchestrator] [--skip-firmware] [--clean]
 
 Options:
+  --bootstrap-only  Create venv and install root Python deps
   --full           Run full deployment pipeline
   --orchestrator   Launch orchestrator directly
   --skip-firmware  Skip PlatformIO build/upload steps
@@ -338,11 +359,13 @@ while true; do
             ;;
         2)
             setup_python_environment
+            link_monorepo_packages
             generate_protobuf
             start_orchestrator
             ;;
         3)
             setup_python_environment
+            link_monorepo_packages
             generate_protobuf
             start_individual_agent
             ;;
