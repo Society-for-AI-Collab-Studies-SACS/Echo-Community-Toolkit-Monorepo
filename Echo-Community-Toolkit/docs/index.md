@@ -5,6 +5,7 @@
 - Contributor Guide (source): `../AGENTS.md`
 - Contributor Guide (docs): `CONTRIBUTING.md`
 - Architecture Map: `ARCHITECTURE_INDEX.md`
+- Bloom Workflow: `../README.md#spiral-bloom-workflow`
 - CI Workflows: https://github.com/AceTheDactyl/Echo-Community-Toolkit/actions
 
 ## Shortcuts
