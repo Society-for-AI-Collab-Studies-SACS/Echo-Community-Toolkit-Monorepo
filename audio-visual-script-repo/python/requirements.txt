@@ -1,0 +1,3 @@
+# Core Python dependencies will be added as modules land.
+zeromq
+requests

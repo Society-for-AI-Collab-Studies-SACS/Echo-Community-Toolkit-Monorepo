@@ -1,0 +1,17 @@
+{
+  "name": "audio-visual-script-repo",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Unified monorepo for audio-visual script authoring and playback.",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "setup": "npm install --workspaces",
+    "dev": "concurrently \"npm run dev --workspace frontend\" \"npm run dev --workspace backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
