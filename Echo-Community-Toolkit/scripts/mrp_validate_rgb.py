@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import json
+import base64
 from pathlib import Path
 from typing import Any, Dict
-import base64
-
-
 def _ensure_cover(cover: Path) -> None:
     if cover.exists():
         return
@@ -32,8 +30,8 @@ def main() -> None:
     if str(root) not in sys.path:
         sys.path.insert(0, str(root))
     # Deferred imports (repo-local modules)
-    from src.mrp.headers import make_frame, parse_frame
-    from src.mrp.meta import sidecar_from_headers
+    from src.mrp.frame import make_frame, parse_frame
+    from src.mrp.meta import sidecar_from_frames
     from src.mrp.adapters import png_lsb
 
     cover = root / "assets" / "images" / "mrp_cover_stub.png"
@@ -41,12 +39,16 @@ def main() -> None:
     out = root / "artifacts" / "mrp_rgb_validate.png"
     out.parent.mkdir(parents=True, exist_ok=True)
 
-    r_payload = _minified_json_bytes(root / "assets" / "data" / "mrp_lambda_R_payload.json")
-    g_payload = _minified_json_bytes(root / "assets" / "data" / "mrp_lambda_G_payload.json")
+    r_payload = base64.b64encode(
+        _minified_json_bytes(root / "assets" / "data" / "mrp_lambda_R_payload.json")
+    )
+    g_payload = base64.b64encode(
+        _minified_json_bytes(root / "assets" / "data" / "mrp_lambda_G_payload.json")
+    )
 
     r = make_frame("R", r_payload, True)
     g = make_frame("G", g_payload, True)
-    sidecar = sidecar_from_headers(parse_frame(r), parse_frame(g))
+    sidecar = sidecar_from_frames(parse_frame(r), parse_frame(g))
     b_payload = json.dumps(sidecar, separators=(",", ":"), sort_keys=True).encode()
     b = make_frame("B", b_payload, True)
 
@@ -57,11 +59,14 @@ def main() -> None:
     G = parse_frame(frames["G"])
     B = parse_frame(frames["B"])
 
-    r_ok = base64.b64decode(R.payload_b64.encode()) == r_payload
-    g_ok = base64.b64decode(G.payload_b64.encode()) == g_payload
-    b_obj = json.loads(base64.b64decode(B.payload_b64.encode()).decode())
+    r_ok = R.payload == r_payload
+    g_ok = G.payload == g_payload
+    b_obj = json.loads(B.payload.decode("utf-8"))
     ecc = {
-        "crc_match": (b_obj.get("crc_r") == R.crc32 and b_obj.get("crc_g") == G.crc32),
+        "crc_match": (
+            b_obj.get("crc_r") == f"{R.crc32:08X}"
+            and b_obj.get("crc_g") == f"{G.crc32:08X}"
+        ),
         "parity_present": bool(b_obj.get("parity")),
         "ecc_scheme": b_obj.get("ecc_scheme"),
     }
