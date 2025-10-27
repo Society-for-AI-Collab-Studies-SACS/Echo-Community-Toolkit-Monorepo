@@ -29,6 +29,8 @@ Unified living workspace for VesselOS, Echo Community Toolkit, narrative engines
    ```bash
    # Toolkit
    (cd Echo-Community-Toolkit && npm ci && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt)
+   # Audio-Visual authoring suite
+   (cd audio-visual-script-repo && npm ci --workspaces && python3 -m pip install -r python/requirements.txt)
    # Kira Prime
    (cd kira-prime && pip install -r requirements.txt && git submodule update --init --recursive)
    # Garden Chronicles
@@ -74,6 +76,7 @@ Full ASCII trees and subsystem context live in [`architecture.md`](architecture.
 
 ```
 Monorepo Root
+├─ audio-visual-script-repo/      Audio-visual authoring UI + engine (Node/Python)
 ├─ Echo-Community-Toolkit/        Core hyperfollow + soulcode toolkit (Node/Python)
 ├─ echo_soulcode/                 Vendored Python package backing soulcode tests/tools
 ├─ The-Living-Garden-Chronicles/  Narrative generation + stego validator
@@ -132,6 +135,21 @@ Each phase guide lists the commands to run, fixtures to prepare, and criteria fo
   - Apply + verify: `node hyperfollow-integration.js && node verify-integration.js`  
   - Full validation sweep: `python3 final_validation.py`
 - **Docs:** See `Echo-Community-Toolkit/README.md`, `docs/ARCHITECTURE_INDEX.md`, and `AGENTS.md` for contributor workflows.
+
+### Audio-Visual Script Suite (`audio-visual-script-repo/`)
+- **Purpose:** End-to-end authoring surface for waveform editing, persona-aware TTS synthesis, and script packaging.
+- **Setup:**  
+  ```bash
+  cd audio-visual-script-repo
+  npm ci --workspaces
+  python3 -m pip install -r python/requirements.txt
+  ```
+- **Core commands:**  
+  - Backend checks: `npm run lint --workspace backend && npm run type-check --workspace backend`  
+  - Frontend checks: `npm run lint --workspace frontend && npm run type-check --workspace frontend`  
+  - Build bundles: `npm run build --workspace backend && npm run build --workspace frontend`  
+  - Python engine tests: `(cd python && python -m pytest -q)`
+- **Docs:** The workspace README and inline `docs/` folder capture roadmap, persona mapping, and UI flow sketches.
 
 ### The-Living-Garden-Chronicles (`The-Living-Garden-Chronicles/`)
 - **Purpose:** Build 20-chapter dream chronicles and validate steganographic payloads.
@@ -236,14 +254,15 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 - `Echo-Community-Toolkit/scripts/run_local_setup_and_verify.sh` – Performs a dry run of toolkit integration without mutating the tree.
 - `kira-prime/tests/e2e_test.sh` – CLI smoke harness (`PRIME_CLI="python3 vesselos.py" ./tests/e2e_test.sh`).
 - `vesselos-dev-research/scripts/bootstrap.sh` – Installs Python/Node deps and prepares workspaces.
+- `scripts/ci/run_*.sh` – CI entrypoints for Toolkit, Kira Prime, Garden Chronicles, and Research (mirrors the Monorepo CI matrix locally).
 - Docker helpers: `(cd docker && docker compose up -d)` brings Redis/Postgres + collab server online.
 
 > Tip: all scripts support `--help` or inline usage comments; inspect them before running against production data.
 
 ## CI Status & Quicklinks
 
-**Badges** – Each workflow surfaces the latest `main` branch health. As additional module-specific workflows land, drop their YAML under `.github/workflows/` and the badges below will light up automatically.
-
+**Badges** – Each workflow surfaces the latest `main` branch health. The aggregate `ci.yml` job fans out across Node and Python suites (audio-visual workspaces, Toolkit, Kira Prime, Garden Chronicles, Research kit, and root smoke tests); module-specific workflows stay available for targeted reruns.
+- **Monorepo aggregate:** [![Monorepo CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml)
 - **Echo-Community-Toolkit:** [![Toolkit CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/echo-toolkit-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/echo-toolkit-ci.yml)
 - **Kira Prime:** [![Kira CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/kira-prime-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/kira-prime-ci.yml)
 - **Living Garden Chronicles:** [![Chronicles CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/living-garden-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/living-garden-ci.yml)
@@ -253,6 +272,7 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 
 | Module | Actions Dashboard |
 | --- | --- |
+| Monorepo aggregate | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3A%22Monorepo+CI%22> |
 | Echo-Community-Toolkit Monorepo | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions> |
 | Kira Prime CLI | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AKira> |
 | The Living Garden Chronicles | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AGarden> |
