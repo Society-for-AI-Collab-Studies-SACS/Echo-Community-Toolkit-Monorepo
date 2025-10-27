@@ -10,7 +10,7 @@ from .adapters import png_lsb
 from .ecc import xor_parity_bytes
 from .frame import MRPFrame, crc32_hex, make_frame
 from .meta import sidecar_from_frames
-from ..ritual.state import (
+from ritual.state import (
     RitualConsentError,
     RitualState,
     default_ritual_state,
@@ -213,7 +213,7 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
     if not sha_ok:
         status = "integrity_failed"
     elif recovered_bytes_total > 0:
-        status = "recovered_with_parity"
+        status = "recovered"
     elif not b_crc_ok or not parity_ok:
         status = "degraded"
     else:

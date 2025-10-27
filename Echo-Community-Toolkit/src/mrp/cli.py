@@ -13,7 +13,7 @@ from .codec import (
     encode_with_mode,
 )
 from .sidecar import validate_sidecar
-from ..ritual.state import default_ritual_state
+from ritual.state import default_ritual_state
 
 
 def _load_headers_from_png(path: Path, *, bits_per_channel: int) -> Dict[str, MRPFrame]:
