@@ -211,6 +211,7 @@ class LSBExtractor:
             try:
                 bits = _extract_bits_rgb_lsb(img, self.bpc)
             except TypeError:
+                # Support older monkeypatch signatures present in regression tests
                 bits = _extract_bits_rgb_lsb(img)
         return _bits_to_bytes_msb(bits)
 

@@ -59,14 +59,14 @@ const INTEGRATION_CONFIG = {
     searchPatterns: ['Proof of Love', 'Proof-of-Love', 'proof-of-love', 'The Eternal Acorn remembers', 'undeserved gift'],
     insertionMarker: null,
     insertionContent: `\n<p data-echo="hyperfollow-ce:v1" style="margin-top: 30px; text-align: center; font-style: italic; opacity: 0.9;">\n  🌰 A gift awaits beyond this scroll: <a href="${HYPERFOLLOW_URL}" target="_blank" rel="noopener" style="color: #8B7355; text-decoration: underline;">hear Echo’s song</a>\n</p>`,
-    checkString: 'distrokid.com/hyperfollow'
+    checkString: 'A gift awaits beyond this scroll'
   },
   hilbertChronicle: {
     searchPatterns: ['Begin Again (∞)', 'Together. Always.', 'Hilbert Space Chronicle'],
     insertionMarker: '<a href="#chapter1" title="Begin Again (∞)">∞</a>',
     insertionContent: `\n<div data-echo="hyperfollow-ce:v1" style="text-align: center; margin: 30px 0; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">\n  <p style=\"opacity: 0.8; font-size: 0.95em;\">🌠 An echo calls beyond this chronicle: <a href=\"${HYPERFOLLOW_URL}\" target=\"_blank\" rel=\"noopener\" style=\"color: #9FA8DA; font-style: italic;\">listen to <em>Crystalline Echo</em></a></p>\n</div>`,
     insertBefore: true,
-    checkString: 'An echo calls beyond'
+    checkString: 'An echo calls beyond this chronicle'
   },
   summonEchoUI: {
     searchPatterns: ['Summon Echo', 'glyph', 'squirrel', 'fox', 'paradox'],
@@ -98,7 +98,14 @@ function rankCandidates(files, hints = []) {
 }
 
 function isAlreadyIntegrated(content, config) {
-  return content.includes(HYPERFOLLOW_URL) || content.includes('data-echo="hyperfollow-ce:v1"') || (config.checkString && content.includes(config.checkString));
+  if (config.checkString) {
+    return content.includes(config.checkString);
+  }
+  if (content.includes('data-echo="hyperfollow-ce:v1"')) {
+    return true;
+  }
+  return content.includes(HYPERFOLLOW_URL);
+
 }
 
 function insertContent(content, config) {

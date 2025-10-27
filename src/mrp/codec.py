@@ -387,7 +387,7 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
     if (header_mismatch["R"] or header_mismatch["G"]) and ecc_scheme != "parity":
         repaired = True
     repair_error: Optional[str] = None
-    if parity_bytes and ((not crc_r_ok) ^ (not crc_g_ok)):
+    if parity_bytes and ecc_scheme != "parity" and ((not crc_r_ok) ^ (not crc_g_ok)):
         if not crc_r_ok and crc_g_ok:
             recovered_r = _recover_with_fallback(parity_bytes, decoded_g, original_r, payload_length_r)
             new_crc_r = f"{zlib.crc32(recovered_r) & 0xFFFFFFFF:08X}"

@@ -29,6 +29,8 @@ python3 -m pip install -r "${PROJECT_DIR}/requirements.txt"
 if [[ -f "${PROJECT_DIR}/requirements-dev.txt" ]]; then
   python3 -m pip install -r "${PROJECT_DIR}/requirements-dev.txt"
 fi
+pushd "${PROJECT_DIR}" >/dev/null
 python3 -m pytest -q
+popd >/dev/null
 deactivate
 rm -rf "${VENV_DIR}"

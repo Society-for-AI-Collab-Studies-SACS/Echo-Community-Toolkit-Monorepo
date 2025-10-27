@@ -8,9 +8,11 @@ EXTRA_PATH="${ROOT_DIR}/vesselos-dev-research"
 
 npm_bootstrap() {
   if [[ -f package-lock.json ]]; then
-    npm ci --no-audit --no-fund
+    if ! npm ci --include=dev --no-audit --no-fund; then
+      npm install --include=dev --no-audit --no-fund
+    fi
   else
-    npm install --no-audit --no-fund
+    npm install --include=dev --no-audit --no-fund
   fi
 }
 
@@ -37,6 +39,7 @@ if [[ -d "${PROJECT_DIR}/vscode-extension" ]]; then
   popd >/dev/null
 fi
 
+pushd "${PROJECT_DIR}" >/dev/null
 rm -rf "${VENV_DIR}"
 python3 -m venv "${VENV_DIR}"
 source "${VENV_DIR}/bin/activate"
@@ -46,8 +49,10 @@ if [[ -f "${PROJECT_DIR}/requirements-dev.txt" ]]; then
   python3 -m pip install -r "${PROJECT_DIR}/requirements-dev.txt"
 fi
 
-PYTHONPATH="${PROJECT_DIR}:${EXTRA_PATH}" python3 vesselos.py validate
+echo "PWD before validate: $(pwd)"
+PYTHONPATH="${PROJECT_DIR}:${EXTRA_PATH}" python3 "${PROJECT_DIR}/vesselos.py" validate
 PYTHONPATH="${PROJECT_DIR}:${EXTRA_PATH}" python3 -m pytest -q
 
 deactivate
+popd >/dev/null
 rm -rf "${VENV_DIR}"

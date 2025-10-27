@@ -6,10 +6,10 @@ import json
 from hashlib import sha256
 from typing import Any, Callable, Dict, Optional
 
-from .adapters import png_lsb
-from .ecc import xor_parity_bytes
-from .frame import MRPFrame, crc32_hex, make_frame
-from .meta import sidecar_from_frames
+from mrp.adapters import png_lsb
+from mrp.ecc import xor_parity_bytes
+from mrp.frame import MRPFrame, crc32_hex, make_frame
+from mrp.meta import sidecar_from_frames
 from ritual.state import (
     RitualConsentError,
     RitualState,
@@ -84,6 +84,7 @@ def encode(
     *,
     ritual_state: Optional[RitualState] = None,
     bits_per_channel: int = 1,
+    ecc: str = "parity",
 ) -> Dict[str, Any]:
     state = _resolve_state(ritual_state)
     state.require_publish_ready()
@@ -97,12 +98,21 @@ def encode(
     payload_r = base64.b64encode(message_bytes)
     payload_g = base64.b64encode(metadata_json)
 
+    ecc_scheme = ecc.lower()
+    if ecc_scheme not in {"parity", "xor"}:
+        raise ValueError(f"Unsupported ecc scheme: {ecc}")
+
     r_frame_bytes = make_frame("R", payload_r, True)
     g_frame_bytes = make_frame("G", payload_g, True)
 
     r_frame, _ = MRPFrame.parse_from(r_frame_bytes, expected_channel="R")
     g_frame, _ = MRPFrame.parse_from(g_frame_bytes, expected_channel="G")
-    sidecar = sidecar_from_frames(r_frame, g_frame, bits_per_channel=bits_per_channel)
+    sidecar = sidecar_from_frames(
+        r_frame,
+        g_frame,
+        bits_per_channel=bits_per_channel,
+        ecc_scheme="parity" if ecc_scheme == "xor" else ecc_scheme,
+    )
 
     b_frame_bytes = make_frame(
         "B",
@@ -129,6 +139,7 @@ def encode(
     return {
         "out": out_png,
         "integrity": sidecar,
+        "ecc": sidecar.get("ecc_scheme", ecc_scheme),
     }
 
 
@@ -154,8 +165,16 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
 
     expected_crc_r = (sidecar.get("crc_r") or channels["R"]["crc_expected"]).upper()
     expected_crc_g = (sidecar.get("crc_g") or channels["G"]["crc_expected"]).upper()
+    parity_len_expected = int(
+        sidecar.get("parity_len")
+        or max(len(channels["R"]["payload"]), len(channels["G"]["payload"]))
+    )
     parity_hex_value = (sidecar.get("parity") or "").upper()
-    parity_bytes = _parity_bytes(parity_hex_value)
+    parity_bytes = _parity_bytes(parity_hex_value) if parity_hex_value else b""
+    parity_length_valid = True
+    if parity_hex_value and len(parity_hex_value) != parity_len_expected * 2:
+        parity_length_valid = False
+        parity_bytes = b""
 
     channels["R"]["crc_expected"] = expected_crc_r
     channels["G"]["crc_expected"] = expected_crc_g
@@ -206,15 +225,21 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
     parity_actual = b""
     if parity_hex_value:
         parity_actual = xor_parity_bytes(channels["R"]["payload"], channels["G"]["payload"])
-        parity_ok = parity_bytes == parity_actual
+        parity_ok = parity_length_valid and parity_bytes == parity_actual
+    elif parity_len_expected:
+        parity_ok = False
 
+    crc_r_ok = channels["R"]["crc_ok"]
+    crc_g_ok = channels["G"]["crc_ok"]
     b_crc_ok = channels["B"]["crc_ok"]
 
     if not sha_ok:
         status = "integrity_failed"
+    elif not (crc_r_ok and crc_g_ok):
+        status = "failed"
     elif recovered_bytes_total > 0:
         status = "recovered"
-    elif not b_crc_ok or not parity_ok:
+    elif not b_crc_ok or not parity_ok or not parity_length_valid:
         status = "degraded"
     else:
         status = "ok"
@@ -248,12 +273,17 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
         "sidecar": sidecar,
     }
 
-    return {
+    result = {
         "message": message_text,
         "metadata": metadata,
         "integrity": integrity,
         "message_length": len(message_bytes),
     }
+
+    if status in {"failed", "integrity_failed"}:
+        result["error"] = "Integrity check failed"
+
+    return result
 
 
 def decode(
@@ -277,6 +307,9 @@ def decode(
         ) from exc
 
     result = _decode_frames(frames, bits_per_channel=bits_per_channel)
+
+    if "error" in result:
+        raise ValueError(result["error"])
 
     state.record_operation(
         "decode",
