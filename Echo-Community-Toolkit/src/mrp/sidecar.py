@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from typing import Any, Dict, Mapping, Optional
 
-from .ecc import parity_hex
+from .ecc import parity_hex, xor_parity_bytes
 from .frame import MRPFrame, crc32_hex
 
 __all__ = [
@@ -125,12 +125,16 @@ def generate_sidecar(
     # Canonical verification fields.
     document["crc_r"] = _normalised_crc(r)
     document["crc_g"] = _normalised_crc(g)
-    document["parity"] = parity_hex(r_bytes, g_bytes)
+    parity_hex_value = parity_hex(r_bytes, g_bytes)
+    parity_bytes = xor_parity_bytes(r_bytes, g_bytes)
+    document["parity"] = parity_hex_value
     document["parity_len"] = max(len(r_bytes), len(g_bytes))
     document["ecc_scheme"] = "xor"
     document["sha256_msg"] = sha_plain_hex
     document["sha256_msg_b64"] = sha_b64_hex
     document["bits_per_channel"] = preserved_bits_per_channel or 1
+    if parity_bytes:
+        document["parity_block_b64"] = base64.b64encode(parity_bytes).decode("ascii")
 
     return document
 

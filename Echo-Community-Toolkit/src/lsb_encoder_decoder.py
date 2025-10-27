@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import base64
-import hashlib
 import json
 import zlib
 from pathlib import Path
@@ -11,9 +10,8 @@ from typing import Any, Dict, List, Optional
 from PIL import Image, ImageDraw  # pillow
 
 from .mrp.adapters import png_lsb
-from .mrp.ecc import xor_parity_bytes
-from .mrp.frame import make_frame
-from .mrp.frame import crc32_hex as mrp_crc32_hex
+from .mrp.frame import MRPFrame, make_frame
+from .mrp.meta import sidecar_from_frames
 
 MAGIC = b"LSB1"
 
@@ -96,34 +94,18 @@ class LSBCodec:
         payload_r = base64.b64encode(message_bytes)
         payload_g = base64.b64encode(metadata_bytes)
 
-        parity_bytes = xor_parity_bytes(payload_r, payload_g)
-        parity_b64 = base64.b64encode(parity_bytes).decode("ascii") if parity_bytes else ""
-
-        sha_msg_b64 = hashlib.sha256(payload_r).hexdigest()
-        sha_msg_plain = hashlib.sha256(message_bytes).hexdigest()
-
-        sidecar = {
-            "ecc_scheme": "xor",
-            "crc_r": mrp_crc32_hex(payload_r),
-            "crc_g": mrp_crc32_hex(payload_g),
-            "sha256_msg_b64": sha_msg_b64,
-            "sha256_msg": sha_msg_plain,
-            "parity_block_b64": parity_b64,
-            "len_r": len(payload_r),
-            "len_g": len(payload_g),
-            "bits_per_channel": self.bpc,
-        }
-
-        if not sidecar["parity_block_b64"]:
-            sidecar.pop("parity_block_b64")
-
-        payload_b = json.dumps(sidecar, separators=(",", ":"), sort_keys=True).encode("utf-8")
-
-        frames = {
+        frames: Dict[str, bytes] = {
             "R": make_frame("R", payload_r, True),
             "G": make_frame("G", payload_g, True),
-            "B": make_frame("B", payload_b, True),
         }
+
+        r_frame, _ = MRPFrame.parse_from(frames["R"], expected_channel="R")
+        g_frame, _ = MRPFrame.parse_from(frames["G"], expected_channel="G")
+        sidecar = sidecar_from_frames(r_frame, g_frame, bits_per_channel=self.bpc)
+
+        payload_b = json.dumps(sidecar, separators=(",", ":"), sort_keys=True).encode("utf-8")
+        frames["B"] = make_frame("B", payload_b, True)
+
         payload_lengths = {"r": len(payload_r), "g": len(payload_g)}
         return frames, sidecar, payload_lengths
 

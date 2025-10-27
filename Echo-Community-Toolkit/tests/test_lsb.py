@@ -156,4 +156,4 @@ def test_round_trip_mrp_mode(tmp_path: Path):
     assert out["detected_format"] == "mrp"
     assert out["message"] == "garden"
     assert out["metadata"] == metadata
-    assert out["integrity"]["status"] in {"ok", "degraded", "recovered"}
+    assert out["integrity"]["status"] in {"ok", "degraded", "recovered_with_parity"}

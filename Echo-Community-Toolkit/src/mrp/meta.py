@@ -5,7 +5,7 @@ from hashlib import sha256
 from typing import Dict, Any
 
 from .frame import MRPFrame, crc32_hex
-from .ecc import parity_hex
+from .ecc import parity_hex, xor_parity_bytes
 
 
 def sidecar_from_frames(r: MRPFrame, g: MRPFrame, *, bits_per_channel: int = 1) -> Dict[str, Any]:
@@ -13,6 +13,7 @@ def sidecar_from_frames(r: MRPFrame, g: MRPFrame, *, bits_per_channel: int = 1) 
     r_bytes = r.payload
     g_bytes = g.payload
     parity = parity_hex(r_bytes, g_bytes)
+    parity_bytes = xor_parity_bytes(r_bytes, g_bytes)
 
     sha_b64_hex = sha256(r_bytes).hexdigest()
     try:
@@ -34,6 +35,11 @@ def sidecar_from_frames(r: MRPFrame, g: MRPFrame, *, bits_per_channel: int = 1) 
         "sha256_msg_b64": sha_b64_hex,
         "ecc_scheme": "xor",
         "bits_per_channel": bits_per_channel,
+        **(
+            {"parity_block_b64": base64.b64encode(parity_bytes).decode("ascii")}
+            if parity_bytes
+            else {}
+        ),
     }
 
 

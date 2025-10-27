@@ -29,6 +29,7 @@ def _load_channel(frame_bytes: bytes, expected: Optional[str] = None) -> Dict[st
         "crc_actual": calc_crc,
         "crc_ok": expected_crc == calc_crc,
         "recovered": False,
+        "corrected_bytes": 0,
     }
 
 
@@ -50,18 +51,25 @@ def _xor_recover(parity: bytes, other_payload: bytes, length: int) -> bytes:
     return recovered[:length]
 
 
-def _recover_channel(target: Dict[str, Any], other: Dict[str, Any], parity: bytes) -> bool:
+def _recover_channel(target: Dict[str, Any], other: Dict[str, Any], parity: bytes) -> int:
     recovered = _xor_recover(parity, other["payload"], target["header"].length)
     if not recovered:
-        return False
+        return 0
     calc_crc = crc32_hex(recovered)
     if calc_crc != target["crc_expected"]:
-        return False
+        return 0
+    prior_payload = target["payload"]
     target["payload"] = recovered
     target["crc_actual"] = calc_crc
     target["crc_ok"] = True
     target["recovered"] = True
-    return True
+    corrected = sum(
+        1
+        for old_byte, new_byte in zip(prior_payload, recovered)
+        if old_byte != new_byte
+    )
+    target["corrected_bytes"] = corrected
+    return corrected
 
 
 def _resolve_state(state: Optional[RitualState]) -> RitualState:
@@ -152,11 +160,11 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
     channels["R"]["crc_expected"] = expected_crc_r
     channels["G"]["crc_expected"] = expected_crc_g
 
-    recovery_performed = False
+    recovered_bytes_total = 0
     if not channels["R"]["crc_ok"] and channels["G"]["crc_ok"]:
-        recovery_performed |= _recover_channel(channels["R"], channels["G"], parity_bytes)
+        recovered_bytes_total += _recover_channel(channels["R"], channels["G"], parity_bytes)
     if not channels["G"]["crc_ok"] and channels["R"]["crc_ok"]:
-        recovery_performed |= _recover_channel(channels["G"], channels["R"], parity_bytes)
+        recovered_bytes_total += _recover_channel(channels["G"], channels["R"], parity_bytes)
 
     if not channels["R"]["crc_ok"] or not channels["G"]["crc_ok"]:
         raise ValueError("Unrecoverable channel corruption detected")
@@ -204,8 +212,8 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
 
     if not sha_ok:
         status = "integrity_failed"
-    elif recovery_performed:
-        status = "recovered"
+    elif recovered_bytes_total > 0:
+        status = "recovered_with_parity"
     elif not b_crc_ok or not parity_ok:
         status = "degraded"
     else:
@@ -224,6 +232,8 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
             "expected": parity_hex_value,
             "actual": parity_actual.hex().upper() if parity_actual else "",
             "ok": parity_ok,
+            "used": recovered_bytes_total > 0,
+            "recovered_bytes": recovered_bytes_total,
         },
         "channels": {
             ch: {
@@ -231,6 +241,7 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
                 "crc_actual": info["crc_actual"],
                 "crc_ok": info["crc_ok"],
                 "recovered": info["recovered"],
+                "corrected_bytes": info.get("corrected_bytes", 0),
             }
             for ch, info in channels.items()
         },

@@ -226,8 +226,14 @@ class LSBExtractor:
                 continue
             try:
                 decoded = _decode_frames(frames, bits_per_channel=bpc)
-            except ValueError:
-                continue
+            except ValueError as exc:
+                return {
+                    "filename": str(path),
+                    "mode": "MRP",
+                    "detected_format": "mrp",
+                    "bits_per_channel": bpc,
+                    "error": str(exc),
+                }
             decoded.pop("message_length", None)
             decoded.update(
                 {

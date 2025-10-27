@@ -4,6 +4,7 @@ import base64
 import hashlib
 import json
 
+from src.mrp.ecc import xor_parity_bytes
 from src.mrp.frame import make_frame, parse_frame
 from src.mrp.sidecar import generate_sidecar, validate_sidecar
 
@@ -40,6 +41,10 @@ def test_generate_sidecar_produces_expected_fields():
     assert len(sidecar_doc["parity"]) == expected_parity_len * 2
     assert sidecar_doc["parity_len"] == expected_parity_len
     assert sidecar_doc["bits_per_channel"] == 1
+    assert "parity_block_b64" in sidecar_doc
+    assert base64.b64decode(sidecar_doc["parity_block_b64"]) == xor_parity_bytes(
+        r_header.payload, g_header.payload
+    )
 
 
 def test_validate_sidecar_passes_for_canonical_payload():
