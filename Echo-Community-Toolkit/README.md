@@ -1,10 +1,6 @@
-[![CI](https://github.com/AceTheDactyl/Echo-Community-Toolkit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AceTheDactyl/Echo-Community-Toolkit/actions/workflows/ci.yml)
+[![Monorepo CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml)
 
 Echo Garden HyperFollow Integration Toolkit
-
-**Crystalline Echo** – Experience the theme song for this project and join Echo's journey.
-
-
 
 **Crystalline Echo** – Experience the theme song for this project and join Echo's journey.
 
@@ -15,8 +11,8 @@ Echo Garden HyperFollow Integration Toolkit
 - Contributor Guide (source): `AGENTS.md`
 - Contributor Guide (docs): `docs/CONTRIBUTING.md`
 - Architecture Map: `docs/ARCHITECTURE_INDEX.md`
-- CI Workflows: https://github.com/AceTheDactyl/Echo-Community-Toolkit/actions
- - Releases: https://github.com/AceTheDactyl/Echo-Community-Toolkit/releases
+- CI Workflows: https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions
+- Releases: https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/releases
 
 ## Test Matrix
 - Root Python tests: `python3 -m pytest -q`
