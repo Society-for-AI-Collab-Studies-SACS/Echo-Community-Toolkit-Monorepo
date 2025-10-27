@@ -2,15 +2,23 @@ name: Echo Toolkit CI
 
 on:
   push:
-    branches: [main]
+    paths:
+      - 'Echo-Community-Toolkit/**'
+      - 'scripts/ci/run_toolkit_ci.sh'
+      - '.github/workflows/echo-toolkit-ci.yml'
+  pull_request:
+    paths:
+      - 'Echo-Community-Toolkit/**'
+      - 'scripts/ci/run_toolkit_ci.sh'
+      - '.github/workflows/echo-toolkit-ci.yml'
 
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: ./scripts/deploy.sh --bootstrap-only
-      - run: . venv/bin/activate && python -m pytest Echo-Community-Toolkit/tests -q
+      - name: Run Echo Toolkit suite
+        run: bash scripts/ci/run_toolkit_ci.sh

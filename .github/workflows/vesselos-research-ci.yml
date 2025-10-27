@@ -1,0 +1,24 @@
+name: VesselOS Research CI
+
+on:
+  push:
+    paths:
+      - 'vesselos-dev-research/**'
+      - 'scripts/ci/run_research_ci.sh'
+      - '.github/workflows/vesselos-research-ci.yml'
+  pull_request:
+    paths:
+      - 'vesselos-dev-research/**'
+      - 'scripts/ci/run_research_ci.sh'
+      - '.github/workflows/vesselos-research-ci.yml'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run VesselOS Research suite
+        run: bash scripts/ci/run_research_ci.sh

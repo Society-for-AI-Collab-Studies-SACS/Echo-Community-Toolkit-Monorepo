@@ -53,11 +53,13 @@ def test_mrp_parity_detection():
     base64_meta = base64.b64encode(json.dumps(TEST_METADATA).encode("utf-8"))
     expected_crc_r = _compute_crc_hex(base64_msg)
     expected_crc_g = _compute_crc_hex(base64_meta)
-    expected_sha = hashlib.sha256(TEST_MESSAGE.encode("utf-8")).hexdigest()
+    expected_sha_b64 = hashlib.sha256(base64_msg).hexdigest()
+    expected_sha_plain = hashlib.sha256(TEST_MESSAGE.encode("utf-8")).hexdigest()
     report = out.get("report", {})
     assert report.get("crc_r") == expected_crc_r
     assert report.get("crc_g") == expected_crc_g
-    assert report.get("sha256_msg") == expected_sha or report.get("sha256_msg_b64") == expected_sha
+    assert report.get("sha256_msg_b64") == expected_sha_b64
+    assert report.get("sha256_msg") == expected_sha_plain
 
     _flip_image_bit(stego_path, 112)
     out_corrupt = decode_mrp(str(stego_path))
@@ -147,4 +149,3 @@ def test_mrp_B_channel_corruption():
     out = decode_mrp(str(stego_path))
     assert "error" in out
     stego_path.unlink(missing_ok=True)
-

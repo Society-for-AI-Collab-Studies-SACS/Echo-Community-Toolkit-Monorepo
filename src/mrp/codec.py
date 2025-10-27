@@ -25,16 +25,19 @@ import base64
 import hashlib
 import json
 import zlib
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from PIL import Image
 from reedsolo import RSCodec, ReedSolomonError
 
-MAGIC = b"MRP1"
-FLAG_CRC32 = 0x01
-HEADER_WITH_CRC_BYTES = 4 + 1 + 1 + 4 + 4  # 112 bits when CRC flag is set
+from .frame import (
+    FLAG_CRC32,
+    HEADER_WITH_CRC_BYTES,
+    MRPFrame,
+    crc32_hex as frame_crc32_hex,
+)
+
 RS_PARITY_BYTES = 16  # RS parity symbols (t = 8 byte corrections)
 
 _rs_codec = RSCodec(RS_PARITY_BYTES)
@@ -118,69 +121,6 @@ def _hamming_decode_bits(code_bits: List[int]) -> Tuple[List[int], bool]:
 
 
 # ---------------------------------------------------------------------------
-# Frame helpers
-# ---------------------------------------------------------------------------
-
-def _build_frame(channel: str, payload: bytes, *, add_crc: bool = True) -> bytes:
-    if len(channel) != 1:
-        raise ValueError("Channel identifier must be a single character.")
-    flags = FLAG_CRC32 if add_crc else 0
-    header = bytearray()
-    header += MAGIC
-    header += channel.encode("ascii")
-    header.append(flags)
-    header += len(payload).to_bytes(4, "big")
-    if add_crc:
-        crc = zlib.crc32(payload) & 0xFFFFFFFF
-        header += crc.to_bytes(4, "big")
-    return bytes(header) + payload
-
-
-@dataclass
-class ParsedFrame:
-    payload: bytes
-    flags: int
-    channel: str
-    channel_valid: bool
-    crc_value: Optional[int]
-    crc_ok: bool
-
-
-def _parse_frame(raw_bytes: bytes, expected_channel: str) -> ParsedFrame:
-    start = raw_bytes.find(MAGIC)
-    if start < 0:
-        raise ValueError("MRP header not found")
-    cursor = start + len(MAGIC)
-    channel = chr(raw_bytes[cursor])
-    cursor += 1
-    channel_valid = channel == expected_channel
-    flags = raw_bytes[cursor]
-    cursor += 1
-    length = int.from_bytes(raw_bytes[cursor : cursor + 4], "big")
-    cursor += 4
-    crc_header = None
-    if flags & FLAG_CRC32:
-        crc_header = int.from_bytes(raw_bytes[cursor : cursor + 4], "big")
-        cursor += 4
-    end = cursor + length
-    if end > len(raw_bytes):
-        raise ValueError("Incomplete payload data")
-    payload = raw_bytes[cursor:end]
-    crc_ok = True
-    if flags & FLAG_CRC32:
-        crc_calc = zlib.crc32(payload) & 0xFFFFFFFF
-        crc_ok = crc_calc == crc_header
-    return ParsedFrame(
-        payload=payload,
-        flags=flags,
-        channel=channel,
-        channel_valid=channel_valid,
-        crc_value=crc_header,
-        crc_ok=crc_ok,
-    )
-
-
-# ---------------------------------------------------------------------------
 # Image bit plane helpers
 # ---------------------------------------------------------------------------
 
@@ -246,7 +186,7 @@ def encode_mrp(
     raw = bytearray(cover.tobytes())
 
     message_bytes = message.encode("utf-8")
-    metadata_json = json.dumps(metadata).encode("utf-8")
+    metadata_json = json.dumps(metadata, ensure_ascii=False).encode("utf-8")
     payload_r = base64.b64encode(message_bytes)
     payload_g = base64.b64encode(metadata_json)
 
@@ -264,22 +204,28 @@ def encode_mrp(
                 buf[idx] = payload_g[idx]
         parity_bytes = bytes(buf)
 
+    sha_msg_b64 = hashlib.sha256(payload_r).hexdigest()
+    sha_msg_plain = hashlib.sha256(message_bytes).hexdigest()
+
     sidecar: Dict[str, Any] = {
         "ecc_scheme": ecc,
-        "crc_r": f"{zlib.crc32(payload_r) & 0xFFFFFFFF:08X}",
-        "crc_g": f"{zlib.crc32(payload_g) & 0xFFFFFFFF:08X}",
-        "sha256_msg": hashlib.sha256(message_bytes).hexdigest(),
+        "crc_r": frame_crc32_hex(payload_r),
+        "crc_g": frame_crc32_hex(payload_g),
+        "sha256_msg_b64": sha_msg_b64,
         "len_r": len(payload_r),
         "len_g": len(payload_g),
     }
+    # Retain legacy digest for tooling that still inspects raw message bytes.
+    sidecar["sha256_msg"] = sha_msg_plain
     if parity_bytes is not None:
         sidecar["parity_block_b64"] = base64.b64encode(parity_bytes).decode("ascii")
 
-    encoded_b = json.dumps(sidecar, separators=(",", ":")).encode("ascii")
+    sidecar_bytes = json.dumps(sidecar, separators=(",", ":")).encode("utf-8")
+    payload_b = base64.b64encode(sidecar_bytes)
 
-    frame_r = _build_frame("R", encoded_r)
-    frame_g = _build_frame("G", encoded_g)
-    frame_b = _build_frame("B", encoded_b)
+    frame_r = MRPFrame.build("R", encoded_r).to_bytes()
+    frame_g = MRPFrame.build("G", encoded_g).to_bytes()
+    frame_b = MRPFrame.build("B", payload_b).to_bytes()
 
     bits_r = _bytes_to_bits(frame_r)
     bits_g = _bytes_to_bits(frame_g)
@@ -321,7 +267,7 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
     raw_bits = [byte & 1 for byte in raw]
     cursor = 0
 
-    def _consume_frame(expected_channel: str) -> ParsedFrame:
+    def _consume_frame(expected_channel: str) -> MRPFrame:
         nonlocal cursor
         header_bits = HEADER_WITH_CRC_BYTES * 8
         if cursor + header_bits > len(raw_bits):
@@ -333,7 +279,7 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
             raise ValueError("Incomplete payload data")
         frame_bits = raw_bits[cursor : cursor + total_bits]
         frame_bytes = _bits_to_bytes(frame_bits)
-        parsed = _parse_frame(frame_bytes, expected_channel)
+        parsed, _consumed = MRPFrame.parse_from(frame_bytes, expected_channel=expected_channel)
         cursor += total_bits
         return parsed
 
@@ -389,12 +335,35 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
         return {"error": error_reason}
 
     parity_bytes = b""
-    if ecc_scheme == "parity":
+    parity_str = sidecar.get("parity_block_b64")
+    if parity_str:
         try:
-            parity_str = sidecar.get("parity_block_b64", "")
-            parity_bytes = base64.b64decode(parity_str) if parity_str else b""
+            parity_bytes = base64.b64decode(parity_str)
         except Exception:
             parity_bytes = b""
+
+    def _parity_from_payloads(r_bytes: bytes, g_bytes: bytes, length: int) -> bytes:
+        block = bytearray(length)
+        for idx in range(length):
+            r_val = r_bytes[idx] if idx < len(r_bytes) else 0
+            g_val = g_bytes[idx] if idx < len(g_bytes) else 0
+            block[idx] = r_val ^ g_val
+        return bytes(block)
+
+    def _recover_with_fallback(
+        parity: bytes, known: bytes, fallback: bytes, target_length: int
+    ) -> bytes:
+        recovered = bytearray(target_length)
+        for idx in range(target_length):
+            if idx < len(parity):
+                parity_val = parity[idx]
+                known_val = known[idx] if idx < len(known) else 0
+                recovered[idx] = parity_val ^ known_val
+            elif idx < len(fallback):
+                recovered[idx] = fallback[idx]
+            else:
+                recovered[idx] = 0
+        return bytes(recovered)
 
     crc_r_expected = sidecar.get("crc_r")
     crc_g_expected = sidecar.get("crc_g")
@@ -407,50 +376,48 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
 
     parity_ok = True
     if parity_bytes:
-        parity_calc = _xor_bytes(decoded_r, decoded_g)[: len(parity_bytes)]
+        parity_calc = _parity_from_payloads(decoded_r, decoded_g, len(parity_bytes))
         parity_ok = parity_calc == parity_bytes
     elif ecc_scheme == "parity":
         parity_ok = False
 
+    original_r = decoded_r
+    original_g = decoded_g
     repaired = False
     if (header_mismatch["R"] or header_mismatch["G"]) and ecc_scheme != "parity":
         repaired = True
     repair_error: Optional[str] = None
-    if parity_bytes and ecc_scheme != "parity" and (not crc_r_ok or not crc_g_ok):
-        if crc_r_ok and not crc_g_ok:
-            recovered_g = bytearray(payload_length_g)
-            for idx in range(payload_length_g):
-                parity_val = parity_bytes[idx] if idx < len(parity_bytes) else 0
-                known = decoded_r[idx] if idx < len(decoded_r) else 0
-                recovered_g[idx] = parity_val ^ known
-            new_crc_g = f"{zlib.crc32(recovered_g) & 0xFFFFFFFF:08X}"
-            if new_crc_g == crc_g_expected:
-                decoded_g = bytes(recovered_g)
-                crc_g_calc = new_crc_g
-                crc_g_ok = True
-                repaired = True
-            else:
-                repair_error = "Failed to repair G channel"
-        elif crc_g_ok and not crc_r_ok:
-            recovered_r = bytearray(payload_length_r)
-            for idx in range(payload_length_r):
-                parity_val = parity_bytes[idx] if idx < len(parity_bytes) else 0
-                known = decoded_g[idx] if idx < len(decoded_g) else 0
-                recovered_r[idx] = parity_val ^ known
+    if parity_bytes and ((not crc_r_ok) ^ (not crc_g_ok)):
+        if not crc_r_ok and crc_g_ok:
+            recovered_r = _recover_with_fallback(parity_bytes, decoded_g, original_r, payload_length_r)
             new_crc_r = f"{zlib.crc32(recovered_r) & 0xFFFFFFFF:08X}"
-            if new_crc_r == crc_r_expected:
-                decoded_r = bytes(recovered_r)
+            sha_expected_b64 = sidecar.get("sha256_msg_b64")
+            sha_match = True
+            if sha_expected_b64:
+                sha_match = hashlib.sha256(recovered_r).hexdigest() == sha_expected_b64
+            if (crc_r_expected is None or new_crc_r == crc_r_expected) and sha_match:
+                decoded_r = recovered_r[:payload_length_r]
                 crc_r_calc = new_crc_r
                 crc_r_ok = True
                 repaired = True
             else:
-                repair_error = "Failed to repair R channel"
-        else:
-            repair_error = "Multiple channel corruption detected"
+                repair_error = "Failed to repair R channel - data unrecoverable"
+        elif not crc_g_ok and crc_r_ok:
+            recovered_g = _recover_with_fallback(parity_bytes, decoded_r, original_g, payload_length_g)
+            new_crc_g = f"{zlib.crc32(recovered_g) & 0xFFFFFFFF:08X}"
+            if crc_g_expected is None or new_crc_g == crc_g_expected:
+                decoded_g = recovered_g[:payload_length_g]
+                crc_g_calc = new_crc_g
+                crc_g_ok = True
+                repaired = True
+            else:
+                repair_error = "Failed to repair G channel - data unrecoverable"
+    elif parity_bytes and not crc_r_ok and not crc_g_ok:
+        repair_error = "Multiple channel corruption detected - cannot repair"
 
-        if repaired:
-            parity_calc = _xor_bytes(decoded_r, decoded_g)[: len(parity_bytes)]
-            parity_ok = parity_calc == parity_bytes
+    if parity_bytes:
+        parity_calc = _parity_from_payloads(decoded_r, decoded_g, len(parity_bytes))
+        parity_ok = parity_calc == parity_bytes
 
     try:
         message_bytes = base64.b64decode(decoded_r, validate=True)
@@ -459,16 +426,23 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
         image.close()
         return {"error": f"Base64 decode failed: {exc}"}
 
-    sha_calc = hashlib.sha256(message_bytes).hexdigest()
-    sha_expected = sidecar.get("sha256_msg") or sidecar.get("sha256_msg_b64")
-    sha_ok = sha_expected is None or sha_calc == sha_expected
+    sha_calc_b64 = hashlib.sha256(decoded_r).hexdigest()
+    sha_calc_plain = hashlib.sha256(message_bytes).hexdigest()
+    sha_expected_b64 = sidecar.get("sha256_msg_b64")
+    sha_expected_plain = sidecar.get("sha256_msg")
+    sha_ok = True
+    if sha_expected_b64:
+        sha_ok = sha_ok and (sha_calc_b64 == sha_expected_b64)
+    if sha_expected_plain:
+        sha_ok = sha_ok and (sha_calc_plain == sha_expected_plain)
 
     payload_ok = crc_r_ok and crc_g_ok and sha_ok and parity_ok
 
     report: Dict[str, Any] = {
         "crc_r": crc_r_calc,
         "crc_g": crc_g_calc,
-        "sha256_msg": sha_calc,
+        "sha256_msg_b64": sha_calc_b64,
+        "sha256_msg": sha_calc_plain,
         "payload_length_r": payload_length_r,
         "payload_length_g": payload_length_g,
         "ecc_scheme": ecc_scheme,

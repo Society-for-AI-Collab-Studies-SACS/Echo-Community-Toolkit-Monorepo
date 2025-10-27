@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 from .adapters import png_lsb
-from .headers import MRPHeader, parse_frame
+from .frame import MRPFrame, parse_frame
 from .codec import (
     RitualConsentError,
     decode as codec_decode,
@@ -17,14 +16,14 @@ from .sidecar import validate_sidecar
 from ..ritual.state import default_ritual_state
 
 
-def _load_headers_from_png(path: Path, *, bits_per_channel: int) -> Dict[str, MRPHeader]:
+def _load_headers_from_png(path: Path, *, bits_per_channel: int) -> Dict[str, MRPFrame]:
     frames = png_lsb.extract_frames(str(path), bits_per_channel=bits_per_channel)
     return {channel: parse_frame(frames[channel]) for channel in ("R", "G", "B")}
 
 
-def _extract_sidecar_from_b(header: MRPHeader) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+def _extract_sidecar_from_b(header: MRPFrame) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
     try:
-        payload = base64.b64decode(header.payload_b64.encode("utf-8")).decode("utf-8")
+        payload = header.payload.decode("utf-8")
     except Exception as exc:  # pylint: disable=broad-except
         return None, f"unable to decode B-channel payload: {exc}"
 

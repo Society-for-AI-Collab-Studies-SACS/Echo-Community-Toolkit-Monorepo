@@ -1,0 +1,24 @@
+name: Living Garden Chronicles CI
+
+on:
+  push:
+    paths:
+      - 'The-Living-Garden-Chronicles/**'
+      - 'scripts/ci/run_chronicles_ci.sh'
+      - '.github/workflows/living-garden-ci.yml'
+  pull_request:
+    paths:
+      - 'The-Living-Garden-Chronicles/**'
+      - 'scripts/ci/run_chronicles_ci.sh'
+      - '.github/workflows/living-garden-ci.yml'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run Chronicles suite
+        run: bash scripts/ci/run_chronicles_ci.sh
