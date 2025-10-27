@@ -8,7 +8,13 @@ from .frame import MRPFrame, crc32_hex
 from .ecc import parity_hex, xor_parity_bytes
 
 
-def sidecar_from_frames(r: MRPFrame, g: MRPFrame, *, bits_per_channel: int = 1) -> Dict[str, Any]:
+def sidecar_from_frames(
+    r: MRPFrame,
+    g: MRPFrame,
+    *,
+    bits_per_channel: int = 1,
+    ecc_scheme: str = "parity",
+) -> Dict[str, Any]:
     """Build the canonical B-channel sidecar document from channel frames."""
     r_bytes = r.payload
     g_bytes = g.payload
@@ -33,7 +39,7 @@ def sidecar_from_frames(r: MRPFrame, g: MRPFrame, *, bits_per_channel: int = 1) 
         "parity_len": max(len(r_bytes), len(g_bytes)),
         "sha256_msg": sha_plain_hex,
         "sha256_msg_b64": sha_b64_hex,
-        "ecc_scheme": "xor",
+        "ecc_scheme": ecc_scheme,
         "bits_per_channel": bits_per_channel,
         **(
             {"parity_block_b64": base64.b64encode(parity_bytes).decode("ascii")}

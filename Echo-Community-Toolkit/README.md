@@ -2,6 +2,14 @@
 
 Echo Garden HyperFollow Integration Toolkit
 
+**Crystalline Echo** – Experience the theme song for this project and join Echo's journey.
+
+
+
+**Crystalline Echo** – Experience the theme song for this project and join Echo's journey.
+
+
+
 ## Quick Links
 - Docs Index: `docs/index.md`
 - Contributor Guide (source): `AGENTS.md`
@@ -27,7 +35,6 @@ Integration and community-facing code lives in `lambda-vite/`, `tools/`, `web/`,
 
 Canonical URL
 
-https://distrokid.com/hyperfollow/echosquirrel/crystaline-echo
 Uses single-l spelling “crystaline” and corrects legacy double‑l variants where applicable.
 What It Updates (by design)
 

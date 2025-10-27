@@ -119,6 +119,38 @@ LLM operators can progress through the implementation roadmap one phase at a tim
 
 Each phase guide lists the commands to run, fixtures to prepare, and criteria for declaring the phase complete. Treat them as living specs—update the docs when new insights land.
 
+## Continuous Integration
+
+The consolidated workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) now drives six parallel checks on every push:
+
+- **audio-visual** – installs workspaces under `audio-visual-script-repo`, runs lint/build/test for the authoring suite.
+- **echo-toolkit** – executes `npm ci`, toolkit integration checks, and the Python parity/LSB regression suite.
+- **kira-prime** – validates the VesselOS CLI, agent hand-off scripts, and shared protobuf stubs.
+- **living-garden** – runs the narrative chronicle fixtures and stego validation regressions.
+- **monorepo-smoke** – provisions the root virtualenv (`python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`) and executes `python -m pytest -q`.
+- **vesselos-research** – boots the research workspace and ensures its CLI sanity commands pass.
+
+Mirror the CI locally before opening a PR:
+
+```bash
+# Root smoke + stego suites
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m pytest -q
+
+# Module-specific runners
+./scripts/ci/run_toolkit_ci.sh
+./scripts/ci/run_kira_ci.sh
+./scripts/ci/run_chronicles_ci.sh
+./scripts/ci/run_research_ci.sh
+```
+
+Remember to refresh the shared deps when editing parity logic or codecs:
+
+```bash
+.venv/bin/pip install -r requirements.txt
+python -m grpc_tools.protoc -Iprotos --python_out=protos --grpc_python_out=protos protos/agents.proto
+```
+
 ## Module Playbook
 
 ### Echo-Community-Toolkit (`Echo-Community-Toolkit/`)

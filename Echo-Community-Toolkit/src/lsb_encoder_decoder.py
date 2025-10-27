@@ -9,9 +9,9 @@ from typing import Any, Dict, List, Optional
 
 from PIL import Image, ImageDraw  # pillow
 
-from .mrp.adapters import png_lsb
-from .mrp.frame import MRPFrame, make_frame
-from .mrp.meta import sidecar_from_frames
+from mrp.adapters import png_lsb
+from mrp.frame import MRPFrame, make_frame
+from mrp.meta import sidecar_from_frames
 
 MAGIC = b"LSB1"
 

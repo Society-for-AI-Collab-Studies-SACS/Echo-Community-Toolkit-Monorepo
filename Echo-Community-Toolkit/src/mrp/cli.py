@@ -5,15 +5,15 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from .adapters import png_lsb
-from .frame import MRPFrame, parse_frame
-from .codec import (
+from mrp.adapters import png_lsb
+from mrp.frame import MRPFrame, parse_frame
+from mrp.codec import (
     RitualConsentError,
     decode as codec_decode,
     encode_with_mode,
 )
-from .sidecar import validate_sidecar
-from ..ritual.state import default_ritual_state
+from mrp.sidecar import validate_sidecar
+from ritual.state import default_ritual_state
 
 
 def _load_headers_from_png(path: Path, *, bits_per_channel: int) -> Dict[str, MRPFrame]:

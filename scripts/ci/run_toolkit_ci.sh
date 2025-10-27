@@ -15,7 +15,9 @@ npm_bootstrap() {
 
 pushd "${PROJECT_DIR}" >/dev/null
 npm_bootstrap
+npm run integrate
 npm run verify
+npm run clean
 popd >/dev/null
 
 if [[ -d "${PROJECT_DIR}/lambda-vite" ]]; then
@@ -31,6 +33,8 @@ python3 -m venv "${VENV_DIR}"
 source "${VENV_DIR}/bin/activate"
 python3 -m pip install --upgrade pip
 python3 -m pip install -r "${PROJECT_DIR}/requirements.txt"
+pushd "${PROJECT_DIR}" >/dev/null
 python3 -m pytest -q
+popd >/dev/null
 deactivate
 rm -rf "${VENV_DIR}"

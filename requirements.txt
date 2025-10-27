@@ -8,3 +8,5 @@ pyserial
 PyYAML
 aiohttp
 jsonschema
+pytest
+reedsolo
