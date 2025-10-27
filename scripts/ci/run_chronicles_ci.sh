@@ -18,5 +18,9 @@ python3 src/validator.py
 deactivate
 rm -rf "${VENV_DIR}"
 
+<<<<<<< HEAD
 # Prevent generated artifacts from leaving the repository dirty during local runs.
+=======
+# Prevent generated artifacts from leaving the tree dirty during local runs.
+>>>>>>> 59498a1af1e3f7d2ba88eb4dcdc8fb04dbf66c41
 git -C "${PROJECT_DIR}" checkout -- frontend/index.html frontend/assets >/dev/null 2>&1 || true

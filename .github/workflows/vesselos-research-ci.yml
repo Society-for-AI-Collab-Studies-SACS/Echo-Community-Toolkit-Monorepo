@@ -1,7 +1,8 @@
-name: VesselOS Research CI
+name: VesselOS Dev Research CI
 
 on:
   push:
+    branches: [ "main" ]
     paths:
       - 'vesselos-dev-research/**'
       - 'scripts/ci/run_research_ci.sh'
@@ -11,14 +12,22 @@ on:
       - 'vesselos-dev-research/**'
       - 'scripts/ci/run_research_ci.sh'
       - '.github/workflows/vesselos-research-ci.yml'
+  workflow_dispatch:
 
 jobs:
-  tests:
+  research:
     runs-on: ubuntu-latest
+    env:
+      CI_SKIP_SBERT: '1'
+      COLLAB_SMOKE_ENABLED: '0'
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
       - name: Run VesselOS Research suite
         run: bash scripts/ci/run_research_ci.sh

@@ -2,6 +2,7 @@ name: Kira Prime CI
 
 on:
   push:
+    branches: [ "main" ]
     paths:
       - 'kira-prime/**'
       - 'vesselos-dev-research/**'
@@ -13,14 +14,25 @@ on:
       - 'vesselos-dev-research/**'
       - 'scripts/ci/run_kira_ci.sh'
       - '.github/workflows/kira-prime-ci.yml'
+  workflow_dispatch:
 
 jobs:
-  tests:
+  prime:
     runs-on: ubuntu-latest
+    env:
+      CI_SKIP_SBERT: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            kira-prime/Echo-Community-Toolkit/package-lock.json
+            kira-prime/vscode-extension/package-lock.json
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
       - name: Run Kira Prime suite
         run: bash scripts/ci/run_kira_ci.sh

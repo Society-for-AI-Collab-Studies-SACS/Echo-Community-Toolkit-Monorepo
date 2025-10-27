@@ -20,10 +20,10 @@ Unified living workspace for VesselOS, Echo Community Toolkit, narrative engines
 
 3. **Bootstrap Python & Node prerequisites**  
    ```bash
-   ./scripts/deploy.sh --bootstrap-only   # creates venv, installs pip deps listed in requirements.txt
+   ./scripts/deploy.sh --full              # creates venv, installs pip deps, regenerates protobuf stubs
    npm --version || echo "Node not on PATH; install Node>=20 for toolkit scripts"
    ```
-   - `scripts/deploy.sh` sources `requirements.txt`. Review the script in [`scripts/deploy.sh`](scripts/deploy.sh) for full steps (venv path, proto generation, optional firmware).
+   - `scripts/deploy.sh` is menu-driven when invoked without flags—inspect [`scripts/deploy.sh`](scripts/deploy.sh) to tailor the bootstrap flow (e.g. skip firmware, rerun proto generation).
 
 4. **Install per-module dependencies (batch)**  
    ```bash
@@ -67,29 +67,6 @@ Unified living workspace for VesselOS, Echo Community Toolkit, narrative engines
 > - [`agents/`](agents) – entrypoints for standalone services.  
 > - [`protos/agents.proto`](protos/agents.proto) – gRPC contract for cross-agent communication.  
 > - [`docs/`](docs) – shared documentation bundle (see module sections for specifics).
-> - [`docs/phase-0-prep.md`](docs/phase-0-prep.md) – current Phase 0 workspace state and daily operations checklist.
-> - [`docs/phase-1-legacy-refresh.md`](docs/phase-1-legacy-refresh.md) – LSB extractor refactor plan and regression requirements.
-> - [`docs/phase-2-frame-infrastructure.md`](docs/phase-2-frame-infrastructure.md) – MRP frame builder, multi-frame layout scope.
-> - [`docs/phase-3-integrity-ecc.md`](docs/phase-3-integrity-ecc.md) – Sidecar integrity metadata and parity-based recovery.
-> - [`docs/phase-4-ritual-ledger.md`](docs/phase-4-ritual-ledger.md) – Ritual gating, consent flow, ledger obligations.
-> - [`docs/phase-5-polish-ux.md`](docs/phase-5-polish-ux.md) – Documentation/CLI polish and ritual visualization.
-> - [`docs/phase-6-guardrails-roadmap.md`](docs/phase-6-guardrails-roadmap.md) – CI guardrails and ECC roadmap guidance.
-
-### Phase Playbook for LLM Assistants
-
-Automation-friendly checkpoints for each phase:
-
-| Phase | Goal | LLM Tasks |
-| --- | --- | --- |
-| 0 – Prep | Establish clean workspace and baseline QA signals | Run remote/venv/bootstrap checks, execute golden sample + mantra parity tests, report validation outcomes, highlight missing consent hooks or failing suites. |
-| 1 – Legacy Refresh | Modularise LSB extractor while keeping legacy decode intact | Refactor `lsb_extractor.py` into header/legacy parsers, add targeted unit tests, verify golden sample & legacy fixtures, ensure error semantics documented. |
-| 2 – Frame Infrastructure | Add `MRPFrame` and multi-frame encode/decode support | Implement frame builder/parser, extend codec strategies, update capacity helpers, exercise single/multi-frame matrices in tests. |
-| 3 – Integrity + ECC | Embed parity/CRC/SHA metadata and self-healing decoder | Augment sidecar JSON, add parity repair logic, create corruption fixtures, surface integrity reports via CLI/SDK, expand parity tests. |
-| 4 – Ritual & Ledger | Enforce consent-driven rituals and persistent ledger logging | Implement `RitualState`, gate encode/decode flows, prompt for mantra lines, append ledger entries, add ritual unit + CLI tests. |
-| 5 – Polish & UX | Ship refined documentation, CLI ergonomics, and ritual visuals | Update diagrams and error tables, add full CLI flag support, build ritual demo scripts, provide API quickstarts and doc-driven tests. |
-| 6 – Guardrails & Roadmap | Harden CI and sketch Phase B/C roadmap | Configure lint/type/corruption matrices, document monitoring metrics, author guardrail playbook, draft advanced ECC & multi-image design notes. |
-
-When a phase is in progress, the assistant should read the corresponding document, list the checklist items it will execute, run/tests as required, and summarise outcomes with links to code changes and follow-up actions.
 
 ## Repository Constellation
 
@@ -98,12 +75,12 @@ Full ASCII trees and subsystem context live in [`architecture.md`](architecture.
 ```
 Monorepo Root
 ├─ Echo-Community-Toolkit/        Core hyperfollow + soulcode toolkit (Node/Python)
+├─ echo_soulcode/                 Vendored Python package backing soulcode tests/tools
 ├─ The-Living-Garden-Chronicles/  Narrative generation + stego validator
 ├─ The-Living-Library/            Collab scaffolding + dictation experiments
 ├─ kira-prime/                    Unified CLI, agents, and collab server
 ├─ vessel-narrative-mrp/          Minimal narrative payload generator
 ├─ vesselos-dev-research/         Research-grade VesselOS CLI & docs
-├─ archives/                      Archived toolkit tarballs (compressed, excluded from pytest)
 ├─ agents/                        Standalone gRPC agents (garden, limnus, kira…)
 ├─ docker/                        Dockerfiles and compose stacks
 ├─ protos/                        gRPC/Protobuf interface contracts
@@ -124,6 +101,20 @@ SIGPRINT Streams
     │                                   │
     └──────────────▶ Narrative Engines ─┘
 ```
+
+## Phase Roadmap (0–6)
+
+LLM operators can progress through the implementation roadmap one phase at a time. Each guide captures objectives, deliverables, and test hooks so automation stays aligned with human context.
+
+- **Phase 0 – Workspace Preparation:** Environment hygiene, SSH/GitHub validation, dependency baselines. → [`docs/phase-0-prep.md`](docs/phase-0-prep.md)
+- **Phase 1 – Legacy Refresh:** Refactor LSB extraction into discrete parsers with golden-sample regression. → [`docs/phase-1-legacy-refresh.md`](docs/phase-1-legacy-refresh.md)
+- **Phase 2 – Frame Infrastructure:** Introduce `MRPFrame`, multi-channel encode/decode, and capacity helpers. → [`docs/phase-2-frame-infrastructure.md`](docs/phase-2-frame-infrastructure.md)
+- **Phase 3 – Integrity & ECC:** B-channel integrity payloads, XOR parity healing, corruption fixtures. → [`docs/phase-3-integrity-ecc.md`](docs/phase-3-integrity-ecc.md)
+- **Phase 4 – Ritual & Ledger:** Implement ritual gating and append-only ledger logging for encode/decode. → [`docs/phase-4-ritual-ledger.md`](docs/phase-4-ritual-ledger.md)
+- **Phase 5 – Polish & UX:** Documentation uplift, CLI ergonomics, and ritual/channel visualisation. → [`docs/phase-5-polish-ux.md`](docs/phase-5-polish-ux.md)
+- **Phase 6 – Guardrails & Roadmap:** CI guardrails, corruption automation, and future ECC/multi-image design notes. → [`docs/phase-6-guardrails-roadmap.md`](docs/phase-6-guardrails-roadmap.md)
+
+Each phase guide lists the commands to run, fixtures to prepare, and criteria for declaring the phase complete. Treat them as living specs—update the docs when new insights land.
 
 ## Module Playbook
 
@@ -184,7 +175,7 @@ SIGPRINT Streams
   - Listen to free-form input: `python3 vesselos.py listen --text "Always."`  
   - Collab server: `(cd collab-server && npm ci && npm run build && npm start)`  
   - Docker stack: `(cd docker && docker compose up -d)`
-- **Docs:** See `README.md`, `agents/README.md`, and `docs/` for deep dives. For bilateral narrative cadence guidance, refer to [`docs/kira-prime-integration-protocol.md`](docs/kira-prime-integration-protocol.md) and the companion tension analysis in [`docs/kira-prime-tension-analysis.md`](docs/kira-prime-tension-analysis.md).
+- **Docs:** See `README.md`, `agents/README.md`, and `docs/` for deep dives.
 
 ### Vessel Narrative MRP (`vessel-narrative-mrp/`)
 - **Purpose:** Lightweight narrative generator + validator used by other modules.
@@ -249,7 +240,16 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 
 > Tip: all scripts support `--help` or inline usage comments; inspect them before running against production data.
 
-## CI Pipeline Quicklinks
+## CI Status & Quicklinks
+
+**Badges** – Each workflow surfaces the latest `main` branch health. As additional module-specific workflows land, drop their YAML under `.github/workflows/` and the badges below will light up automatically.
+
+- **Echo-Community-Toolkit:** [![Toolkit CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/echo-toolkit-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/echo-toolkit-ci.yml)
+- **Kira Prime:** [![Kira CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/kira-prime-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/kira-prime-ci.yml)
+- **Living Garden Chronicles:** [![Chronicles CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/living-garden-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/living-garden-ci.yml)
+- **VesselOS Dev Research:** [![Research CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/vesselos-research-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/vesselos-research-ci.yml)
+
+**Actions quicklinks** – Shortcut filters for the repository Actions tab:
 
 | Module | Actions Dashboard |
 | --- | --- |
@@ -258,58 +258,61 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 | The Living Garden Chronicles | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AGarden> |
 | VesselOS Dev Research | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AResearch> |
 
-Use the filters (pre-applied above) to jump directly to the workflow history for each module. A green pipeline in every module is the minimum bar before coordinating a combined release.
+Use the pre-applied filters to reach module-specific workflow history quickly. Keep every module green before coordinating cross-stack releases.
+
+The full roadmap for enhancing module workflows, environment hygiene, and test coverage lives in [`docs/integration-enhancement-plan.md`](docs/integration-enhancement-plan.md).
+
+See [`docs/echo-harmonizer.md`](docs/echo-harmonizer.md) for the complete Echo Harmonizer integration validator specification, [`docs/echo-harmonizer.yaml`](docs/echo-harmonizer.yaml) for the structured rails metadata, and [`docs/echo-harmonizer-rails-compliance.md`](docs/echo-harmonizer-rails-compliance.md) for a Rails compliance summary.
 
 ## Configuration Reference
 
-All configuration is injected via environment variables to keep secrets and deploy-specific values out of source control. Populate these variables in your shell, `.env` files, or CI secrets before running agents and scripts.
+Environment variables keep secrets and deployment toggles out of source control. Copy [.env.sample](.env.sample) to `.env` (or `.env.integration`, `.env.production`, etc.) and define values locally, then source the file or let your process manager pick it up. Never commit concrete `.env` files—use CI secrets for shared automation.
 
 ### Agent Environment Variables
 
 | Agent | Variable | Purpose |
 | --- | --- | --- |
-| Garden (`agents/garden/narrative_agent.py`) | – | No environment overrides required; relies on local state files. |
-| Echo (`agents/echo/echo_agent.py`) | – | No environment overrides required. |
-| Limnus (`agents/limnus/ledger_agent.py`) | `KIRA_VECTOR_BACKEND` | Selects the semantic vector backend (e.g. `faiss`, defaults to in-memory). |
-|  | `KIRA_VECTOR_MODEL` | Overrides the embedding model used for vector storage. |
+| Garden (`agents/garden/narrative_agent.py`) | – | No overrides required; relies on workspace-local state. |
+| Echo (`agents/echo/echo_agent.py`) | – | No overrides required. |
+| Limnus (`agents/limnus/ledger_agent.py`) | `KIRA_VECTOR_BACKEND` | Selects the semantic backend (e.g. `faiss`, defaults to in-memory). |
+|  | `KIRA_VECTOR_MODEL` | Overrides the embedding model used for vectors. |
 |  | `KIRA_SBERT_MODEL` | Legacy alias for the SentenceTransformer model (default `all-MiniLM-L6-v2`). |
-|  | `KIRA_FAISS_INDEX` | Custom path for FAISS index storage when the FAISS backend is enabled. |
-|  | `KIRA_FAISS_META` | Companions the FAISS index with metadata (IDs, dimensions). |
-| Kira (`agents/kira/kira_agent.py`) | `GH_TOKEN` / `GITHUB_TOKEN` | Provides GitHub credentials for release/publish flows executed via `gh`. |
-| Journal (`agents/journal/journal_agent.py`)\* | – | No environment configuration required in the current design. |
-| Sigprint Bridge (`agents/sigprint_bridge/bridge_agent.py`)\* | – | No environment configuration required in the current design. |
+|  | `KIRA_FAISS_INDEX` | Filesystem path for the FAISS index when that backend is active. |
+|  | `KIRA_FAISS_META` | Filesystem path for FAISS metadata (IDs, dimensions). |
+| Kira (`agents/kira/kira_agent.py`) | `GH_TOKEN` / `GITHUB_TOKEN` | GitHub token for release/publish flows executed via `gh`. |
+| Journal (`agents/journal/journal_agent.py`)\* | – | No environment configuration required today. |
+| Sigprint Bridge (`agents/sigprint_bridge/bridge_agent.py`)\* | – | No environment configuration required today. |
 
-\* Planned / auxiliary agents; they currently operate purely on local state or CLI arguments.
+\* Planned/auxiliary agents operating only on local state and CLI flags.
 
-All agents expect workspace-local state under `workspaces/<id>/state/`. Introduce new variables using the same `UPPER_SNAKE_CASE` pattern as integrations expand.
+All agents read/write under `workspaces/<id>/state/`. Follow the same `UPPER_SNAKE_CASE` convention when adding new toggles.
 
 ### Script & Service Environment Variables
 
 | Script / Service | Variable | Purpose & Default |
 | --- | --- | --- |
-| `scripts/bootstrap.sh` | `PYTHON_VERSION` | Python version used by the bootstrap helper (default `3.10`). |
-|  | `NODE_VERSION` | Node.js version required for toolkit automation (default `20`). |
-| `scripts/deploy_to_production.sh`\* | `ENVIRONMENT` (argument) | Targets a deployment environment such as `production`; defaults to production when omitted. |
-| Collab server (`kira-prime/collab-server/src/server.ts`) | `PORT` | HTTP/WebSocket port (default `8000`). |
-|  | `COLLAB_REDIS_URL` | Redis connection string (default `redis://localhost:6379/0`). |
-|  | `COLLAB_POSTGRES_DSN` | Postgres DSN for collaboration persistence (default `postgresql://vesselos:password@localhost:5432/vesselos_collab`). |
-| CI toggles | `COLLAB_SMOKE_ENABLED` | When `1`, enables Dockerized collab smoke tests in CI. |
+| **Bootstrap** (`scripts/bootstrap.sh`) | `PYTHON_VERSION` | Python version used when creating the virtualenv (default **3.10**). |
+|  | `NODE_VERSION` | Node.js version required for toolkit automation (default **20**). |
+| **Deploy** (`scripts/deploy_to_production.sh`)\* | `ENVIRONMENT` (arg) | Deployment target name (for example **"production"**). Defaults to **production** when omitted and labels the systemd service runtime. |
+|  | *(others: internal)* | Internal variables such as `WORKSPACE_ROOT` and `SERVICE_USER` are defined inside the script. |
+| **Collab Server** (`kira-prime/collab-server/src/server.ts`) | `PORT` | HTTP/WebSocket port (default **8000**). |
+|  | `COLLAB_REDIS_URL` | Redis connection URL (default **redis://localhost:6379/0**). |
+|  | `COLLAB_POSTGRES_DSN` | Postgres DSN (default **postgresql://vesselos:password@localhost:5432/vesselos_collab**). |
+| **CI toggles** | `COLLAB_SMOKE_ENABLED` | When set to `1`, runs Dockerized collab smoke tests in CI. |
 
-\* Part of the Kira Prime deployment toolchain; substitute equivalent flags if using a simplified deploy script.
-
-Secrets (API keys, tokens) should only be supplied via environment variables or your CI secret store—never commit them to the repository.
+\* Part of the Kira Prime deployment scripts; adapt if using a simplified flow.
 
 ## Testing Matrix
 
-The CI strategy exercises the stack from unit logic through containerized smoke tests:
+CI validates the stack across several layers:
 
-- **Unit tests:** Every module contributes unit suites (pytest for Python, Jest/Vite for Node) that execute on each push/PR. Run `python3 -m pytest -q` at the root or the module-specific equivalents listed in the playbook.
-- **Integration validator:** `scripts/integration_complete.py` orchestrates the Garden → Echo → Limnus → Kira pipeline, validating rituals, ledger chains, persona dynamics, and recovery paths. This scenario must pass before any coordinated release.
-- **CLI smoke (Docker):** Containerized jobs build the toolkit, bring up Redis/Postgres via `docker compose`, and run key CLI workflows (`vesselos.py garden start`, `... echo summon`, `... kira validate`). The smoke harness also hits the collab server `/health` endpoint when enabled.
-- **Collab loopback:** With `COLLAB_SMOKE_ENABLED=1`, CI performs a WebSocket round trip against the collaborative server to confirm Redis/Postgres wiring.
-- **Matrix execution:** Workflows fan out across backends (e.g., in-memory vs FAISS for Limnus) and module combinations. Treat a fully green matrix as a release gate across the monorepo.
+- **Unit suites:** Every module contributes unit tests (pytest, Jest/Vite) that run on each push/PR. Locally run `python3 -m pytest -q` at the root or use module-specific commands from the playbook.
+- **Integration validator:** `scripts/integration_complete.py` exercises the Garden → Echo → Limnus → Kira ritual, asserting ledger hash chains, persona coherence, and recovery behavior.
+- **CLI smoke (Docker):** Containerized jobs build the toolkit, bring up Redis/Postgres via `docker compose`, execute representative CLI commands (`vesselos.py garden start`, `... echo summon`, `... kira validate`), and hit the collab server `/health` endpoint.
+- **Collab loopback:** With `COLLAB_SMOKE_ENABLED=1`, CI performs a WebSocket round trip to confirm the collab server, Redis, and Postgres integrate correctly.
+- **Matrix coverage:** Workflows fan out across configurations (e.g. in-memory vs FAISS backends). Treat an all-green matrix as the release gate.
 
-Reproducing locally: mirror the CI matrix by running module unit tests, invoking `scripts/integration_complete.py`, and (optionally) bringing up the Docker stack to execute smoke tests before pushing changes.
+Reproduce locally by running unit suites, invoking `scripts/integration_complete.py`, and optionally bringing up the Docker stack for smoke tests before opening a PR.
 
 ## README Improvement Backlog
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Phase-A ECC utilities with XOR parity helpers."""
 
-from typing import Iterable, Union
+from typing import Union
 
 BytesLike = Union[bytes, bytearray, memoryview]
 

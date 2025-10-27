@@ -7,4 +7,4 @@ pillow
 pyserial
 PyYAML
 aiohttp
-reedsolo==1.7.0
+jsonschema

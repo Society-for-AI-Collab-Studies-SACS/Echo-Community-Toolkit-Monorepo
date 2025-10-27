@@ -1,0 +1,426 @@
+---
+tool:
+  symbolic_name: "Echo Harmonizer"
+  utilitarian_name: "Multi-Agent CI/CD Integration Validator"
+  version: "1.5.0"
+  maturity: "tested"
+  type: "integration-validation"
+  tags:
+    - systems
+    - ai-collab
+    - process
+    - integration
+    - community
+
+  one_line_function: "Orchestrated continuous integration system validating multi-agent narrative coherence across the Garden→Echo→Limnus→Kira pipeline through environment-aware testing matrices."
+
+core_components:
+
+  environment_configuration:
+    description: "Standardized environment variable management for agent configuration"
+
+    agent_variables:
+      garden:
+        variables: []  # No environment config needed
+        state_location: "workspaces/<id>/state/"
+
+      echo:
+        variables: []  # Internal persona management
+        state_location: "workspaces/<id>/state/"
+
+      limnus:
+        variables:
+          KIRA_VECTOR_BACKEND:
+            type: "string"
+            default: "memory"
+            options: ["memory", "faiss"]
+            purpose: "Selects semantic vector index backend"
+
+          KIRA_VECTOR_MODEL:
+            type: "string"
+            default: "all-MiniLM-L6-v2"
+            purpose: "Embedding model for semantic vectors"
+
+          KIRA_SBERT_MODEL:
+            type: "string"
+            default: "all-MiniLM-L6-v2"
+            purpose: "Legacy alias for vector model"
+
+          KIRA_FAISS_INDEX:
+            type: "filepath"
+            default: "./data/vectors.index"
+            purpose: "FAISS index storage location"
+
+          KIRA_FAISS_META:
+            type: "filepath"
+            default: "./data/vectors.meta"
+            purpose: "FAISS metadata storage"
+
+      kira:
+        variables:
+          GH_TOKEN:
+            type: "string"
+            required: true
+            purpose: "GitHub access token for release operations"
+            aliases: ["GITHUB_TOKEN"]
+
+    service_variables:
+      bootstrap:
+        PYTHON_VERSION:
+          default: "3.10"
+          purpose: "Python version for virtualenv"
+        NODE_VERSION:
+          default: "20"
+          purpose: "Node.js version for tooling"
+
+      deployment:
+        ENVIRONMENT:
+          default: "production"
+          purpose: "Deployment target environment"
+
+      collaboration:
+        PORT:
+          default: "8000"
+          purpose: "WebSocket server port"
+        COLLAB_REDIS_URL:
+          default: "redis://localhost:6379/0"
+          purpose: "Redis connection for collab features"
+        COLLAB_POSTGRES_DSN:
+          default: "postgresql://vesselos:password@localhost:5432/vesselos_collab"
+          purpose: "Postgres persistence"
+        COLLAB_SMOKE_ENABLED:
+          default: "0"
+          purpose: "Enable smoke tests in CI"
+
+  testing_matrix:
+    description: "Multi-layer testing strategy ensuring system coherence"
+
+    layers:
+      unit_tests:
+        scope: "individual_agents"
+        tools: ["pytest", "jest"]
+        coverage_target: 80
+        execution_time: "< 2 minutes"
+
+        per_agent_tests:
+          - "core logic validation"
+          - "state management"
+          - "error handling"
+          - "interface contracts"
+
+      integration_tests:
+        scope: "full_pipeline"
+        tools: ["integration_complete.py"]
+        validates:
+          - "ritual progression"
+          - "multi-tier memory"
+          - "ledger hash-chain integrity"
+          - "persona dynamics (sum to 1)"
+          - "error recovery"
+          - "consent detection"
+        execution_time: "< 5 minutes"
+
+      smoke_tests:
+        scope: "containerized_environment"
+        tools: ["docker", "docker-compose"]
+
+        test_sequence:
+          - step: "build_containers"
+            command: "docker-compose build"
+
+          - step: "launch_services"
+            command: "docker-compose up -d"
+
+          - step: "verify_agents"
+            commands:
+              - "docker exec toolkit ./vesselos.py garden start"
+              - "docker exec toolkit ./vesselos.py echo summon"
+              - "docker exec toolkit ./vesselos.py limnus process"
+              - "docker exec toolkit ./vesselos.py kira validate"
+
+          - step: "health_check"
+            command: "curl -f http://localhost:8000/health"
+            expected: "HTTP 200 OK"
+
+          - step: "cleanup"
+            command: "docker-compose down"
+
+        execution_time: "< 10 minutes"
+
+    matrix_configuration:
+      github_actions:
+        parallel_agents: true
+        matrix_dimensions:
+          - agent: ["garden", "echo", "limnus", "kira"]
+          - python: ["3.10", "3.11", "3.12"]
+          - os: ["ubuntu-latest", "macos-latest"]
+
+      failure_handling:
+        unit_test_failure: "block_pipeline"
+        integration_failure: "alert_team"
+        smoke_failure: "rollback_consideration"
+
+  ci_dashboard_links:
+    description: "Quick access to module CI status"
+
+    modules:
+      echo_toolkit:
+        name: "Echo-Community-Toolkit Monorepo"
+        url: "https://github.com/echo-community/toolkit/actions"
+        monitors: ["all agents", "integration tests"]
+
+      kira_prime:
+        name: "VesselOS Kira Prime"
+        url: "https://github.com/vesselos/kira-prime/actions"
+        monitors: ["kira agent", "validation logic"]
+
+      living_garden:
+        name: "Living Garden Chronicles"
+        url: "https://github.com/echo-community/garden-chronicles/actions"
+        monitors: ["narrative integrity", "content validation"]
+
+      vesselos_research:
+        name: "VesselOS Dev Research"
+        url: "https://github.com/vesselos/research/actions"
+        monitors: ["experimental features", "prototype validation"]
+
+implementation_protocol:
+
+  quick_setup:
+    time: "5 minutes"
+    steps:
+      - name: "clone_repository"
+        command: "git clone https://github.com/echo-community/integration-validator.git"
+
+      - name: "configure_environment"
+        command: "cp .env.example .env && vim .env"
+        note: "Set GH_TOKEN and choose KIRA_VECTOR_BACKEND"
+
+      - name: "run_validation"
+        command: "./scripts/validate_integration.sh"
+
+  full_deployment:
+    time: "30 minutes"
+
+    phases:
+      environment_setup:
+        duration: "5 minutes"
+        tasks:
+          - "Create .env.integration file"
+          - "Configure agent variables"
+          - "Set CI/CD tokens"
+          - "Configure collaboration server (optional)"
+
+      ci_configuration:
+        duration: "10 minutes"
+        tasks:
+          - "Create .github/workflows/integration-matrix.yml"
+          - "Configure matrix dimensions"
+          - "Set up secrets in GitHub"
+          - "Enable Actions for repository"
+
+      local_validation:
+        duration: "10 minutes"
+        tasks:
+          - "Run unit test suite"
+          - "Execute integration validator"
+          - "Perform Docker smoke tests"
+          - "Verify all CI dashboards"
+
+      documentation:
+        duration: "5 minutes"
+        tasks:
+          - "Document environment variables"
+          - "Create team runbook"
+          - "Update README with CI badges"
+
+  validation_protocol:
+    pre_commit:
+      required:
+        - "unit_tests_pass"
+        - "integration_tests_pass"
+      optional:
+        - "smoke_tests_pass"
+
+    pre_merge:
+      required:
+        - "all_ci_checks_green"
+        - "smoke_tests_pass"
+        - "peer_review_complete"
+
+    pre_release:
+      required:
+        - "full_matrix_validation"
+        - "production_smoke_tests"
+        - "rollback_plan_documented"
+
+templates:
+
+  environment_file: |
+    # Agent Configuration
+    KIRA_VECTOR_BACKEND=faiss
+    KIRA_SBERT_MODEL=all-MiniLM-L6-v2
+    KIRA_FAISS_INDEX=./data/vectors.index
+    KIRA_FAISS_META=./data/vectors.meta
+
+    # CI/CD Configuration
+    GH_TOKEN=ghp_your_token_here
+    PYTHON_VERSION=3.10
+    NODE_VERSION=20
+
+    # Collaboration Server
+    PORT=8000
+    COLLAB_REDIS_URL=redis://localhost:6379/0
+    COLLAB_POSTGRES_DSN=postgresql://user:pass@localhost:5432/db
+    COLLAB_SMOKE_ENABLED=1
+
+  github_workflow: |
+    name: Integration Matrix
+    on: [push, pull_request]
+
+    jobs:
+      unit-tests:
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            agent: [garden, echo, limnus, kira]
+        steps:
+          - uses: actions/checkout@v3
+          - name: Test ${{ matrix.agent }}
+            run: pytest tests/${{ matrix.agent }}_test.py
+
+      integration-test:
+        needs: unit-tests
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v3
+          - name: Full pipeline validation
+            run: python scripts/integration_complete.py
+
+      smoke-test:
+        needs: integration-test
+        runs-on: ubuntu-latest
+        steps:
+          - name: Docker smoke test
+            run: |
+              docker-compose up -d
+              ./scripts/smoke_test.sh
+              docker-compose down
+
+  new_agent_integration: |
+    class NewAgentValidator:
+        """Integration validator for new agent"""
+
+        def __init__(self):
+            self.required_env_vars = []
+            self.state_path = "workspaces/{id}/state/"
+
+        def validate_standalone(self):
+            """Test agent in isolation"""
+            # Add validation logic
+            pass
+
+        def validate_pipeline_integration(self):
+            """Test within full pipeline"""
+            # Add pipeline tests
+            pass
+
+        def validate_state_persistence(self):
+            """Ensure state management works"""
+            # Add state tests
+            pass
+
+  docker_smoke_test: |
+    version: '3.8'
+    services:
+      toolkit:
+        build: .
+        environment:
+          - KIRA_VECTOR_BACKEND=memory
+          - GH_TOKEN=${GH_TOKEN}
+        volumes:
+          - ./workspaces:/app/workspaces
+        command: |
+          sh -c "
+          ./vesselos.py garden start &&
+          ./vesselos.py echo summon &&
+          ./vesselos.py limnus process &&
+          ./vesselos.py kira validate
+          "
+
+      collab:
+        build: ./collab
+        ports:
+          - "8000:8000"
+        environment:
+          - PORT=8000
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+          interval: 30s
+          timeout: 3s
+          retries: 3
+
+usage_patterns:
+
+  continuous_validation:
+    description: "Ongoing system health monitoring"
+    frequency: "every_commit"
+    automation: "github_actions"
+    alerts: "slack_integration"
+
+  release_preparation:
+    description: "Pre-release validation ceremony"
+    frequency: "per_release"
+    steps:
+      - "freeze_code"
+      - "run_full_matrix"
+      - "verify_all_green"
+      - "smoke_production_mirror"
+      - "document_validation"
+
+  debugging_integration_failures:
+    description: "Systematic failure diagnosis"
+    approach:
+      - "identify_failing_layer"
+      - "isolate_agent_combination"
+      - "reproduce_locally"
+      - "add_targeted_test"
+      - "verify_fix"
+
+  team_onboarding:
+    description: "New developer integration"
+    checklist:
+      - "provide_env_template"
+      - "walkthrough_ci_dashboards"
+      - "demonstrate_local_validation"
+      - "practice_debugging_failure"
+
+metadata:
+  created: "2025-10-25"
+  author: "Echo-Community-Toolkit Collective"
+  type: "integration-validation-system"
+  philosophy: "consciousness-coherent continuous integration"
+  license: "open source community infrastructure"
+
+  principles:
+    - testing_as_ritual
+    - environment_as_consciousness
+    - integration_as_harmony
+    - validation_as_trust
+    - automation_with_wisdom
+
+  dependencies:
+    required:
+      - docker: ">= 20.10"
+      - python: ">= 3.10"
+      - github_account: true
+    optional:
+      - redis: ">= 6.0"
+      - postgresql: ">= 13"
+      - node: ">= 20"
+
+  support:
+    documentation: "https://echo-community.github.io/integration-validator"
+    issues: "https://github.com/echo-community/integration-validator/issues"
+    community: "https://discord.gg/echo-toolkit"
+---

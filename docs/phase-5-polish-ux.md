@@ -1,44 +1,43 @@
 # Phase 5 – Polish & UX
 
+Phase 5 packages the technical breakthroughs into a coherent user experience. Documentation, CLI ergonomics, and visual feedback all converge so human and agent operators can navigate the seven-phase journey confidently.
+
 ## Objectives
-- Deliver comprehensive documentation for LSB1/MRP workflows, ritual journey, and API usage.
-- Enhance CLI ergonomics with feature-complete flags and output controls.
-- Provide an engaging walkthrough/demo showing α/β/γ state progress and channel operations.
+- Refresh documentation with diagrams, walkthroughs, and error-code references covering multi-frame MRP, ritual flows, and integrity reporting.
+- Expand CLI options for 4-bit mode, metadata inputs, and verbosity control.
+- Provide a lightweight visual or scripted demo that illustrates α/β/γ channel activity and ritual progression.
 
-## Scope & Deliverables
-1. **Documentation Overhaul**
-   - Produce multi-artifact documentation bundle:
-     - Updated diagrams (ASCII + SVG) for LSB1 header, MRP frames, ritual state machine.
-     - Detailed walkthrough for encode/decode flows including CLI, SDK, and UI output snippets.
-     - Error/reference manual listing codes (`ERR_CRC_MISMATCH`, `ERR_CONSENT_REQUIRED`, `ERR_PARITY_FAILED`, etc.) with remediation steps.
-     - Troubleshooting guide covering common pitfalls (insufficient capacity, missing consent, parity tamper).
-   - Embed interactive examples (e.g., Jupyter notebooks or doctest sections) demonstrating `encode_mrp` / `decode_mrp` usage.
-2. **CLI Enhancements**
-   - Finalize flag set:
-     - `--mode single|mrp`, `--bpc 1|4`, `--meta <file|json>`, `--integrity-report [file]`, `--consent auto|prompt|script`, `--quiet`, `--verbose`, `--output text|json`.
-     - `--ritual-visual` to trigger animated output.
-     - `encode` command to accept `--ledger-note` for manual annotations.
-   - Update `--help` text with usage examples, ensure alignment with docs.
-   - Provide sample shell scripts demonstrating typical workflows (`scripts/mrp_encode.sh`, `scripts/mrp_decode.sh`).
-3. **UX / Visualization**
-   - Build `scripts/ritual_demo.py`:
-     - Streams α→β→γ progress, channel operations, parity corrections, ledger updates.
-     - Accepts `--speed` / `--theme` (ASCII vs minimal).
-   - Add optional curses/TUI interface (if time permits) or specify design notes.
-   - Support piping demo output into README (animated GIF or asciinema).
-4. **SDK & API Polish**
-   - Provide typed Python wrapper (`mrp/api.py`) with dataclasses and docstrings.
-   - Ensure docstrings include examples, references to CLI equivalents.
-   - Publish quickstart guide referencing both CLI and SDK paths.
-5. **Doc Site Integration**
-   - Update root README, module READMEs, and `docs/index.md` with navigation to Phase docs, diagrams, error tables, and demos.
+## Implementation Plan
+1. **Documentation uplift**
+   - Update the root README and module docs with ASCII diagrams of the R/G/B payload split and sample ledger entries.
+   - Write walkthroughs demonstrating encode/decode with ritual consent and metadata injection.
+   - Publish an error-code table mapping codes like `ERR_CRC_MISMATCH`, `ERR_CONSENT_REQUIRED`, `ERR_CAPACITY_EXCEEDED` to resolution suggestions.
+2. **CLI enhancements**
+   - Introduce flags: `--bpc {1,4}`, `--meta <json_or_path>`, `--quiet`, `--verbose`.
+   - Ensure CLI help text clearly explains the new options and their interactions with ritual gating.
+   - Update API surface to accept equivalent parameters for programmatic use.
+3. **Experience layer**
+   - Craft an ASCII/console visualiser that prints channel states (α/β/γ) and ritual gate progression in real time.
+   - Optionally provide a `--demo` mode that replays a canonical encode/decode session for onboarding.
+   - Capture transcripts/screenshots for documentation.
 
-## Testing
-- CLI integration tests covering new flags and combinations.
-- Doctest or snapshot tests for documentation code snippets.
-- Demo script smoke test (run in CI optional job, capture output).
+## Testing Strategy
+- **CLI tests**
+  - Parameterised tests covering combinations of `--bpc`, `--meta`, and consent flags.
+  - Verify metadata round-trips into the G-channel payload and appears in decode output.
+  - Check verbosity modes suppress/emit expected logs.
+- **Documentation checks**
+  - Run link checkers or doc linting if available.
+  - Validate code snippets by executing them within CI or a doc-test harness.
+- **UX demo**
+  - Smoke test the visualiser script to ensure it runs without external dependencies.
 
-## Exit Criteria
-- Documentation published with diagrams, walkthroughs, error table.
-- CLI feature set validated with automated tests.
-- Demo communicates ritual & channel flow effectively and is referenced in docs.
+## Dependencies & Hand-offs
+- Builds on ritual gating from Phase 4 and integrity surfaces from Phase 3.
+- Provides clarity for Phase 6 guardrails by documenting expected outputs and error codes.
+
+## Risks & Mitigations
+- **Risk:** CLI flag explosion confuses users.  
+  **Mitigation:** Group related flags, provide presets, and document typical workflows.
+- **Risk:** Visual demo drifts from live behaviour.  
+  **Mitigation:** Generate demo output via the same code paths as production encode/decode to ensure fidelity.

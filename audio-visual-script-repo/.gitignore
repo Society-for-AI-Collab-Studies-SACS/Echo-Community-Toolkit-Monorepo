@@ -1,0 +1,13 @@
+node_modules/
+npm-debug.log*
+/frontend/node_modules
+/backend/node_modules
+/python/.venv
+__pycache__/
+.DS_Store
+.env
+integration/outputs/
+integration/ledger/*.png
+scripts/.gitkeep
+/frontend/dist
+/backend/dist

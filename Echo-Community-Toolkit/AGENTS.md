@@ -15,6 +15,7 @@
 - Full validation: `python3 final_validation.py` (rebuilds golden sample, verifies MRP).
 - UI (lambda‑vite): `cd lambda-vite && npm ci && npm run build`.
 - Hyperfollow integration: `node hyperfollow-integration.js --dry-run` then `node verify-integration.js`.
+- Bloom workflow: `./bloom.py inhale` • `./bloom.py hold --report-json` • `./bloom.py exhale --docker` • `./bloom.py release --cleanup`.
 
 ## Coding Style & Naming Conventions
 - Python: 4‑space indent, `snake_case` functions/vars, `PascalCase` classes, `UPPER_SNAKE` constants.

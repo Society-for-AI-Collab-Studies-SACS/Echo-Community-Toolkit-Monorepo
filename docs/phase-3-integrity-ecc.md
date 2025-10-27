@@ -1,62 +1,47 @@
-# Phase 3 – Integrity & ECC
+# Phase 3 – Integrity & Error Correction
+
+Phase 3 equips the MRP stack with integrity metadata and XOR-parity–based self-healing, ensuring payloads announce and repair corruption when possible.
 
 ## Objectives
-- Populate the B-channel with integrity metadata (CRC32, SHA-256, XOR parity) for the R/G payloads.
-- Teach the decoder to perform parity-based repair and report detailed integrity status.
-- Exercise corruption scenarios through automated fixtures.
+- Populate the B-channel MRP frame with CRC32 values, SHA-256 hashes, and parity bytes covering the R (message) and G (metadata) frames.
+- Implement parity-driven recovery and structured integrity reporting in the decoder.
+- Deliver fixtures proving detection and correction of single-channel corruption.
 
-## Scope & Deliverables
-1. **Sidecar Augmentation**
-   - Extend `mrp.meta.sidecar_from_headers` to compute:
-     - `crc_r`, `crc_g` (uppercase hex strings, 8 chars).
-     - `sha256_msg` (hex) and `sha256_msg_b64`.
-     - `parity` (uppercase hex string of XOR parity bytes), `parity_len`.
-     - `ecc_scheme="xor"`, `bits_per_channel`.
-     - Optional `frame_version=1` for future upgrades.
-   - Serialize B-frame payload as compact JSON (sorted keys) and ensure deterministic encoding for test comparisons.
-2. **Decoder Repair Logic**
-   - Implement helper `xor_recover(parity_bytes, healthy_payload, expected_len)` returning reconstructed bytes.
-   - Flow:
-     1. Parse frames.
-     2. Validate CRC for R/G; record mismatches.
-     3. If exactly one payload fails, attempt parity repair.
-     4. Validate repaired payload via CRC and SHA.
-     5. Build integrity report dataclass with fields:
-        - `status`: `"ok"`, `"recovered_with_parity"`, `"degraded"`, `"integrity_failed"`.
-        - `crc_checks`: per-channel boolean and expected/actual values.
-        - `parity`: expected hex, actual hex, match boolean.
-        - `sha256`: expected hex/b64, actual hex/b64, ok boolean.
-        - `repaired_bytes`: count, channel.
-        - `errors`: list of messages (e.g., "CRC mismatch after parity repair").
-   - Ensure decoder gracefully handles missing parity data (treat as degraded).
-3. **Fixtures & Fault Injection**
-   - Add utilities in `tests/util/stego_mutations.py`:
-     - `flip_bits(img_path, channel, indices)` (bit-level).
-     - `zero_channel(img_path, channel)`.
-     - `tamper_parity(img_path, hex_patch)`.
-   - Create canonical corrupted fixtures:
-     - `corrupt_r_single_bit.png`
-     - `corrupt_g_single_bit.png`
-     - `corrupt_parity.png`
-     - `corrupt_b_sidecar.png`
-     - `zeroed_g_channel.png`
-   - Document the corruption operations so QA can reproduce.
-4. **CLI/SDK Surface**
-   - CLI: add `--integrity-report` to emit JSON to stdout or file.
-   - CLI output (default) summarises status, corrected bytes, parity verdict.
-   - SDK: `DecodeResult.integrity` property returning dataclass; `decode_mrp(..., report_handler=callable)` hook.
-   - Ensure exit codes reflect severity (`0` success / recovered, `2` degraded, `3` integrity_failed).
-5. **Documentation**
-   - Update docs with flow diagram: decode → CRC check → parity repair → SHA verification → status.
-   - Provide table explaining each status and recommended operator action.
+## Implementation Plan
+1. **Integrity payload schema**
+   - Define a JSON schema containing: `{message_crc32, metadata_crc32, message_sha256, parity_hex, corrected_bytes}`.
+   - Encode schema into the B-channel frame as UTF-8 JSON; document in repo specs.
+   - Extend encoder to compute CRC32/SHA-256 from the definitive R/G payloads after final packing.
+2. **Parity generation**
+   - Use `xor_parity_bytes(R_payload, G_payload)` to derive parity bytes (already restored in Phase 0).
+   - Store parity in both raw bytes (for decoder) and hex (for logging/testing).
+3. **Decoder recovery workflow**
+   - After extracting all frames, verify CRCs; if mismatch occurs, attempt parity repair by computing `R = parity ⊕ G` or `G = parity ⊕ R` depending on the failing channel.
+   - Re-run CRC and SHA-256 validation post-repair; track number of corrected bytes.
+   - Surface structured result: `{status, corrected_channels, unrecoverable_errors, integrity_log}`.
+   - Record failures when both channels disagree or SHA-256 still mismatches.
+4. **Telemetry**
+   - Log integrity actions in a consistent format (consumed later by Ritual/Ledger).
+   - Ensure CLI/API responses include `integrity_status` values such as `ok`, `recovered_with_parity`, `failed_crc`, `failed_sha256`.
 
-## Testing
-- `pytest tests/steganography/test_mrp_codec.py -q` expanded to cover new fixtures.
-- Dedicated tests verifying parity math (round-trip parity bytes, parity_len correctness).
-- Tests for SHA mismatch reporting when parity recovers CRC but hash differs.
-- Integration test that corrupts payloads, runs CLI decode, and inspects exit codes/messages.
+## Testing Strategy
+- **Unit tests**
+  - CRC/SHA generation correctness using known payloads.
+  - Parity regeneration from R/G pair equals stored parity.
+  - Decoder repairs a single-byte flip injected into R or G.
+  - Decoder reports unrecoverable when both channels corrupted or parity length mismatched.
+- **Fixtures**
+  - Construct sample multi-frame image; programmatically corrupt R, G, and entire channels to validate detection vs recovery.
+  - Fixture where G-channel is fully zeroed: message recovers, metadata flagged lost.
+- **CI integration**
+  - Add corruption simulations to automated suite (tie into Phase 6 guardrails later).
 
-## Exit Criteria
-- Decoder successfully repairs single-channel corruptions and reports failures otherwise.
-- Integrity metadata consistently emitted and consumed across encode/decode.
-- CI corruption suite passes (bit flip, parity tamper, channel loss).
+## Dependencies & Hand-offs
+- Requires Phase 2 multi-frame infrastructure and parity helpers introduced earlier.
+- Supplies integrity reporting consumed by Phase 4 ledger logging and CLI UX in Phase 5.
+
+## Risks & Mitigations
+- **Risk:** Parity logic assumes only one channel is corrupted; simultaneous corruption can yield false positives.  
+  **Mitigation:** Always compare SHA-256 after repair; if mismatch persists, mark as failure.
+- **Risk:** Large payloads may cause performance regressions when computing hashes.  
+  **Mitigation:** Profile critical sections and cache intermediate results when feasible.

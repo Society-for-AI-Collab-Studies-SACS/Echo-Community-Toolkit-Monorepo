@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/script.schema.json",
+  "title": "Script",
+  "description": "Structure for audio-visual scripts containing persona dialog and timing metadata.",
+  "type": "object",
+  "required": ["title", "personas", "scenes"],
+  "properties": {
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "personas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "displayName"],
+        "properties": {
+          "id": { "type": "string" },
+          "displayName": { "type": "string" },
+          "voice": { "type": "string", "description": "Identifier for the TTS voice to use." }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "lines"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["persona", "text"],
+              "properties": {
+                "persona": { "type": "string" },
+                "text": { "type": "string" },
+                "media": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["type", "src"],
+                    "properties": {
+                      "type": { "type": "string", "enum": ["image", "audio", "video"] },
+                      "src": { "type": "string" },
+                      "start": { "type": "number" },
+                      "end": { "type": "number" }
+                    }
+                  }
+                },
+                "timing": {
+                  "type": "object",
+                  "properties": {
+                    "expectedDuration": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

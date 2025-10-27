@@ -65,7 +65,7 @@ Spiral Bloom Workflow
 - Exhale (build/deploy, optional Docker/GitHub Actions): `./bloom.py exhale --docker`
 - Release (logs, status, cleanup, reports): `./bloom.py release --report --cleanup`
 
-All commands accept `--env` to load additional variables and `--dry-run` to preview actions.
+All commands accept `--env` to load extra configuration and `--dry-run` to preview actions.
 Files
 
 hyperfollow-integration.js Runs the integration (adds links).
