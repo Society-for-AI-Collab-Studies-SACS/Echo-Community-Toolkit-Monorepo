@@ -298,7 +298,7 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 - **Echo-Community-Toolkit:** [![Toolkit CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/echo-toolkit-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/echo-toolkit-ci.yml)
 - **Kira Prime:** [![Kira CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/kira-prime-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/kira-prime-ci.yml)
 - **Living Garden Chronicles:** [![Chronicles CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/living-garden-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/living-garden-ci.yml)
-- **VesselOS Dev Research:** [![Research CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/vesselos-research-ci.yml/badge.svg?branch=main)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/vesselos-research-ci.yml)
+- **VesselOS Dev Research:** [![Research CI](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml/badge.svg?branch=main&job=vesselos-research)](https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml?query=workflow%3A%22Monorepo+CI%22)
 
 **Actions quicklinks** – Shortcut filters for the repository Actions tab:
 
@@ -308,7 +308,7 @@ Each agent exposes `--help` for additional flags (ports, workspace paths, theme 
 | Echo-Community-Toolkit Monorepo | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions> |
 | Kira Prime CLI | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AKira> |
 | The Living Garden Chronicles | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AGarden> |
-| VesselOS Dev Research | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions?query=workflow%3AResearch> |
+| VesselOS Dev Research | <https://github.com/Society-for-AI-Collab-Studies-SACS/Echo-Community-Toolkit-Monorepo/actions/workflows/ci.yml?query=workflow%3A%22Monorepo+CI%22+job%3Avesselos-research> |
 
 Use the pre-applied filters to reach module-specific workflow history quickly. Keep every module green before coordinating cross-stack releases.
 
