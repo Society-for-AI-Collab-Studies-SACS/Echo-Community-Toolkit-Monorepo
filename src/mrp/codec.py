@@ -464,6 +464,8 @@ def decode_mrp(stego_path: str) -> Dict[str, Any]:
 
     if not payload_ok:
         result["error"] = repair_error or "Integrity check failed"
+    elif report.get("ecc_scheme") == "parity" and report.get("repaired"):
+        result["error"] = repair_error or "Parity integrity check failed"
 
     image.close()
     return result

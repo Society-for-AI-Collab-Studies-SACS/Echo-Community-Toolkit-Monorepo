@@ -26,3 +26,4 @@ PlatformIO/.pio/
 
 # Ignore GitHub CLI credential cache
 .config/gh/hosts.yml
+.venv/

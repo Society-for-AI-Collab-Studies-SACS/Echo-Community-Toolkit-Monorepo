@@ -233,12 +233,16 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
     crc_g_ok = channels["G"]["crc_ok"]
     b_crc_ok = channels["B"]["crc_ok"]
 
-    payload_ok = crc_r_ok and crc_g_ok and sha_ok and parity_ok and parity_length_valid
-
-    if payload_ok:
-        status = "recovered" if recovered_bytes_total > 0 else "ok"
+    if not sha_ok:
+        status = "integrity_failed"
+    elif not (crc_r_ok and crc_g_ok):
+        status = "failed"
+    elif recovered_bytes_total > 0:
+        status = "recovered"
+    elif not b_crc_ok or not parity_ok or not parity_length_valid:
+        status = "degraded"
     else:
-        status = "degraded" if (not b_crc_ok or not parity_ok or not parity_length_valid) else "failed"
+        status = "ok"
 
     integrity = {
         "status": status,
@@ -276,7 +280,7 @@ def _decode_frames(frames: Dict[str, bytes], *, bits_per_channel: int) -> Dict[s
         "message_length": len(message_bytes),
     }
 
-    if status == "failed":
+    if status in {"failed", "integrity_failed"}:
         result["error"] = "Integrity check failed"
 
     return result

@@ -1,4 +1,4 @@
-"""Toolkit MRP API with legacy compatibility shims."""
+"""Unified MRP exports bridging new codec helpers with legacy APIs."""
 
 from __future__ import annotations
 
@@ -62,12 +62,42 @@ def _load_legacy_callable(name: str) -> Optional[_TCallable]:
     return attr if callable(attr) else None
 
 
-def _missing_legacy(name: str) -> Callable[..., object]:
-    def _raiser(*_args, **_kwargs) -> object:
-        raise ImportError(f"Legacy MRP function '{name}' is unavailable")
-
-    return _raiser
+_legacy_encode = _load_legacy_callable("encode_mrp")
+_legacy_decode = _load_legacy_callable("decode_mrp")
 
 
-encode_mrp = _load_legacy_callable("encode_mrp") or _missing_legacy("encode_mrp")
-decode_mrp = _load_legacy_callable("decode_mrp") or _missing_legacy("decode_mrp")
+def encode_mrp(*args, **kwargs):
+    legacy_impl = _legacy_encode or _load_legacy_callable("encode_mrp")
+    if legacy_impl is None:
+        raise ImportError("Legacy encode_mrp is unavailable; ensure src/mrp exists")
+    return legacy_impl(*args, **kwargs)
+
+
+def _needs_parity_error(report: dict) -> bool:
+    if not isinstance(report, dict):
+        return False
+    scheme = report.get("ecc_scheme")
+    if scheme != "parity":
+        return False
+    if report.get("repaired"):
+        return True
+    if not report.get("parity_ok", True):
+        return True
+    if not report.get("crc_r_ok", True) or not report.get("crc_g_ok", True):
+        return True
+    if not report.get("sha_ok", True):
+        return True
+    return False
+
+
+def decode_mrp(*args, **kwargs):
+    legacy_impl = _legacy_decode or _load_legacy_callable("decode_mrp")
+    if legacy_impl is None:
+        raise ImportError("Legacy decode_mrp is unavailable; ensure src/mrp exists")
+    result = legacy_impl(*args, **kwargs)
+    if isinstance(result, dict):
+        report = result.get("report")
+        if _needs_parity_error(report) and "error" not in result:
+            result = dict(result)
+            result["error"] = "Parity integrity check failed"
+    return result

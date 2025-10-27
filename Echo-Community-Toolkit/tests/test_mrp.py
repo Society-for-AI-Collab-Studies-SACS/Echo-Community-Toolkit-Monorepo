@@ -75,7 +75,7 @@ def test_mrp_parity_recovers_corrupted_r_channel(tmp_path: Path):
     assert out["metadata"] == metadata
 
     integrity = out["integrity"]
-    assert integrity["status"] in {"recovered_with_parity", "recovered"}
+    assert integrity["status"] in {"recovered", "recovered_with_parity"}
     assert integrity["parity"]["used"] is True
     assert integrity["parity"]["recovered_bytes"] == 1
 
@@ -99,7 +99,7 @@ def test_mrp_parity_recovers_corrupted_g_channel(tmp_path: Path):
     assert out["metadata"] == metadata
 
     integrity = out["integrity"]
-    assert integrity["status"] in {"recovered_with_parity", "recovered"}
+    assert integrity["status"] in {"recovered", "recovered_with_parity"}
     assert integrity["parity"]["used"] is True
     assert integrity["parity"]["recovered_bytes"] == 1
 
