@@ -16,6 +16,12 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
+# Ensure the default Node.js version is available for login shells.
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    . "$HOME/.nvm/nvm.sh"
+    nvm use --silent default >/dev/null 2>&1
+fi
+
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"

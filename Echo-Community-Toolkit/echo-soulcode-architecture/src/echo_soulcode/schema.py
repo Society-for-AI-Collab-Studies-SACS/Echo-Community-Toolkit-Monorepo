@@ -17,6 +17,13 @@ import json
 import copy
 from typing import Dict, Any, Literal
 from jsonschema import validate as js_validate, Draft202012Validator
+from jsonschema.exceptions import SchemaError
+
+__all__ = [
+    "validate_bundle",
+    "validate_schema",
+    "SchemaError",
+]
 
 DRAFT = "https://json-schema.org/draft/2020-12/schema"
 X_VERSION = "1.1.0"
@@ -168,16 +175,21 @@ def load_schema(kind: Literal["soulcode","bundle"]="soulcode") -> Dict[str, Any]
         return BUNDLE
     return SINGLE_SOULCODE
 
+
+def validate_schema(schema: Dict[str, Any]) -> None:
+    """Ensure a JSON schema definition complies with Draft 2020-12."""
+    Draft202012Validator.check_schema(schema)
+
 def validate_soulcode(obj: Dict[str, Any]) -> None:
     """Validate a single soulcode; raises ValidationError on failure."""
     s = load_schema("soulcode")
-    Draft202012Validator.check_schema(s)
+    validate_schema(s)
     js_validate(instance=obj, schema=s)
 
 def validate_bundle(obj: Dict[str, Any]) -> None:
     """Validate a bundle; raises ValidationError on failure."""
     s = load_schema("bundle")
-    Draft202012Validator.check_schema(s)
+    validate_schema(s)
     js_validate(instance=obj, schema=s)
 
 if __name__ == "__main__":

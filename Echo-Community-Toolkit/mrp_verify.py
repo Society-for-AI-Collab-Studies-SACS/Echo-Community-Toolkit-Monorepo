@@ -4,9 +4,9 @@ mrp_verify.py — Multi-Channel Resonance Protocol (MRP) Phase‑A verifier
 
 Verifies an MRP Phase‑A stego payload using the provided
 R/G/B payload JSONs and optional sidecar JSON. Checks:
-  • CRC32(R_b64/G_b64) against B
-  • SHA‑256(R_b64) against B & sidecar
-  • Parity block (Phase‑A): P[i] = R_b64[i] XOR G_b64[i] for i < len(R_b64); else P[i] = G_b64[i]
+  • CRC32 of raw R/G payload bytes against B-channel claims
+  • SHA‑256 (hex + base64) of the R payload against B & sidecar
+  • XOR parity (hex) between R/G payloads for Phase‑A
   • Sidecar sanity (if provided): header flags, used_bits math, capacity_bits vs PNG dims
 
 Exit code: 0 on success, 1 on any check failing.
@@ -71,24 +71,25 @@ def compute_png_dims(path: str) -> Optional[Tuple[int, int]]:
         return None
 
 
-def compute_phase_a_parity_b64(r_b64: bytes, g_b64: bytes) -> str:
+def compute_phase_a_parity_hex(r_payload: bytes, g_payload: bytes) -> Tuple[str, int]:
     """
-    Phase‑A parity (as used by the seed package):
-      • Produce P of length len(G_b64)
-      • For i in [0, len(R_b64)-1]: P[i] = R_b64[i] XOR G_b64[i]
-      • For i in [len(R_b64), len(G_b64)-1]: P[i] = G_b64[i]
-      • Return base64(P)
+    Phase‑A parity block (hex representation) and length:
+      • Pad shorter payload with zeros
+      • XOR byte-wise
+      • Return uppercase hex string plus underlying byte length
     """
 
-    Lg = len(g_b64)
-    Lr = len(r_b64)
-    P = bytearray(Lg)
-    for i in range(Lg):
-        if i < Lr:
-            P[i] = r_b64[i] ^ g_b64[i]
-        else:
-            P[i] = g_b64[i]
-    return base64.b64encode(bytes(P)).decode("ascii")
+    length = max(len(r_payload), len(g_payload))
+    if length == 0:
+        return "", 0
+
+    parity = bytearray(length)
+    for idx in range(length):
+        r_val = r_payload[idx] if idx < len(r_payload) else 0
+        g_val = g_payload[idx] if idx < len(g_payload) else 0
+        parity[idx] = r_val ^ g_val
+
+    return bytes(parity).hex().upper(), length
 
 
 def verify(args) -> Dict[str, Any]:
@@ -97,33 +98,38 @@ def verify(args) -> Dict[str, Any]:
     G_obj = load_json(args.G)
     B_obj = load_json(args.B)
 
-    # Minify and wrap in base64 (canonical form used on-wire)
+    # Minify to canonical payload bytes
     R_min = minify_json_bytes(R_obj)
     G_min = minify_json_bytes(G_obj)
-    R_b64 = base64.b64encode(R_min)
-    G_b64 = base64.b64encode(G_min)
+    B_min = minify_json_bytes(B_obj)
 
     # Recompute hashes
-    crc_r = crc32_hex(R_b64)
-    crc_g = crc32_hex(G_b64)
-    sha_r_b64 = hashlib.sha256(R_b64).hexdigest()
+    crc_r = crc32_hex(R_min)
+    crc_g = crc32_hex(G_min)
+    sha_digest = hashlib.sha256(R_min).digest()
+    sha_r_hex = sha_digest.hex()
+    sha_r_b64 = base64.b64encode(sha_digest).decode("ascii")
 
     # Expected from B-payload
-    exp_crc_r = B_obj.get("crc_r")
-    exp_crc_g = B_obj.get("crc_g")
-    exp_sha = B_obj.get("sha256_msg_b64")
-    exp_par_b64 = B_obj.get("parity_block_b64")
+    exp_crc_r = (B_obj.get("crc_r") or "").upper()
+    exp_crc_g = (B_obj.get("crc_g") or "").upper()
+    exp_sha_hex = (B_obj.get("sha256_msg") or "").lower()
+    exp_sha_b64 = B_obj.get("sha256_msg_b64") or ""
+    exp_parity = (B_obj.get("parity") or "").upper()
+    exp_parity_len = B_obj.get("parity_len")
     ecc_scheme = B_obj.get("ecc_scheme")
 
     # Parity recompute (Phase‑A only)
-    calc_par_b64 = compute_phase_a_parity_b64(R_b64, G_b64)
+    calc_parity, calc_parity_len = compute_phase_a_parity_hex(R_min, G_min)
 
     checks = {
-        "crc_r_ok": (crc_r == exp_crc_r),
-        "crc_g_ok": (crc_g == exp_crc_g),
-        "sha256_r_b64_ok": (sha_r_b64 == exp_sha),
-        "ecc_scheme_ok": (ecc_scheme in ("parity", "PARITY")),
-        "parity_block_ok": (calc_par_b64 == exp_par_b64),
+        "crc_r_ok": bool(exp_crc_r) and crc_r == exp_crc_r,
+        "crc_g_ok": bool(exp_crc_g) and crc_g == exp_crc_g,
+        "sha256_r_hex_ok": bool(exp_sha_hex) and sha_r_hex == exp_sha_hex,
+        "sha256_r_b64_ok": bool(exp_sha_b64) and sha_r_b64 == exp_sha_b64,
+        "ecc_scheme_ok": ecc_scheme in ("xor", "XOR"),
+        "parity_block_ok": bool(exp_parity) and calc_parity == exp_parity,
+        "parity_len_ok": isinstance(exp_parity_len, int) and exp_parity_len == calc_parity_len,
     }
 
     # Sidecar checks (optional)
@@ -150,6 +156,14 @@ def verify(args) -> Dict[str, Any]:
         header_magic_ok = True
         header_flags_crc_set = True
 
+        expected_payload_lengths = {
+            "R": len(R_min),
+            "G": len(G_min),
+            "B": len(B_min),
+        }
+
+        payload_len_ok = True
+
         for k in ("R", "G", "B"):
             ch_k = ch.get(k, {})
             hdr_k = headers.get(k, {})
@@ -161,8 +175,11 @@ def verify(args) -> Dict[str, Any]:
             if isinstance(payload_len, int) and isinstance(used_bits, int):
                 if used_bits != (payload_len + HEADER_LEN_WITH_CRC) * 8:
                     used_bits_math_ok = False
+                if payload_len != expected_payload_lengths.get(k):
+                    payload_len_ok = False
             else:
                 used_bits_math_ok = False
+                payload_len_ok = False
 
             # capacity bits
             if cap_bits_expected is not None and isinstance(capacity_bits, int):
@@ -178,12 +195,16 @@ def verify(args) -> Dict[str, Any]:
                 header_flags_crc_set = False
 
         # Sidecar sha check
-        sidecar_sha_ok = S.get("sha256_msg_b64") == sha_r_b64
+        sidecar_sha_ok = (
+            S.get("sha256_msg") == sha_r_hex
+            or S.get("sha256_msg_b64") == sha_r_b64
+        )
 
         checks.update(
             {
                 "sidecar_sha256_ok": sidecar_sha_ok,
                 "sidecar_used_bits_math_ok": used_bits_math_ok,
+                "sidecar_payload_len_ok": payload_len_ok,
                 "sidecar_capacity_bits_ok": cap_bits_ok,
                 "sidecar_header_magic_ok": header_magic_ok,
                 "sidecar_header_flags_crc_ok": header_flags_crc_set,
@@ -205,21 +226,24 @@ def verify(args) -> Dict[str, Any]:
         "lengths": {
             "R_min_bytes": len(R_min),
             "G_min_bytes": len(G_min),
-            "R_b64_bytes": len(R_b64),
-            "G_b64_bytes": len(G_b64),
+            "B_min_bytes": len(B_min),
+            "parity_len_bytes": calc_parity_len,
         },
         "computed": {
             "crc_r": crc_r,
             "crc_g": crc_g,
+            "sha256_r_hex": sha_r_hex,
             "sha256_r_b64": sha_r_b64,
-            "parity_b64_head": calc_par_b64[:64] + ("..." if len(calc_par_b64) > 64 else ""),
+            "parity_hex_head": calc_parity[:64] + ("..." if len(calc_parity) > 64 else ""),
         },
         "expected_from_B": {
             "crc_r": exp_crc_r,
             "crc_g": exp_crc_g,
-            "sha256_msg_b64": exp_sha,
+            "sha256_msg": exp_sha_hex,
+            "sha256_msg_b64": exp_sha_b64,
             "ecc_scheme": ecc_scheme,
-            "parity_len_b64": len(exp_par_b64) if isinstance(exp_par_b64, str) else None,
+            "parity": exp_parity,
+            "parity_len": exp_parity_len,
         },
         "checks": checks,
         "mrp_ok": ok,
@@ -230,6 +254,7 @@ def verify(args) -> Dict[str, Any]:
         # include just a minimal echo to avoid huge logs
         report["sidecar_echo"] = {
             "file": sidecar_info.get("file"),
+            "sha256_msg": sidecar_info.get("sha256_msg"),
             "sha256_msg_b64": sidecar_info.get("sha256_msg_b64"),
             "channels": sidecar_info.get("channels"),
             "headers": sidecar_info.get("headers"),
@@ -269,9 +294,11 @@ def main() -> None:
 
     # Pretty print summary
     print("=== MRP Phase‑A Verify ===")
-    print(f"R_b64 crc32: {report['computed']['crc_r']}  (expect {report['expected_from_B']['crc_r']})")
-    print(f"G_b64 crc32: {report['computed']['crc_g']}  (expect {report['expected_from_B']['crc_g']})")
-    print(f"SHA256(R_b64): {report['computed']['sha256_r_b64']}  (expect {report['expected_from_B']['sha256_msg_b64']})")
+    print(f"R crc32: {report['computed']['crc_r']}  (expect {report['expected_from_B']['crc_r']})")
+    print(f"G crc32: {report['computed']['crc_g']}  (expect {report['expected_from_B']['crc_g']})")
+    print(
+        f"SHA256(R): {report['computed']['sha256_r_hex']}  (expect {report['expected_from_B']['sha256_msg']})"
+    )
     print(f"Parity OK: {report['checks']['parity_block_ok']}  ECC scheme: {report['expected_from_B']['ecc_scheme']}")
     # Sidecar summaries if present
     if any(k.startswith("sidecar_") for k in report["checks"].keys()):
@@ -279,6 +306,7 @@ def main() -> None:
             "Sidecar checks:",
             f"sha_ok={report['checks'].get('sidecar_sha256_ok')}",
             f"used_bits_math_ok={report['checks'].get('sidecar_used_bits_math_ok')}",
+            f"payload_len_ok={report['checks'].get('sidecar_payload_len_ok')}",
             f"capacity_ok={report['checks'].get('sidecar_capacity_bits_ok')}",
             f"hdr_magic_ok={report['checks'].get('sidecar_header_magic_ok')}",
             f"hdr_flags_crc_ok={report['checks'].get('sidecar_header_flags_crc_ok')}",

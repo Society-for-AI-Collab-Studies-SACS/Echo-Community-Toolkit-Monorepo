@@ -1,72 +1,121 @@
-name: CI
+name: Monorepo CI
 
 on:
   push:
-    paths:
-      - 'audio-visual-script-repo/**'
-      - '.github/workflows/ci.yml'
   pull_request:
-    paths:
-      - 'audio-visual-script-repo/**'
-      - '.github/workflows/ci.yml'
+  workflow_dispatch:
 
 jobs:
-  build-and-test:
+  audio-visual:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.10', '3.11', '3.12']
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: |
-            audio-visual-script-repo/package-lock.json
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+          cache: npm
+          cache-dependency-path: audio-visual-script-repo/package-lock.json
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: audio-visual-script-repo/python/requirements.txt
-
-      - name: Install Node dependencies
+          python-version: '3.11'
+      - name: Install Node workspaces
         working-directory: audio-visual-script-repo
-        run: npm ci
-
-      - name: Install Python dependencies
+        run: npm ci --workspaces
+      - name: Install Python engine dependencies
+        working-directory: audio-visual-script-repo/python
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements.txt
+      - name: Lint & type-check backend
         working-directory: audio-visual-script-repo
-        run: pip install -r python/requirements.txt
-
-      - name: Lint backend
+        run: npm run lint --workspace backend && npm run type-check --workspace backend
+      - name: Lint & type-check frontend
         working-directory: audio-visual-script-repo
-        run: npm run lint --workspace backend
-
-      - name: Type-check backend
-        working-directory: audio-visual-script-repo
-        run: npm run type-check --workspace backend
-
-      - name: Lint frontend
-        working-directory: audio-visual-script-repo
-        run: npm run lint --workspace frontend
-
-      - name: Type-check frontend
-        working-directory: audio-visual-script-repo
-        run: npm run type-check --workspace frontend
-
+        run: npm run lint --workspace frontend && npm run type-check --workspace frontend
       - name: Build backend
         working-directory: audio-visual-script-repo
         run: npm run build --workspace backend
-
       - name: Build frontend
         working-directory: audio-visual-script-repo
         run: npm run build --workspace frontend
+      - name: Run Python engine tests
+        working-directory: audio-visual-script-repo/python
+        run: python -m pytest -q
 
-      - name: Run Python tests
-        working-directory: audio-visual-script-repo
-        run: pytest python
+  echo-toolkit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            Echo-Community-Toolkit/package-lock.json
+            Echo-Community-Toolkit/lambda-vite/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Echo Toolkit suite
+        run: bash scripts/ci/run_toolkit_ci.sh
+
+  kira-prime:
+    runs-on: ubuntu-latest
+    env:
+      CI_SKIP_SBERT: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            kira-prime/Echo-Community-Toolkit/package-lock.json
+            kira-prime/vscode-extension/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Kira Prime suite
+        run: bash scripts/ci/run_kira_ci.sh
+
+  living-garden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Living Garden suite
+        run: bash scripts/ci/run_chronicles_ci.sh
+
+  vesselos-research:
+    runs-on: ubuntu-latest
+    env:
+      CI_SKIP_SBERT: '1'
+      COLLAB_SMOKE_ENABLED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Research suite
+        run: bash scripts/ci/run_research_ci.sh
+
+  monorepo-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install root dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+      - name: Run root smoke tests
+        run: python3 -m pytest -q

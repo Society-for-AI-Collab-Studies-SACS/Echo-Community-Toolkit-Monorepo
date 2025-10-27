@@ -142,3 +142,9 @@ gh workflow list
 codex
 gh auth status
 codex
+codex
+sudo install
+pip
+codex resume 019a1ebf-4fa5-7b00-a277-d9c2a20dd09b
+codex
+codex resume 019a1ebf-4fa5-7b00-a277-d9c2a20dd09b

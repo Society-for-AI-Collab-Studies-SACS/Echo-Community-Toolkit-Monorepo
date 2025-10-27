@@ -23,3 +23,6 @@ PlatformIO/.pio/
 
 # OS junk
 *.DS_Store
+
+# Ignore GitHub CLI credential cache
+.config/gh/hosts.yml
