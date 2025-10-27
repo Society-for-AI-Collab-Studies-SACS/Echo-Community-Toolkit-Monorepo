@@ -50,6 +50,17 @@ def _flip_first_payload_byte(frame_bytes: bytes, channel: str) -> bytes:
     return bytes(mutated)
 
 
+def _mutate_b_channel(frame_bytes: bytes) -> bytes:
+    frame, _ = MRPFrame.parse_from(frame_bytes, expected_channel="B")
+    sidecar = json.loads(frame.payload.decode("utf-8"))
+    sidecar["parity"] = "00"
+    payload = json.dumps(sidecar, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    mutated = bytearray(make_frame("B", payload, True))
+    crc_offset = 4 + 1 + 1 + 4  # magic + channel + flags + length
+    mutated[crc_offset] ^= 0xFF
+    return bytes(mutated)
+
+
 def test_mrp_parity_recovers_corrupted_r_channel(tmp_path: Path):
     cover_path, stego_path, metadata = _prep_mrp_image(tmp_path)
     frames = png_lsb.extract_frames(str(stego_path), bits_per_channel=1)
@@ -66,12 +77,36 @@ def test_mrp_parity_recovers_corrupted_r_channel(tmp_path: Path):
     integrity = out["integrity"]
     assert integrity["status"] == "recovered_with_parity"
     assert integrity["parity"]["used"] is True
-    assert integrity["parity"]["recovered_bytes"] > 0
+    assert integrity["parity"]["recovered_bytes"] == 1
 
     channels = integrity["channels"]
     assert channels["R"]["recovered"] is True
-    assert channels["R"]["corrected_bytes"] > 0
+    assert channels["R"]["corrected_bytes"] == 1
     assert channels["G"]["recovered"] is False
+
+
+def test_mrp_parity_recovers_corrupted_g_channel(tmp_path: Path):
+    cover_path, stego_path, metadata = _prep_mrp_image(tmp_path)
+    frames = png_lsb.extract_frames(str(stego_path), bits_per_channel=1)
+    frames["G"] = _flip_first_payload_byte(frames["G"], "G")
+
+    corrupted = tmp_path / "stego_corrupt_g.png"
+    png_lsb.embed_frames(str(cover_path), str(corrupted), frames, bits_per_channel=1)
+
+    out = LSBExtractor().extract_from_image(corrupted)
+    assert out["mode"] == "MRP"
+    assert out["message"] == "garden"
+    assert out["metadata"] == metadata
+
+    integrity = out["integrity"]
+    assert integrity["status"] == "recovered_with_parity"
+    assert integrity["parity"]["used"] is True
+    assert integrity["parity"]["recovered_bytes"] == 1
+
+    channels = integrity["channels"]
+    assert channels["G"]["recovered"] is True
+    assert channels["G"]["corrected_bytes"] == 1
+    assert channels["R"]["recovered"] is False
 
 
 def test_mrp_parity_cannot_recover_when_multiple_channels_corrupt(tmp_path: Path):
@@ -87,3 +122,34 @@ def test_mrp_parity_cannot_recover_when_multiple_channels_corrupt(tmp_path: Path
     assert out["mode"] == "MRP"
     assert "error" in out
     assert "Unrecoverable channel corruption" in out["error"]
+
+
+def test_mrp_reports_degraded_when_b_channel_corrupted(tmp_path: Path):
+    cover_path, stego_path, metadata = _prep_mrp_image(tmp_path)
+    frames = png_lsb.extract_frames(str(stego_path), bits_per_channel=1)
+    frames["B"] = _mutate_b_channel(frames["B"])
+
+    corrupted = tmp_path / "stego_corrupt_b.png"
+    png_lsb.embed_frames(str(cover_path), str(corrupted), frames, bits_per_channel=1)
+
+    out = LSBExtractor().extract_from_image(corrupted)
+    assert out["mode"] == "MRP"
+    assert out["message"] == "garden"
+    assert out["metadata"] == metadata
+
+    integrity = out["integrity"]
+    assert integrity["status"] == "degraded"
+    assert integrity["parity"]["used"] is False
+    assert integrity["parity"]["recovered_bytes"] == 0
+    assert integrity["channels"]["B"]["crc_ok"] is False
+
+
+def test_mrp_integrity_ok_path_marks_parity_unused(tmp_path: Path):
+    _, stego_path, metadata = _prep_mrp_image(tmp_path)
+    out = LSBExtractor().extract_from_image(stego_path)
+
+    integrity = out["integrity"]
+    assert integrity["status"] == "ok"
+    assert integrity["parity"]["used"] is False
+    assert integrity["parity"]["recovered_bytes"] == 0
+    assert out["metadata"] == metadata
